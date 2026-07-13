@@ -1,8 +1,7 @@
-# JSM VIDEO GENERATOR - FINAL ERROR FREE - 16 LANG + 30 CAT + 6 PLATFORMS + 540p 20MIN
+# JSM VIDEO GENERATOR - FINAL ERROR FREE - FIXED show_api
 import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip
 from PIL import Image
-
 B="JSM VIDEO GENERATOR";CONTACT="03043399133"
 K1="c2JfcHVibGlzaGFibGVfMVc0Tks2WDdFZGFjbV9lU0JJY0ZEUV9Da1Q2YzRFWQ=="
 K2="NTYzODYyOTMtMTRmYWNkOTRmZGFjMjZmOWZjMzdmNWYyYw=="
@@ -12,21 +11,10 @@ def D(e):
  try:return base64.b64decode(e.encode()).decode()
  except:return ""
 PK=D(K2);XK=[D(k) for k in K4]
-
-VOICES={
-"English Male":"en-US-GuyNeural","English Female":"en-US-JennyNeural",
-"Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural",
-"Hindi Male":"hi-IN-MadhurNeural","Hindi Female":"hi-IN-SwaraNeural",
-"Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural",
-"Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural",
-"French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural",
-"German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural",
-"Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural"
-}
+VOICES={"English Male":"en-US-GuyNeural","English Female":"en-US-JennyNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Hindi Male":"hi-IN-MadhurNeural","Hindi Female":"hi-IN-SwaraNeural","Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural","Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural","French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural","German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural","Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural"}
 CATS=["Business & Finance","Crypto & Trading","Islamic & Quran","News & Breaking","Sports & Cricket","Technology & AI","Health & Doctor","Farming Kisan","Kitchen Cooking","Trending Viral","Politics Trump","Education","Motivation","Real Estate","Gold & Silver","Cars & Bikes","Pets & Animals","Beauty & Fashion","Travel","Food Vlog","Fitness","History","Science","Comedy","Music","Kids","Army & Police","Weather","Property","Jobs"]
 PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"ASIF786":600,"JSM30":30,"JSM100":100,"JSM300":300,"JSM500":500,"JSM786":600,"JSM600":600,"JSMGOLD":1000,"JSM786GOLD":9999}
 FREE_DB="/tmp/free_daily.json";LICENSE_DB="/tmp/jsm_licenses_final.json"
-
 def Lj(p):
  try:
   if os.path.exists(p):return json.load(open(p))
@@ -35,7 +23,6 @@ def Lj(p):
 def Sj(p,d):
  try:json.dump(d,open(p,'w'))
  except:pass
-
 def Kw(text, category):
  l=text.lower(); cat=(category or "").lower()
  if "trump" in l: return "Donald Trump president speech white house news"
@@ -56,7 +43,6 @@ def Kw(text, category):
  w=re.findall(r'\w+',l);k=[x for x in w if x not in st and len(x)>2]
  clean=" ".join(k[:3]) if k else l[:25]
  return clean + " professional safe"
-
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:600])
  try:
@@ -64,7 +50,6 @@ def Ai(p,path,W=960,H=540):
   if r.status_code==200 and len(r.content)>5000:open(path,'wb').write(r.content);return path
  except:pass
  Image.new('RGB',(W,H),color=(15,23,42)).save(path);return path
-
 def St(k,d,W,H,cat):
  q=Kw(k,cat)
  for key in XK:
@@ -73,7 +58,6 @@ def St(k,d,W,H,cat):
    j=r.json()
    if 'videos' in j and j['videos']:
     vids=j['videos'][0]['video_files']
-    # 540p ke liye 640w ya 960w wala lo
     link=next((v['link'] for v in vids if v['width']>=640 and v['width']<=1280), vids[0]['link'])
     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(link,timeout=10).content)
     clip=VideoFileClip(t).resize((W,H))
@@ -99,9 +83,7 @@ def St(k,d,W,H,cat):
    return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
  except:pass
  return ColorClip((W,H),color=(20,40,80),duration=d)
-
 async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
-
 def run_tts(text, out, voice):
  try:
   loop=asyncio.new_event_loop()
@@ -109,7 +91,6 @@ def run_tts(text, out, voice):
   loop.run_until_complete(Tt(text,out,voice))
   loop.close()
  except:pass
-
 def Gen(email,code,script,lang,cat,vtype):
  if not script.strip():return None,None,"","","","Script likho"
  if not email.strip():return None,None,"","","","Email likho"
@@ -148,44 +129,40 @@ def Gen(email,code,script,lang,cat,vtype):
    nd=au.duration/60.0;needT+=nd
    if needT>rem+0.1:
     au.close()
-    return None,None,"","","",f"Need {needT:.1f}m Baki {rem:.1f}m - Script chhota karo"
+    return None,None,"","","",f"Need {needT:.1f}m Baki {rem:.1f}m"
    if needT>22:
     au.close()
     break
    inn=[s.strip() for s in re.split(r'[.!?]+',ch) if s.strip()][:2]
    if not inn:inn=[ch[:30]]
    per=au.duration/max(len(inn),1)
-   clips=[]
-   for s in inn:
-    cl=St(s,per,W,H,cat).set_duration(per)
-    clips.append(cl)
+   clips=[St(s,per,W,H,cat).set_duration(per) for s in inn]
    fn=concatenate_videoclips(clips,method="compose").set_audio(au)
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
    fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',bitrate='800k',logger=None)
    pvs.append(VideoFileClip(vp))
    au.close()
-  if not pvs:return None,None,"","","","No parts - Script badlo"
+  if not pvs:return None,None,"","","","No parts"
   fv=concatenate_videoclips(pvs,method="compose");vf=f"/tmp/FINAL_{uuid.uuid4().hex[:5]}.mp4"
   fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',bitrate='800k',logger=None)
   tp=f"/tmp/T_{uuid.uuid4().hex[:4]}.jpg";Ai(script,tp,W,H)
   if free:
    ft[et]=ut+needT;Sj(FREE_DB,ft)
-   return vf,tp,title,desc,ht,f"FREE {needT:.1f}m Used {ft[et]:.1f}/1.0 540p SAFE OK"
+   return vf,tp,title,desc,ht,f"FREE {needT:.1f}m Used {ft[et]:.1f}/1.0 540p"
   else:
    lic_db[code]["used"]+=needT;Sj(LICENSE_DB,lic_db)
    nr=lic_db[code]["total"]-lic_db[code]["used"]
-   return vf,tp,title,desc,ht,f"PAID {code} Cut {needT:.1f}m Baki {nr:.1f}/{lic_db[code]['total']}m Exp {lic_db[code]['expiry']} 540p SAFE OK"
- except Exception as e:
-  return None,None,"","","",f"Error:{e}"
+   return vf,tp,title,desc,ht,f"PAID {code} Cut {needT:.1f}m Baki {nr:.1f}/{lic_db[code]['total']}m Exp {lic_db[code]['expiry']}"
+ except Exception as e:return None,None,"","","",f"Error:{e}"
  finally:
   for c in pvs:
    try:c.close()
    except:pass
 
 with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
- gr.Markdown(f"# JSM AI BY JAM SAEED MOTHA | 30 Cat | 16 Lang | {CONTACT} | 540p LONG 20MIN | 6 PLATFORMS SAFE")
+ gr.Markdown(f"# JSM AI BY JAM SAEED MOTHA | 30 Cat | 16 Lang | {CONTACT} | 540p LONG 20MIN")
  with gr.Row():
-  email=gr.Textbox(label="Email");code=gr.Textbox(label="Code ASIF/ALI/JSM=100min JSM786=600min");lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="Language - 16")
+  email=gr.Textbox(label="Email");code=gr.Textbox(label="Code");lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="Language - 16")
  with gr.Row():
   cat=gr.Dropdown(CATS,value="Business & Finance",label="Category - 30 Cats");vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type 540p")
  script=gr.Textbox(lines=6,label="Script - 20 MIN TAK",placeholder="20 min kahani likho...")
@@ -194,6 +171,6 @@ with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
   video=gr.Video(label="Final Video 540p");thumb=gr.Image(label="Thumbnail")
  with gr.Row():
   t1=gr.Textbox(label="Title");d1=gr.Textbox(label="Description");h1=gr.Textbox(label="Hashtags")
- status=gr.Textbox(label="Status - Baki Minutes + Expiry + Lock")
+ status=gr.Textbox(label="Status")
  btn.click(Gen,[email,code,script,lang,cat,vtype],[video,thumb,t1,d1,h1,status])
-demo.queue(max_size=50).launch(share=True,server_name="0.0.0.0",show_api=False)
+demo.queue(max_size=50).launch(share=True,server_name="0.0.0.0")

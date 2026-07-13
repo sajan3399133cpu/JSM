@@ -1,4 +1,3 @@
-# JSM VIDEO GENERATOR - FINAL ERROR FREE - FIXED show_api
 import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip
 from PIL import Image
@@ -158,7 +157,6 @@ def Gen(email,code,script,lang,cat,vtype):
   for c in pvs:
    try:c.close()
    except:pass
-
 with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
  gr.Markdown(f"# JSM AI BY JAM SAEED MOTHA | 30 Cat | 16 Lang | {CONTACT} | 540p LONG 20MIN")
  with gr.Row():

@@ -1,4 +1,4 @@
-import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
+  import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip
 from PIL import Image
 B="JSM VIDEO GENERATOR";CONTACT="03043399133"
@@ -22,6 +22,7 @@ def Lj(p):
 def Sj(p,d):
  try:json.dump(d,open(p,'w'))
  except:pass
+def safe(t):return re.sub(r'[^\w\s\-.,:;()#@ ]', '', t)[:80]
 def Kw(text, category):
  l=text.lower(); cat=(category or "").lower()
  if "trump" in l: return "Donald Trump president speech white house news"
@@ -109,7 +110,7 @@ def Gen(email,code,script,lang,cat,vtype):
    if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED {lic['expiry']} Renew {CONTACT}"
    if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam {lic['used']:.1f}/{lic['total']}m"
   rem=lic["total"]-lic["used"];free=False
- title=f"{script[:60]}";desc=f"{script[:400]}\n\nJSM VIDEO GENERATOR";ht="#JSM"
+ title=safe(script);desc=safe(script[:400]);ht="#JSM"
  pvs=[]
  try:
   sents=[s.strip() for s in re.split(r'[.!?۔]+',script) if s.strip()];chs=[];cur=""
@@ -142,33 +143,64 @@ def Gen(email,code,script,lang,cat,vtype):
    pvs.append(VideoFileClip(vp))
    au.close()
   if not pvs:return None,None,"","","","No parts"
-  fv=concatenate_videoclips(pvs,method="compose");vf=f"/tmp/FINAL_{uuid.uuid4().hex[:5]}.mp4"
+  fv=concatenate_videoclips(pvs,method="compose")
+  out_dir="/tmp/gradio";os.makedirs(out_dir, exist_ok=True)
+  vf=f"{out_dir}/FINAL_{uuid.uuid4().hex[:5]}.mp4"
   fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',bitrate='800k',logger=None)
-  tp=f"/tmp/T_{uuid.uuid4().hex[:4]}.jpg";Ai(script,tp,W,H)
+  tp=f"{out_dir}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(script,tp,W,H)
   if free:
    ft[et]=ut+needT;Sj(FREE_DB,ft)
-   return vf,tp,title,desc,ht,f"FREE {needT:.1f}m Used {ft[et]:.1f}/1.0 540p"
+   return vf,tp,title,desc,ht,f"FREE {needT:.1f}m Used {ft[et]:.1f}/1.0"
   else:
    lic_db[code]["used"]+=needT;Sj(LICENSE_DB,lic_db)
    nr=lic_db[code]["total"]-lic_db[code]["used"]
-   return vf,tp,title,desc,ht,f"PAID {code} Cut {needT:.1f}m Baki {nr:.1f}/{lic_db[code]['total']}m Exp {lic_db[code]['expiry']}"
- except Exception as e:return None,None,"","","",f"Error:{e}"
+   return vf,tp,title,desc,ht,f"PAID {code} Baki {nr:.1f}/{lic_db[code]['total']}m Exp {lic_db[code]['expiry']}"
+ except Exception as e:return None,None,"","","",f"Error:{str(e)[:100]}"
  finally:
   for c in pvs:
    try:c.close()
    except:pass
-with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
- gr.Markdown(f"# JSM AI BY JAM SAEED MOTHA | 30 Cat | 16 Lang | {CONTACT} | 540p LONG 20MIN")
+
+css="""
+.gradio-container{background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)!important}
+#header{text-align:center; padding:20px 0 10px 0}
+#header h1{color:#FFD700!important; font-size:38px!important; font-weight:900!important; letter-spacing:2px!important; text-shadow:0 0 20px rgba(255,215,0,0.5)!important; margin:0!important}
+#header p{color:#bfa75a!important; font-size:14px!important; margin-top:5px!important; letter-spacing:1px!important}
+#features{display:flex; justify-content:center; gap:12px; margin:15px 0; flex-wrap:wrap}
+.feat{background:linear-gradient(135deg,#1a1a1a,#2a2a2a); border:1px solid #FFD700; border-radius:20px; padding:6px 14px; color:#FFD700; font-size:12px; font-weight:600}
+button.primary{background:linear-gradient(90deg,#D4AF37,#FFD700,#D4AF37)!important; color:#000!important; font-weight:900!important; font-size:18px!important; height:56px!important; border-radius:14px!important; box-shadow:0 4px 20px rgba(255,215,0,0.4)!important}
+.gr-input,.gr-dropdown, textarea{background:#1e1e1e!important; border:1px solid #333!important; color:#fff!important; border-radius:12px!important}
+label{color:#FFD700!important; font-weight:600!important}
+"""
+
+with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
+ gr.HTML(f"""
+ <div id="header">
+ <h1>✦ JSM VIDEO GENERATOR ✦</h1>
+ <p>AI POWERED VIDEO STUDIO</p>
+ <div id="features">
+ <div class="feat">🎙️ 16 Languages</div>
+ <div class="feat">🎬 30 Categories</div>
+ <div class="feat">⏱️ 20 Min Long</div>
+ <div class="feat">🔒 Safe Filter</div>
+ <div class="feat">⚡ 6 Platforms</div>
+ </div>
+ </div>
+ """)
  with gr.Row():
-  email=gr.Textbox(label="Email");code=gr.Textbox(label="Code");lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="Language - 16")
+  email=gr.Textbox(label="Email", placeholder="your@gmail.com")
+  code=gr.Textbox(label="License Code", placeholder="ASIF786 for 600min")
+  lang=gr.Dropdown(list(VOICES.keys()), value="English Male", label="Language")
  with gr.Row():
-  cat=gr.Dropdown(CATS,value="Business & Finance",label="Category - 30 Cats");vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type 540p")
- script=gr.Textbox(lines=6,label="Script - 20 MIN TAK",placeholder="20 min kahani likho...")
- btn=gr.Button("GENERATE VIDEO - 20 MIN 540p",variant="primary")
+  cat=gr.Dropdown(CATS, value="Business & Finance", label="Category")
+  vtype=gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Video Type")
+ script=gr.Textbox(lines=6, label="Your Script", placeholder="Type your 20 minute story here...")
+ btn=gr.Button("✨ GENERATE VIDEO ✨", variant="primary")
  with gr.Row():
-  video=gr.Video(label="Final Video 540p");thumb=gr.Image(label="Thumbnail")
+  video=gr.Video(label="Final Video")
+  thumb=gr.Image(label="AI Thumbnail")
  with gr.Row():
   t1=gr.Textbox(label="Title");d1=gr.Textbox(label="Description");h1=gr.Textbox(label="Hashtags")
  status=gr.Textbox(label="Status")
- btn.click(Gen,[email,code,script,lang,cat,vtype],[video,thumb,t1,d1,h1,status])
-demo.queue(max_size=50).launch(share=True,server_name="0.0.0.0")
+ btn.click(Gen, [email,code,script,lang,cat,vtype], [video,thumb,t1,d1,h1,status])
+demo.queue(max_size=50).launch(share=True, server_name="0.0.0.0")

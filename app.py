@@ -22,27 +22,27 @@ def Lj(p):
 def Sj(p,d):
  try:json.dump(d,open(p,'w'))
  except:pass
-def safe(t):return re.sub(r'[^\w\s\-.,:;()#@ ]', '', t)[:80]
-def Kw(text, category):
- l=text.lower(); cat=(category or "").lower()
- if "trump" in l: return "Donald Trump president speech white house news"
- if "biden" in l: return "Joe Biden president white house speech"
- if "imran" in l: return "Pakistan parliament politics Imran Khan news"
- if "news" in cat or "breaking" in cat: return "news studio anchor professional breaking news"
- if "business" in cat or "finance" in cat or "crypto" in cat: return "finance stock market business trading office"
- if "farming" in cat or "kisan" in l: return "farmer agriculture tractor field working"
- if "kitchen" in cat: return "cooking kitchen chef food professional"
- if "doctor" in cat or "health" in cat: return "doctor hospital medical professional"
- if "cricket" in l or "sports" in cat: return "cricket stadium sports match"
- if "islamic" in cat: return "islamic mosque beautiful"
- if "technology" in cat: return "technology AI computer office"
+def safe(t):return re.sub(r'[^\w\s\-.,:;()#@ ]','',t)[:80]
+def Kw(text,category):
+ l=text.lower();cat=(category or "").lower()
+ if "trump" in l:return "Donald Trump president speech white house news"
+ if "biden" in l:return "Joe Biden president white house speech"
+ if "imran" in l:return "Pakistan parliament politics Imran Khan news"
+ if "news" in cat or "breaking" in cat:return "news studio anchor professional breaking news"
+ if "business" in cat or "finance" in cat or "crypto" in cat:return "finance stock market business trading office"
+ if "farming" in cat or "kisan" in l:return "farmer agriculture tractor field working"
+ if "kitchen" in cat:return "cooking kitchen chef food professional"
+ if "doctor" in cat or "health" in cat:return "doctor hospital medical professional"
+ if "cricket" in l or "sports" in cat:return "cricket stadium sports match"
+ if "islamic" in cat:return "islamic mosque beautiful"
+ if "technology" in cat:return "technology AI computer office"
  m={"tractor":"tractor farming","khet":"farm field","biryani":"cooking kitchen"}
  for k,v in m.items():
   if k in l:return v
  st={"hai","ka","ki","ke","ko","me","ne","aur","ye","wo","to","se","par","bhi","ek","wala","raha","is","the","and","in","on"}
  w=re.findall(r'\w+',l);k=[x for x in w if x not in st and len(x)>2]
  clean=" ".join(k[:3]) if k else l[:25]
- return clean + " professional safe"
+ return clean+" professional safe"
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:600])
  try:
@@ -58,7 +58,7 @@ def St(k,d,W,H,cat):
    j=r.json()
    if 'videos' in j and j['videos']:
     vids=j['videos'][0]['video_files']
-    link=next((v['link'] for v in vids if v['width']>=640 and v['width']<=1280), vids[0]['link'])
+    link=next((v['link'] for v in vids if v['width']>=640 and v['width']<=1280),vids[0]['link'])
     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(link,timeout=10).content)
     clip=VideoFileClip(t).resize((W,H))
     return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
@@ -84,7 +84,7 @@ def St(k,d,W,H,cat):
  except:pass
  return ColorClip((W,H),color=(20,40,80),duration=d)
 async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
-def run_tts(text, out, voice):
+def run_tts(text,out,voice):
  try:
   loop=asyncio.new_event_loop()
   asyncio.set_event_loop(loop)
@@ -144,7 +144,7 @@ def Gen(email,code,script,lang,cat,vtype):
    au.close()
   if not pvs:return None,None,"","","","No parts"
   fv=concatenate_videoclips(pvs,method="compose")
-  out_dir="/tmp/gradio";os.makedirs(out_dir, exist_ok=True)
+  out_dir="/tmp/gradio";os.makedirs(out_dir,exist_ok=True)
   vf=f"{out_dir}/FINAL_{uuid.uuid4().hex[:5]}.mp4"
   fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',bitrate='800k',logger=None)
   tp=f"{out_dir}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(script,tp,W,H)
@@ -155,25 +155,23 @@ def Gen(email,code,script,lang,cat,vtype):
    lic_db[code]["used"]+=needT;Sj(LICENSE_DB,lic_db)
    nr=lic_db[code]["total"]-lic_db[code]["used"]
    return vf,tp,title,desc,ht,f"PAID {code} Baki {nr:.1f}/{lic_db[code]['total']}m Exp {lic_db[code]['expiry']}"
- except Exception as e:return None,None,"","","",f"Error:{str(e)[:100]}"
+ except Exception as e:return None,None,"","","",f"Error:{str(e)[:120]}"
  finally:
   for c in pvs:
    try:c.close()
    except:pass
-
 css="""
 .gradio-container{background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)!important}
-#header{text-align:center; padding:20px 0 10px 0}
-#header h1{color:#FFD700!important; font-size:38px!important; font-weight:900!important; letter-spacing:2px!important; text-shadow:0 0 20px rgba(255,215,0,0.5)!important; margin:0!important}
-#header p{color:#bfa75a!important; font-size:14px!important; margin-top:5px!important; letter-spacing:1px!important}
-#features{display:flex; justify-content:center; gap:12px; margin:15px 0; flex-wrap:wrap}
-.feat{background:linear-gradient(135deg,#1a1a1a,#2a2a2a); border:1px solid #FFD700; border-radius:20px; padding:6px 14px; color:#FFD700; font-size:12px; font-weight:600}
-button.primary{background:linear-gradient(90deg,#D4AF37,#FFD700,#D4AF37)!important; color:#000!important; font-weight:900!important; font-size:18px!important; height:56px!important; border-radius:14px!important; box-shadow:0 4px 20px rgba(255,215,0,0.4)!important}
-.gr-input,.gr-dropdown, textarea{background:#1e1e1e!important; border:1px solid #333!important; color:#fff!important; border-radius:12px!important}
-label{color:#FFD700!important; font-weight:600!important}
+#header{text-align:center;padding:20px 0 10px 0}
+#header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important;letter-spacing:2px!important;text-shadow:0 0 20px rgba(255,215,0,0.5)!important;margin:0!important}
+#header p{color:#bfa75a!important;font-size:14px!important;margin-top:5px!important;letter-spacing:1px!important}
+#features{display:flex;justify-content:center;gap:12px;margin:15px 0;flex-wrap:wrap}
+.feat{background:linear-gradient(135deg,#1a1a1a,#2a2a2a);border:1px solid #FFD700;border-radius:20px;padding:6px 14px;color:#FFD700;font-size:12px;font-weight:600}
+button.primary{background:linear-gradient(90deg,#D4AF37,#FFD700,#D4AF37)!important;color:#000!important;font-weight:900!important;font-size:18px!important;height:56px!important;border-radius:14px!important;box-shadow:0 4px 20px rgba(255,215,0,0.4)!important}
+.gr-input,.gr-dropdown,textarea{background:#1e1e1e!important;border:1px solid #333!important;color:#fff!important;border-radius:12px!important}
+label{color:#FFD700!important;font-weight:600!important}
 """
-
-with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
+with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
  gr.HTML(f"""
  <div id="header">
  <h1>✦ JSM VIDEO GENERATOR ✦</h1>
@@ -188,19 +186,19 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
  </div>
  """)
  with gr.Row():
-  email=gr.Textbox(label="Email", placeholder="your@gmail.com")
-  code=gr.Textbox(label="License Code", placeholder="ASIF786 for 600min")
-  lang=gr.Dropdown(list(VOICES.keys()), value="English Male", label="Language")
+  email=gr.Textbox(label="Email",placeholder="your@gmail.com")
+  code=gr.Textbox(label="License Code",placeholder="ASIF786 for 600min")
+  lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="Language")
  with gr.Row():
-  cat=gr.Dropdown(CATS, value="Business & Finance", label="Category")
-  vtype=gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Video Type")
- script=gr.Textbox(lines=6, label="Your Script", placeholder="Type your 20 minute story here...")
- btn=gr.Button("✨ GENERATE VIDEO ✨", variant="primary")
+  cat=gr.Dropdown(CATS,value="Business & Finance",label="Category")
+  vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Video Type")
+ script=gr.Textbox(lines=6,label="Your Script",placeholder="Type your 20 minute story here...")
+ btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
  with gr.Row():
   video=gr.Video(label="Final Video")
   thumb=gr.Image(label="AI Thumbnail")
  with gr.Row():
   t1=gr.Textbox(label="Title");d1=gr.Textbox(label="Description");h1=gr.Textbox(label="Hashtags")
  status=gr.Textbox(label="Status")
- btn.click(Gen, [email,code,script,lang,cat,vtype], [video,thumb,t1,d1,h1,status])
-demo.queue(max_size=50).launch(share=True, server_name="0.0.0.0")
+ btn.click(Gen,[email,code,script,lang,cat,vtype],[video,thumb,t1,d1,h1,status])
+demo.queue(max_size=50).launch(share=True,server_name="0.0.0.0")

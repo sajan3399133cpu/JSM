@@ -1,7 +1,7 @@
 # JSM VIDEO GENERATOR - MASTER V1.0 LOCKED - 26 JAN 2026
 # CHECKLIST LOCKED: 16 Lang | 30 Cat | 6 Platforms(Pexels5+Pixabay+Coverr+Mixkit+Videvo+Popular) | 20Min | Safe Filter Kw | 540p Internal Golden UI | Download Fix | 20min Chunks 25
 import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
-from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip
+from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip
 from PIL import Image
 B="JSM VIDEO GENERATOR";CONTACT="03043399133"
 K1="c2JfcHVibGlzaGFibGVfMVc0Tks2WDdFZGFjbV9lU0JJY0ZEUV9Da1Q2YzRFWQ=="
@@ -116,7 +116,7 @@ def run_tts(text,out,voice):
   loop.run_until_complete(Tt(text,out,voice))
   loop.close()
  except:pass
-def Gen(email,code,script,lang,cat,vtype):
+def Gen(email,code,script,lang,cat,vtype,show_sub):
  if not script.strip():return None,None,"","","","Script likho"
  if not email.strip():return None,None,"","","","Email likho"
  W,H=(540,960) if "TikTok" in vtype else(960,540)
@@ -161,7 +161,18 @@ def Gen(email,code,script,lang,cat,vtype):
    inn=[s.strip() for s in re.split(r'[.!?]+',ch) if s.strip()][:2]
    if not inn:inn=[ch[:30]]
    per=au.duration/max(len(inn),1)
-   clips=[St(s,per,W,H,cat).set_duration(per) for s in inn]
+      clips=[]
+   for s in inn:
+       base_clip=St(s,per,W,H,cat).set_duration(per)
+       # SUBTITLE SENSOR - Agar tick hai to text lagao
+       if show_sub:
+           try:
+               from moviepy.editor import TextClip
+               txt = TextClip(s[:80], fontsize=28, color='white', bg_color='black', method='caption', size=(W*0.8, None)).set_duration(per).set_position(('center','bottom'))
+               base_clip = CompositeVideoClip([base_clip, txt])
+           except:
+               pass
+       clips.append(base_clip)
    fn=concatenate_videoclips(clips,method="compose").set_audio(au)
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
    fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',bitrate='800k',logger=None)
@@ -215,9 +226,12 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   code=gr.Textbox(label="License Code",placeholder="ASIF786 for 600min")
   lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="Language")
  with gr.Row():
-  cat=gr.Dropdown(CATS,value="Business & Finance",label="Category")
-  vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Video Type")
- script=gr.Textbox(lines=6,label="Your Script",placeholder="Type your 20 minute story here...")
+ vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Video Type")
+ cat=gr.Textbox(value="Auto", visible=False)
+  script=gr.Textbox(lines=6,label="Your Script",placeholder="Type your 20 minute story here...")
+ with gr.Row():
+     show_sub=gr.Checkbox(label="✅ Add Subtitles (ہر جملے کے نیچے لکھائی آئے گی)", value=False)
+     auto_sensor=gr.Textbox(label="AI SENSOR", value="Auto: Har jumla khud detect hoga - 32 Categories", interactive=False)
  btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
  with gr.Row():
   video=gr.Video(label="Final Video")
@@ -225,5 +239,5 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
  with gr.Row():
   t1=gr.Textbox(label="Title");d1=gr.Textbox(label="Description");h1=gr.Textbox(label="Hashtags")
  status=gr.Textbox(label="Status")
- btn.click(Gen,[email,code,script,lang,cat,vtype],[video,thumb,t1,d1,h1,status])
+  btn.click(Gen,[email,code,script,lang,cat,vtype,show_sub],[video,thumb,t1,d1,h1,status])
 demo.queue(max_size=50).launch(share=True,server_name="0.0.0.0")

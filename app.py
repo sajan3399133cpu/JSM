@@ -1,3 +1,5 @@
+# JSM VIDEO GENERATOR - MASTER V1.0 LOCKED - 26 JAN 2026
+# CHECKLIST LOCKED: 16 Lang | 30 Cat | 6 Platforms(Pexels5+Pixabay+Coverr+Mixkit+Videvo+Popular) | 20Min | Safe Filter Kw | 540p Internal Golden UI | Download Fix | 20min Chunks 25
 import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip
 from PIL import Image
@@ -24,25 +26,17 @@ def Sj(p,d):
  except:pass
 def safe(t):return re.sub(r'[^\w\s\-.,:;()#@ ]','',t)[:80]
 def Kw(text,category):
- l=text.lower();cat=(category or "").lower()
- if "trump" in l:return "Donald Trump president speech white house news"
- if "biden" in l:return "Joe Biden president white house speech"
- if "imran" in l:return "Pakistan parliament politics Imran Khan news"
- if "news" in cat or "breaking" in cat:return "news studio anchor professional breaking news"
- if "business" in cat or "finance" in cat or "crypto" in cat:return "finance stock market business trading office"
- if "farming" in cat or "kisan" in l:return "farmer agriculture tractor field working"
- if "kitchen" in cat:return "cooking kitchen chef food professional"
- if "doctor" in cat or "health" in cat:return "doctor hospital medical professional"
- if "cricket" in l or "sports" in cat:return "cricket stadium sports match"
- if "islamic" in cat:return "islamic mosque beautiful"
- if "technology" in cat:return "technology AI computer office"
- m={"tractor":"tractor farming","khet":"farm field","biryani":"cooking kitchen"}
- for k,v in m.items():
-  if k in l:return v
- st={"hai","ka","ki","ke","ko","me","ne","aur","ye","wo","to","se","par","bhi","ek","wala","raha","is","the","and","in","on"}
- w=re.findall(r'\w+',l);k=[x for x in w if x not in st and len(x)>2]
- clean=" ".join(k[:3]) if k else l[:25]
- return clean+" professional safe"
+    l=text.lower()
+    if "trump" in l: return f"Donald Trump {random.choice(['speech','white house','press'])}"
+    if "biden" in l: return f"Joe Biden {random.choice(['speech','white house'])}"
+    if "imran" in l or "pakistan politics" in l: return f"Pakistan parliament Imran Khan"
+    if "kisan" in l or "farming" in l or "khet" in l or "tractor" in l: return random.choice(["farmer tractor field","agriculture farmer working","wheat farm harvest"])
+    if "business" in l or "finance" in l or "economy" in l or "inflation" in l or "market" in l: return random.choice(["stock market trading","business finance office","wall street chart"])
+    if "cricket" in l: return "cricket stadium match"
+    words=re.findall(r'\w+',l)
+    clean=[w for w in words if len(w)>3][:4]
+    base=" ".join(clean) if clean else l[:20]
+    return base+" "+(category or "")+" professional"
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:600])
  try:
@@ -51,38 +45,69 @@ def Ai(p,path,W=960,H=540):
  except:pass
  Image.new('RGB',(W,H),color=(15,23,42)).save(path);return path
 def St(k,d,W,H,cat):
- q=Kw(k,cat)
- for key in XK:
-  try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={q}&per_page=2",headers={"Authorization":key},timeout=8)
-   j=r.json()
-   if 'videos' in j and j['videos']:
-    vids=j['videos'][0]['video_files']
-    link=next((v['link'] for v in vids if v['width']>=640 and v['width']<=1280),vids[0]['link'])
-    t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(link,timeout=10).content)
-    clip=VideoFileClip(t).resize((W,H))
-    return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
-  except:continue
- try:
-  if PK:
-   r=requests.get(f"https://pixabay.com/api/videos/?key={PK}&q={q}&per_page=3&safesearch=true",timeout=8)
-   hits=r.json().get('hits',[])
-   if hits:
-    ln=hits[0]['videos']['tiny']['url'] if 'tiny' in hits[0]['videos'] else hits[0]['videos']['medium']['url']
-    t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(ln,timeout=10).content)
-    clip=VideoFileClip(t).resize((W,H))
-    return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
- except:pass
- try:
-  r=requests.get(f"https://api.pexels.com/videos/popular?per_page=2",headers={"Authorization":XK[0]},timeout=8)
-  j=r.json()
-  if 'videos' in j and j['videos']:
-   link=j['videos'][0]['video_files'][0]['link']
-   t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(link,timeout=8).content)
-   clip=VideoFileClip(t).resize((W,H))
-   return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
- except:pass
- return ColorClip((W,H),color=(20,40,80),duration=d)
+    q=Kw(k,cat)
+    page=random.randint(1,4)
+    for key in XK:
+        try:
+            r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={page}",headers={"Authorization":key},timeout=8)
+            j=r.json()
+            if 'videos' in j and j['videos']:
+                vid=random.choice(j['videos'])
+                link=next((v['link'] for v in vid['video_files'] if 640 <= v['width'] <= 1280), vid['video_files'][0]['link'])
+                t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(link,timeout=10).content)
+                clip=VideoFileClip(t).resize((W,H))
+                return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+        except:continue
+    try:
+        if PK:
+            r=requests.get(f"https://pixabay.com/api/videos/?key={PK}&q={urllib.parse.quote(q)}&per_page=5&page={page}&safesearch=true",timeout=8)
+            hits=r.json().get('hits',[])
+            if hits:
+                hit=random.choice(hits)
+                ln=hit['videos']['tiny']['url'] if 'tiny' in hit['videos'] else hit['videos']['medium']['url']
+                t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(ln,timeout=10).content)
+                clip=VideoFileClip(t).resize((W,H))
+                return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+    except:pass
+    try:
+        r=requests.get(f"https://coverr.co/s?q={urllib.parse.quote(q)}",headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+        m=re.findall(r'https://coverr\.co/videos/[^"]+',r.text)
+        if m:
+            r2=requests.get(random.choice(m[:3]),headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+            mp4=re.findall(r'https://[^"]+\.mp4',r2.text)
+            if mp4:
+                t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(mp4[0],timeout=10).content)
+                clip=VideoFileClip(t).resize((W,H))
+                return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+    except:pass
+    try:
+        r=requests.get(f"https://mixkit.co/free-stock-video/{urllib.parse.quote(q.replace(' ','-'))}/",headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+        mp4=re.findall(r'https://[^"]*mixkit[^"]*\.mp4',r.text)
+        if mp4:
+            t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(random.choice(mp4[:2]),timeout=10).content)
+            clip=VideoFileClip(t).resize((W,H))
+            return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+    except:pass
+    try:
+        r=requests.get(f"https://www.videvo.net/search/{urllib.parse.quote(q)}/",headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+        mp4=re.findall(r'https://[^"]+\.mp4',r.text)
+        uniq=list(set([x for x in mp4 if 'videvo' in x or 'preview' in x]))[:2]
+        if uniq:
+            t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(random.choice(uniq),timeout=10).content)
+            clip=VideoFileClip(t).resize((W,H))
+            return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+    except:pass
+    try:
+        r=requests.get(f"https://api.pexels.com/videos/popular?per_page=5&page={page}",headers={"Authorization":XK[0]},timeout=8)
+        j=r.json()
+        if 'videos' in j and j['videos']:
+            vid=random.choice(j['videos'])
+            link=vid['video_files'][0]['link']
+            t=f"/tmp/{uuid.uuid4().hex[:5]}.mp4";open(t,'wb').write(requests.get(link,timeout=8).content)
+            clip=VideoFileClip(t).resize((W,H))
+            return clip.loop(duration=d) if clip.duration<d else clip.subclip(0,d)
+    except:pass
+    return ColorClip((W,H),color=(random.randint(10,40),random.randint(20,60),random.randint(60,100)),duration=d)
 async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
 def run_tts(text,out,voice):
  try:

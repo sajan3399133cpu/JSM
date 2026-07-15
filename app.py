@@ -142,7 +142,6 @@ def Gen(email,code,script,lang,vtype,show_sub,cat_hidden):
    except:pass
 
 css="""
-.gradio-container{background:#0a0a0a!important}
 #header{text-align:center;padding:16px 0}
 #header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important;text-shadow:0 0 20px gold!important;margin:0!important}
 footer{display:none!important}
@@ -150,6 +149,7 @@ button.primary{background:linear-gradient(90deg,#D4AF37,#FFD700)!important;color
 .gr-input,.gr-dropdown,textarea{background:#1e1e1e!important;border:1px solid #333!important;color:#fff!important}
 label{color:#FFD700!important}
 """
+
 with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
  gr.HTML("""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1></div>""")
  with gr.Row():
@@ -168,4 +168,5 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   t1=gr.Textbox(label="Title");d1=gr.Textbox(label="Description");h1=gr.Textbox(label="Hashtags")
  status=gr.Textbox(label="Status")
  btn.click(Gen,[email,code,script,lang,vtype,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
-demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0",show_api=False,show_error=False)
+
+demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")

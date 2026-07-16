@@ -2,7 +2,7 @@ import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urll
 from moviepy.editor import *
 from PIL import Image
 import secrets,string
-CONTACT="03043399133|03022246271";ADMIN_PASS="JSM786";ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+CONTACT="03043399133|03022246271";ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!";ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Motivational":"en-US-GuyNeural","EN News":"en-US-DavisNeural","EN Deep":"en-US-JasonNeural","EN Female":"en-US-JennyNeural","EN Female News":"en-US-AriaNeural","UK Male":"en-GB-RyanNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Hindi Male":"hi-IN-MadhurNeural","Hindi Female":"hi-IN-SwaraNeural","Arabic M":"ar-SA-HamedNeural","Arabic F":"ar-SA-ZariyahNeural","Spanish M":"es-ES-AlvaroNeural","Spanish F":"es-ES-ElviraNeural","French M":"fr-FR-HenriNeural","French F":"fr-FR-DeniseNeural","German M":"de-DE-ConradNeural","German F":"de-DE-KatjaNeural","Turkish M":"tr-TR-AhmetNeural","Turkish F":"tr-TR-EmelNeural","Motivational 2":"en-US-EricNeural","News F2":"en-US-MichelleNeural","Story Female":"en-US-SaraNeural","AU Male":"en-AU-WilliamNeural"}

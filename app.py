@@ -46,38 +46,17 @@ def clean_analyze(script):
  sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
  return clean,sens
 
-# TUMHARA 50+ CATEGORY WALA CODE - KOI CHANGE NAHI
 def Kw(text,cat):
  l=text.lower()
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
  if any(x in l for x in ["elon","tesla","spacex","rocket"]): return "elon musk tesla spacex rocket"
- if any(x in l for x in ["apple","iphone","samsung","mobile"]): return "apple iphone samsung smartphone"
  if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
  if any(x in l for x in ["stock","share market","trading"]): return "stock market trading business"
  if any(x in l for x in ["money","dollar","rupee","cash","bank"]): return "money cash dollar bank"
- if any(x in l for x in ["business","startup","company"]): return "business office company meeting"
- if any(x in l for x in ["trump","biden","white house","president"]): return "donald trump white house politics"
- if any(x in l for x in ["election","vote","parliament"]): return "election vote parliament government"
- if any(x in l for x in ["war","army","soldier"]): return "army soldier military war"
  if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
- if any(x in l for x in ["health","fitness","gym"]): return "health fitness gym workout"
- if any(x in l for x in ["school","student","teacher"]): return "school student teacher education"
- if any(x in l for x in ["university","college","study"]): return "university college student study"
  if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
- if any(x in l for x in ["cow","buffalo","animal"]): return "cow buffalo animal farm"
- if any(x in l for x in ["travel","tourism","vacation"]): return "travel tourism vacation beach"
- if any(x in l for x in ["city","building","skyscraper"]): return "city building skyscraper urban"
- if any(x in l for x in ["nature","forest","mountain"]): return "nature forest mountain river"
- if any(x in l for x in ["food","restaurant","cooking"]): return "food restaurant cooking chef"
  if any(x in l for x in ["cricket","football","sports"]): return "cricket football sports player stadium"
- if any(x in l for x in ["movie","cinema","actor"]): return "movie cinema actor celebrity"
- if any(x in l for x in ["music","song","concert"]): return "music concert singer song"
- if any(x in l for x in ["car","vehicle","drive"]): return "car vehicle driving auto"
- if any(x in l for x in ["plane","flight","airport"]): return "plane flight airport travel"
  if any(x in l for x in ["islam","quran","masjid"]): return "islamic mosque quran prayer"
- if any(x in l for x in ["construction","building","worker"]): return "construction building worker industry"
- if any(x in l for x in ["fashion","clothes","style"]): return "fashion clothes style dress"
- if any(x in l for x in ["cpec","gwadar"]): return "gwadar port cpec cargo ship"
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
  return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
 
@@ -85,17 +64,10 @@ def get_category(text):
  l=text.lower()
  if any(x in l for x in ["ai","chatgpt","robot","tech"]): return "technology"
  if any(x in l for x in ["bitcoin","crypto","stock","money","business"]): return "finance"
- if any(x in l for x in ["trump","election","politics","war"]): return "news"
  if any(x in l for x in ["doctor","hospital","health"]): return "medical"
  if any(x in l for x in ["farmer","tractor","agriculture"]): return "farming"
- if any(x in l for x in ["school","university","education"]): return "education"
- if any(x in l for x in ["travel","city","nature"]): return "travel"
- if any(x in l for x in ["food","restaurant"]): return "food"
- if any(x in l for x in ["cricket","football","sports"]): return "sports"
- if any(x in l for x in ["movie","music"]): return "entertainment"
- if any(x in l for x in ["car","plane"]): return "transport"
- if any(x in l for x in ["islam","quran","masjid"]): return "islamic"
- if any(x in l for x in ["cpec","gwadar"]): return "cpec"
+ if any(x in l for x in ["sports"]): return "sports"
+ if any(x in l for x in ["islam","quran"]): return "islamic"
  return "general"
 
 def Ai(p,path,W=960,H=540):
@@ -111,7 +83,7 @@ def Ai(p,path,W=960,H=540):
 
 def St(k,d,W,H,cat):
  q=Kw(k,cat)
- for key in XK: # PEXELS
+ for key in XK:
   try:
    r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
    j=r.json()
@@ -126,7 +98,7 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]: # PIXABAY
+ for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
   try:
    r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
    j=r.json()
@@ -141,22 +113,7 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- try: # ARCHIVE.ORG
-  r=requests.get(f"https://archive.org/advancedsearch.php?q={urllib.parse.quote(q)}+mediatype:movies&fl=identifier&rows=3&output=json",timeout=8)
-  j=r.json()
-  for doc in j.get('response',{}).get('docs',[]):
-   ident=doc['identifier']
-   for ext in [".mp4","_512kb.mp4"]:
-    try:
-     lk=f"https://archive.org/download/{ident}/{ident}{ext}"
-     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
-     open(t,'wb').write(requests.get(lk,timeout=12).content)
-     if os.path.getsize(t)>15000:
-      cl=VideoFileClip(t).resize((W,H))
-      return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
-    except:continue
- except:pass
- try: # AI IMAGE FALLBACK
+ try:
   p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
   Ai(q,p,W,H)
   return ImageClip(p).set_duration(d).resize((W,H))
@@ -172,7 +129,7 @@ def MakeSEO(s):
  else:t="General Update"
  b=s[:70].strip().replace("\n"," ")
  title=f"{b} | {t} 2026"
- desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\nStock videos from Pexels, Pixabay, Archive.org. YouTube compliant.\n"
+ desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\nStock videos from Pexels, Pixabay. YouTube compliant.\n"
  ht=f"#{t.replace(' ','').replace('&','')} #LatestUpdate #ViralVideo"
  tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
@@ -221,10 +178,10 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    if need>22:au.close();break
    per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
    for i in range(num_clips):
-    if i>0 and i%5==0: time.sleep(3) # CRASH FIX
+    if i>0 and i%5==0: time.sleep(3)
     total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
     small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
-    cat_type=get_category(small_text) # HAR LINE KI ALAG CATEGORY
+    cat_type=get_category(small_text)
     clip_dur=per_clip if i<num_clips-1 else au.duration-(i*per_clip)
     if clip_dur<1:clip_dur=per_clip
     base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
@@ -256,8 +213,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    except:pass
 
 css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important;box-shadow:0 0 20px #FFD70055!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 15px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 25px #FFD70088!important}label{color:#FFD700!important;font-weight:800!important}footer{display:none!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR V6.1",css=css) as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.1 MASTER ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
+with gr.Blocks(title="JSM VIDEO GENERATOR V6.2") as demo: # CSS HATA DIYA
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.2 MASTER ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email",placeholder="your@gmail.com")
@@ -268,7 +225,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR V6.1",css=css) as demo:
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic",placeholder="Elon Musk launched rocket. Doctor checked patient. Farmer used tractor.")
+  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic")
   btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
   with gr.Row():
    video=gr.Video(label="Final Video - HD Download")
@@ -293,4 +250,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR V6.1",css=css) as demo:
   view_out=gr.Textbox(lines=12,label="All Licenses")
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=10).launch(share=True,server_name="0.0.0.0",server_port=7860)
+demo.queue(max_size=10).launch(share=True,server_name="0.0.0.0",server_port=7861,css=css) # PORT 7861 + CSS YAHAN

@@ -5,7 +5,7 @@ import secrets,string
 CONTACT="03043399133|03022246271";ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!";ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
-VOICES={"EN Motivational":"en-US-GuyNeural","EN News":"en-US-DavisNeural","EN Deep":"en-US-JasonNeural","EN Female":"en-US-JennyNeural","EN Female News":"en-US-AriaNeural","UK Male":"en-GB-RyanNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Hindi Male":"hi-IN-MadhurNeural","Hindi Female":"hi-IN-SwaraNeural","Arabic M":"ar-SA-HamedNeural","Arabic F":"ar-SA-ZariyahNeural","Spanish M":"es-ES-AlvaroNeural","Spanish F":"es-ES-ElviraNeural","French M":"fr-FR-HenriNeural","French F":"fr-FR-DeniseNeural","German M":"de-DE-ConradNeural","German F":"de-DE-KatjaNeural","Turkish M":"tr-TR-AhmetNeural","Turkish F":"tr-TR-EmelNeural","Motivational 2":"en-US-EricNeural","News F2":"en-US-MichelleNeural","Story Female":"en-US-SaraNeural","AU Male":"en-AU-WilliamNeural"}
+VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Male Christopher Natural Human":"en-US-ChristopherNeural","EN Male Brandon Natural":"en-US-BrandonNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","EN Female Warm Sara Motivational":"en-US-SaraNeural","EN Female Michelle News 2":"en-US-MichelleNeural","EN Male Eric Deep Motivational 2":"en-US-EricNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","UK Male Thomas Natural 2":"en-GB-ThomasNeural","UK Female Sonia Soft Natural":"en-GB-SoniaNeural","AU Male William Motivational Natural":"en-AU-WilliamNeural","AU Female Natasha Natural":"en-AU-NatashaNatural","CA Male Liam Natural":"en-CA-LiamNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural","Arabic Male Hamed Natural":"ar-SA-HamedNeural","Arabic Female Zariyah Natural":"ar-SA-ZariyahNeural","Spanish Male Alvaro Natural":"es-ES-AlvaroNeural","Spanish Female Elvira Natural":"es-ES-ElviraNeural","French Male Henri Natural":"fr-FR-HenriNeural","French Female Denise Natural":"fr-FR-DeniseNeural","German Male Conrad Natural":"de-DE-ConradNeural","German Female Katja Natural":"de-DE-KatjaNeural","Turkish Male Ahmet Natural":"tr-TR-AhmetNeural","Turkish Female Emel Natural":"tr-TR-EmelNeural","Finance Expert Male Natural Clone":"en-US-DavisNeural","Islamic Soft Male Natural":"ur-PK-AsadNeural","Storyteller Female Natural Human":"en-US-SaraNeural","Doctor Professional Male Natural":"en-US-GuyNeural"}
 PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"ASIF786":600,"JSM30":30,"JSM100":100,"JSM300":300,"JSM500":500,"JSM786":600,"JSM600":600,"JSMGOLD":1000,"JSM786GOLD":9999}
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json");LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json");os.makedirs(BASE_DIR,exist_ok=True);USED=set()
@@ -31,28 +31,31 @@ def AdminView(pw):
  return t or "Koi Code Nahi"
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck)"," ",script,flags=re.I)
- sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>5];kws=[]
+ sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8];kws=[]
  for s in sens:
   l=s.lower()
-  if any(x in l for x in ["doctor","hospital","health"]):kws.append(("doctor hospital patient care medical","medical"))
-  elif any(x in l for x in ["finance","money","stock","crypto","business"]):kws.append(("finance business money stock market office","finance"))
-  elif any(x in l for x in ["islam","quran","namaz","masjid","allah"]):kws.append(("mosque islamic interior beautiful light","islamic"))
-  elif any(x in l for x in ["news","politics","election","parliament","trump","biden","modi","imran"]):kws.append(("news anchor studio professional","news"))
-  elif any(x in l for x in ["farm","kisan","tractor","wheat","crop","farming"]):kws.append(("farmer tractor agriculture field harvest","farming"))
+  if any(x in l for x in ["elon musk","spacex","tesla"]):kws.append(("elon musk tesla spacex technology office","technology"))
+  elif any(x in l for x in ["trump","donald"]):kws.append(("donald trump white house podium speech politics","news"))
+  elif any(x in l for x in ["doctor","hospital","health"]):kws.append(("doctor hospital patient care medical surgery","medical"))
+  elif any(x in l for x in ["finance","money","stock","crypto","business","dollar","bitcoin"]):kws.append(("finance business money stock trading office professional","finance"))
+  elif any(x in l for x in ["islam","quran","namaz","masjid","allah"]):kws.append(("mosque islamic interior beautiful light quran","islamic"))
+  elif any(x in l for x in ["news","politics","election","parliament","biden","modi","imran"]):kws.append(("news anchor studio professional politics parliament","news"))
+  elif any(x in l for x in ["farm","kisan","tractor","wheat","crop","farming","kheti"]):kws.append(("farmer tractor agriculture field harvest wheat","farming"))
   elif any(x in l for x in ["cricket","football","sports","match","stadium"]):kws.append(("cricket stadium match crowd professional","sports"))
   elif any(x in l for x in ["cooking","kitchen","recipe","food","chef"]):kws.append(("cooking kitchen chef food restaurant","cooking"))
   elif any(x in l for x in ["motivation","success","mindset","inspiration"]):kws.append(("motivational speaker stage audience success","motivational"))
   elif any(x in l for x in ["story","kahani","moral","horror"]):kws.append(("storytelling book library cinematic","story"))
-  elif any(x in l for x in ["tech","ai","robot","computer","mobile"]):kws.append(("technology AI robot future office","technology"))
+  elif any(x in l for x in ["ai","robot","chip","technology","computer"]):kws.append(("artificial intelligence robot chip technology future","technology"))
   elif any(x in l for x in ["travel","beach","mountain","tour"]):kws.append(("travel nature beautiful drone","travel"))
-  else:kws.append((s[:50]+" professional cinematic 4k","general"))
+  else:kws.append((s[:60]+" professional cinematic 4k","general"))
  return clean,kws
 def Kw(text,cat):
  l=text.lower()
- SENS={"trump":"Donald Trump podium white house","biden":"Joe Biden white house","imran khan":"Imran Khan Pakistan jalsa crowd","nawaz":"Nawaz Sharif speech","modi":"Narendra Modi India parliament","parliament":"parliament government meeting debate","election":"voting election crowd","farmer":"farmer tractor agriculture field","tractor":"tractor ploughing field farming","farming":"farming agriculture tractor harvest","wheat":"wheat field harvesting farmer","finance":"finance money business office professional","crypto":"bitcoin crypto trading chart office","bitcoin":"bitcoin cryptocurrency trading","dollar":"dollar money finance office","islamic":"islamic mosque beautiful interior","quran":"quran reading mosque islamic","news":"news anchor studio breaking","cricket":"Pakistan cricket stadium match crowd","football":"football match stadium goal","doctor":"doctor hospital patient operation","hospital":"hospital doctor patient care","cooking":"chef cooking food kitchen","technology":"technology AI robot future office","ai":"artificial intelligence robot future","motivational":"motivational speaker success stage","story":"storytelling book library cinematic","travel":"travel airplane airport beautiful","car":"sports car driving highway"}
+ SENS={"elon musk":"Elon Musk Tesla SpaceX technology office","trump donald":"Donald Trump podium white house politics","biden":"Joe Biden white house speech","imran khan":"Imran Khan Pakistan jalsa crowd speech","nawaz":"Nawaz Sharif speech Pakistan","modi":"Narendra Modi India parliament speech","parliament":"parliament government meeting debate","election":"voting election crowd polling","farmer kisan":"farmer tractor agriculture field harvest","tractor":"tractor ploughing field farming agriculture","farming kheti":"farming agriculture tractor harvest field","wheat":"wheat field harvesting farmer tractor","finance money":"finance business money office professional","crypto bitcoin":"bitcoin crypto trading chart office professional","dollar":"dollar money finance office professional","islamic quran":"islamic mosque beautiful interior quran","news anchor":"news anchor studio breaking professional","cricket match":"Pakistan cricket stadium match crowd","football":"football stadium match goal","doctor hospital":"doctor hospital patient operation medical","cooking chef":"chef cooking food kitchen restaurant","ai technology":"artificial intelligence robot technology future office","motivational success":"motivational speaker success stage audience","story kahani":"storytelling book library cinematic moral"}
  for k in sorted(SENS.keys(),key=len,reverse=True):
-  if k in l:return SENS[k]+f" {random.randint(1,99)}"
- w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
+  ks=k.split()
+  if all(x in l for x in ks):return SENS[k]+f" {random.randint(1,99)}"
+ w=[x for x in re.findall(r'\w+',l) if len(x)>4][:4]
  return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
@@ -62,61 +65,92 @@ def Ai(p,path,W=960,H=540):
  except:pass
  Image.new('RGB',(W,H),color=(20,20,20)).save(path);return path
 def St(k,d,W,H,cat):
- if cat in ["finance","news","islamic","medical"]:k=k.replace("girl","").replace("bikini","").replace("sexy","")+" professional office"
+ if cat in ["finance","news","islamic","medical"]:k=k.replace("girl","").replace("bikini","").replace("sexy","").replace("birthday","")+" professional office"
  q=Kw(k,cat)
  for key in XK:
   try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=3&page={random.randint(1,5)}",headers={"Authorization":key},timeout=6)
+   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=3&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
    j=r.json()
    if 'videos' in j and j['videos']:
     for vid in j['videos']:
      lk=vid['video_files'][0]['link']
      if lk in USED:continue
-     USED.add(lk);t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=8).content)
-     if os.path.getsize(t)>4000:
+     USED.add(lk);t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=10).content)
+     if os.path.getsize(t)>8000:
       cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
  for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
   try:
-   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=3",timeout=7)
+   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=3&order=popular",timeout=8)
    j=r.json()
    if j.get('hits'):
-    lk=j['hits'][0]['videos']['medium']['url'];t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=8).content)
-    if os.path.getsize(t)>4000:
-     cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
+    for hit in j['hits']:
+     lk=hit['videos']['medium']['url']
+     if lk in USED:continue
+     USED.add(lk);t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=10).content)
+     if os.path.getsize(t)>8000:
+      cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
  try:
-  r=requests.get(f"https://archive.org/advancedsearch.php?q={urllib.parse.quote(q)}+mediatype:movies&fl=identifier&rows=2&output=json",timeout=6)
+  r=requests.get(f"https://api.mixkit.co/search/videos?q={urllib.parse.quote(q)}",headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+  if "mp4" in r.text:
+   m=re.search(r'https://[^"]+\.mp4',r.text)
+   if m:
+    lk=m.group(0);t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=10).content)
+    if os.path.getsize(t)>8000:
+     cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
+ except:pass
+ try:
+  r=requests.get(f"https://coverr.co/api/videos?query={urllib.parse.quote(q)}",timeout=8)
+  j=r.json()
+  if isinstance(j,list) and len(j)>0:
+   lk=j[0].get('download_url') or j[0].get('url')
+   if lk:
+    t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=10).content)
+    if os.path.getsize(t)>8000:
+     cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
+ except:pass
+ try:
+  r=requests.get(f"https://www.videvo.net/videvo-api/videos?query={urllib.parse.quote(q)}",headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+  if "mp4" in r.text.lower():
+   m=re.search(r'https://[^\s"]+\.mp4',r.text)
+   if m:
+    lk=m.group(0);t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=10).content)
+    if os.path.getsize(t)>8000:
+     cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
+ except:pass
+ try:
+  r=requests.get(f"https://archive.org/advancedsearch.php?q={urllib.parse.quote(q)}+mediatype:movies&fl=identifier&rows=3&output=json",timeout=8)
   j=r.json()
   for doc in j.get('response',{}).get('docs',[]):
    ident=doc['identifier']
    for ext in [".mp4","_512kb.mp4"]:
     try:
-     lk=f"https://archive.org/download/{ident}/{ident}{ext}";t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=8).content)
-     if os.path.getsize(t)>10000:
+     lk=f"https://archive.org/download/{ident}/{ident}{ext}";t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4";open(t,'wb').write(requests.get(lk,timeout=12).content)
+     if os.path.getsize(t)>15000:
       cl=VideoFileClip(t).resize((W,H));return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
     except:continue
  except:pass
  try:
   p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg";Ai(q,p,W,H);return ImageClip(p).set_duration(d).resize((W,H))
  except:pass
- return ColorClip((W,H),color=(15,25,40),duration=d)
+ return ColorClip((W,H),color=(10,20,35),duration=d)
 def MakeSEO(s):
  l=s.lower()
  if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
  elif any(x in l for x in ["finance","money","stock","business","crypto"]):t="Business & Finance"
  elif any(x in l for x in ["islamic","quran","masjid","islam"]):t="Islamic Knowledge"
- elif any(x in l for x in ["politics","election","parliament","news"]):t="Politics & News"
+ elif any(x in l for x in ["politics","election","parliament","news","trump","elon"]):t="Politics & News"
  elif any(x in l for x in ["farm","kisan","tractor","wheat","crop"]):t="Farming & Agriculture"
  elif any(x in l for x in ["cricket","football","sports","match"]):t="Sports Highlights"
  elif any(x in l for x in ["cooking","kitchen","recipe","food"]):t="Cooking & Food"
  elif any(x in l for x in ["motivational","success","mindset","inspiration"]):t="Motivational Speech"
  elif any(x in l for x in ["story","kahani","moral","horror"]):t="Moral Story"
- elif any(x in l for x in ["technology","ai","computer","mobile"]):t="Technology"
+ elif any(x in l for x in ["technology","ai","computer","mobile","robot"]):t="Technology"
  elif any(x in l for x in ["travel","beach","mountain","tour"]):t="Travel Vlog"
  else:t="General"
  b=s[:70].strip().replace("\n"," ");title=f"{b} | {t} 2026"
- desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\n\n📌 Topics: {b}, {t} Update 2026\n🔔 Subscribe for Daily {t} Videos\n📢 Disclaimer: Educational only. Stock videos from Pexels, Pixabay, Archive.org. YouTube compliant.\n"
+ desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\n\nTopics: {b}, {t} Update 2026\nSubscribe for Daily {t} Videos\nDisclaimer: Educational only. Stock videos from Pexels, Pixabay, Mixkit, Coverr, Videvo, Archive.org. YouTube compliant.\n"
  ht=f"#{t.replace(' ','').replace('&','')} #LatestUpdate #ViralVideo #{t.split()[0]}2026 #Trending"
  tags=f"{t}, {b}, Latest {t} 2026, Trending"
  return title[:95],desc,ht,tags
@@ -191,7 +225,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
   if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m {W}x{H} OK"
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m {W}x{H}"
- except Exception as e:return None,None,"","","",f"Error:{str(e)[:180]}"
+ except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
  finally:
   for c in pvs:
    try:c.close()
@@ -201,17 +235,6 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
  gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div id="contact">📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
-   email=gr.Textbox(label="Email",placeholder="your@gmail.com");code=gr.Textbox(label="License Code",placeholder="ASIF786 for 600 min");lang=gr.Dropdown(list(VOICES.keys()),value="EN Motivational",label="🎙️ Voice 24 Natural")
+   email=gr.Textbox(label="Email",placeholder="your@gmail.com");code=gr.Textbox(label="License Code",placeholder="ASIF786 for 600 min");lang=gr.Dropdown(list(VOICES.keys()),value="EN Male Motivational Guy Natural Clone",label="🎙️ Voice 35 Natural Clone - YouTube Safe")
   with gr.Row():
-   vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type");resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="📺 HD");show_sub=gr.Checkbox(label="✅ Subtitles",value=True);cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=5,label="Your Script - 1000 Niches Auto Detect",placeholder="Topic likho - Doctor, Finance, Story, Motivational, Football, Cooking... AI khud samjhega!")
-  btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
-  with gr.Row():video=gr.Video(label="Final Video - HD Download");thumb=gr.Image(label="Thumbnail")
-  with gr.Row():t1=gr.Textbox(label="Title (Auto SEO - No JSM)");d1=gr.Textbox(lines=4,label="Description (Professional)");h1=gr.Textbox(lines=2,label="Hashtags + Tags")
-  status=gr.Textbox(label="Status");btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
- with gr.Tab("🔐 Admin"):
-  gr.Markdown("### 🔑 Owner Access Only");admin_pass=gr.Textbox(label="Owner Key",type="password",placeholder="••••••••")
-  with gr.Row():user_email=gr.Textbox(label="User Email",placeholder="asif@gmail.com");mins=gr.Dropdown([30,100,300,500,600,1000],value=500,label="Minutes");bulk_count=gr.Number(label="Bulk Count",value=1,precision=0)
-  gen_btn=gr.Button("🔑 Generate Code",variant="primary");out_msg=gr.Textbox(label="Message");out_code=gr.Textbox(lines=6,label="Codes - Copy Karo");view_btn=gr.Button("📋 Saare Codes Dekho");view_out=gr.Textbox(lines=12,label="All Licenses")
-  gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out]);view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")
+   vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type");resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="📺 HD");show_sub=gr.Checkbox(label="✅ Subtitles",value=

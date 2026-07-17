@@ -4,7 +4,7 @@ from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
@@ -40,23 +40,28 @@ def AdminView(pw):
  db=Lj(LICENSE_DB);t=""
  for k,v in db.items():t+=f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} | {v['expiry']}\n"
  return t or "Koi Code Nahi"
+
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck)"," ",script,flags=re.I)
  sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
  kws=[]
  for s in sens:
   l=s.lower()
-  if "elon" in l: kws.append(("elon musk tesla spacex technology office","technology"))
-  elif "trump" in l: kws.append(("donald trump white house podium speech","news"))
-  elif "farmer" in l or "kisan" in l or "tractor" in l: kws.append(("farmer tractor agriculture field harvest","farming"))
-  elif "ai" in l: kws.append(("artificial intelligence robot chip technology future","technology"))
-  elif "doctor" in l: kws.append(("doctor hospital patient care medical","medical"))
-  elif "finance" in l or "money" in l: kws.append(("finance business money stock trading office","finance"))
+  if any(x in l for x in ["elon","tesla","spacex"]): kws.append(("elon musk tesla spacex rocket technology","technology"))
+  elif any(x in l for x in ["trump","biden","white house","election"]): kws.append(("donald trump white house podium politics speech","news"))
+  elif any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture"]): kws.append(("farmer tractor agriculture field harvest wheat","farming"))
+  elif any(x in l for x in ["ai","artificial intelligence","robot","chatgpt"]): kws.append(("artificial intelligence robot chip technology future","technology"))
+  elif any(x in l for x in ["doctor","hospital","health","patient"]): kws.append(("doctor hospital patient medical care","medical"))
+  elif any(x in l for x in ["finance","money","stock","business","crypto","bitcoin"]): kws.append(("finance business money stock trading office","finance"))
+  elif any(x in l for x in ["islam","quran","masjid","prayer"]): kws.append(("islamic mosque quran prayer","islamic"))
+  elif any(x in l for x in ["car","bike","tesla","vehicle"]): kws.append(("car vehicle driving road","technology"))
+  elif any(x in l for x in ["cricket","football","sport"]): kws.append(("cricket football sport stadium","sports"))
   else: kws.append((s[:60]+" professional cinematic 4k","general"))
  return clean,kws
+
 def Kw(text,cat):
  l=text.lower()
- if "elon" in l: return "Elon Musk Tesla SpaceX technology"
+ if "elon" in l: return "Elon Musk Tesla SpaceX rocket technology"
  if "trump" in l: return "Donald Trump white house podium politics"
  if "farmer" in l or "kisan" in l or "tractor" in l: return "farmer tractor agriculture field harvest"
  if "ai" in l: return "artificial intelligence robot chip technology future"
@@ -64,6 +69,7 @@ def Kw(text,cat):
  if "finance" in l or "money" in l: return "finance business money office professional"
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:4]
  return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
+
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
  try:
@@ -72,15 +78,16 @@ def Ai(p,path,W=960,H=540):
    open(path,'wb').write(r.content)
    return path
  except:pass
- Image.new('RGB',(W,H),color=(20,20,20)).save(path)
+ Image.new('RGB',(W,H),color=(0,0,0)).save(path) # BLACK BG
  return path
+
 def St(k,d,W,H,cat):
  if cat in ["finance","news","islamic","medical"]:
   k=k.replace("girl","").replace("bikini","").replace("sexy","").replace("birthday","")+" professional office"
  q=Kw(k,cat)
  for key in XK:
   try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=3&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
+   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
    j=r.json()
    if 'videos' in j and j['videos']:
     for vid in j['videos']:
@@ -95,7 +102,7 @@ def St(k,d,W,H,cat):
   except:continue
  for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
   try:
-   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=3&order=popular",timeout=8)
+   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
    j=r.json()
    if j.get('hits'):
     for hit in j['hits']:
@@ -128,7 +135,8 @@ def St(k,d,W,H,cat):
   Ai(q,p,W,H)
   return ImageClip(p).set_duration(d).resize((W,H))
  except:pass
- return ColorClip((W,H),color=(10,20,35),duration=d)
+ return ColorClip((W,H),color=(0,0,0),duration=d) # BLACK BG
+
 def MakeSEO(s):
  l=s.lower()
  if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
@@ -143,6 +151,7 @@ def MakeSEO(s):
  ht=f"#{t.replace(' ','').replace('&','')} #LatestUpdate #ViralVideo"
  tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
+
 async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
 def run_tts(tx,out,vc):
  try:
@@ -151,6 +160,7 @@ def run_tts(tx,out,vc):
   loop.run_until_complete(Tt(tx,out,vc))
   loop.close()
  except:pass
+
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
@@ -227,9 +237,10 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   for c in pvs:
    try:c.close()
    except:pass
-css="body{background:#000!important}#header{text-align:center;padding:10px;background:#000!important;border-bottom:2px solid #FFD700}#header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#FFD700!important;font-weight:900!important;height:60px!important;border-radius:14px!important;font-size:18px!important;border:2px solid #FFD700!important}label{color:#FFD700!important}"
+
+css="body{background:#000!important}#header{text-align:center;padding:10px;background:#000!important;border-bottom:2px solid #FFD700}#header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#FFD700!important;font-weight:900!important;height:60px!important;border-radius:14px!important;font-size:18px!important;border:2px solid #FFD700!important}label{color:#FFD700!important}input,textarea,select{background:#111!important;color:#FFD700!important;border:1px solid #FFD700!important}"
 with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div style="color:#FFD700">📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email",placeholder="your@gmail.com")

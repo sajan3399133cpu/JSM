@@ -307,4 +307,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   view_out=gr.Textbox(lines=12,label="All Licenses")
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")
+demo.queue(concurrency_count=1, max_size=50).launch(share=True,server_name="0.0.0.0", timeout=1800)

@@ -4,7 +4,7 @@ from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
@@ -40,39 +40,67 @@ def AdminView(pw):
  db=Lj(LICENSE_DB);t=""
  for k,v in db.items():t+=f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} | {v['expiry']}\n"
  return t or "Koi Code Nahi"
+
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party)"," ",script,flags=re.I)
  sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
  kws=[]
  for s in sens:
-  l=s.lower()
-  if any(x in l for x in ["cpec","gwadar","pak china","china pakistan"]): kws.append(("gwadar port cpec pakistan china cargo ship container","cpec"))
-  elif any(x in l for x in ["pakistan","islamabad","lahore","karachi","imran khan","nawaz","shahbaz"]): kws.append(("pakistan flag islamabad lahore minar e pakistan crowd","pakistan"))
-  elif any(x in l for x in ["elon","tesla","spacex"]): kws.append(("elon musk tesla spacex rocket technology","technology"))
-  elif any(x in l for x in ["trump","biden","white house","election","america"]): kws.append(("donald trump white house podium politics speech usa flag","news"))
-  elif any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture","kheti","fasal"]): kws.append(("pakistani farmer tractor agriculture field harvest wheat punjab","farming"))
-  elif any(x in l for x in ["ai","artificial intelligence","robot","chatgpt"]): kws.append(("artificial intelligence robot chip technology future office","technology"))
-  elif any(x in l for x in ["doctor","hospital","health","patient","clinic"]): kws.append(("doctor hospital patient medical care pakistan hospital","medical"))
-  elif any(x in l for x in ["finance","money","stock","business","crypto","bitcoin","dollar","rupee"]): kws.append(("finance business money stock trading office professional pakistan","finance"))
-  elif any(x in l for x in ["islam","quran","masjid","namaz","allah","ramadan"]): kws.append(("beautiful islamic mosque interior quran light pakistan faisal mosque","islamic"))
-  elif any(x in l for x in ["road","highway","motorway","bridge","construction"]): kws.append(("pakistan motorway highway road construction bridge","pakistan"))
-  else: kws.append((s[:60]+" pakistan professional cinematic 4k","general"))
+  kws.append((s[:80],"general"))
  return clean,kws
+
+# 50+ SMART CATEGORIES
 def Kw(text,cat):
  l=text.lower()
- if "cpec" in l or "gwadar" in l: return "Gwadar port CPEC Pakistan China cargo ship aerial"
- if "pakistan" in l: return "Pakistan flag Islamabad Lahore city aerial professional"
- if "islamabad" in l: return "Islamabad Pakistan Faisal Mosque aerial"
- if "punjab" in l: return "Punjab Pakistan wheat field farmer tractor"
- if "elon" in l: return "Elon Musk Tesla SpaceX rocket technology"
- if "trump" in l: return "Donald Trump white house podium politics USA"
- if "farmer" in l or "kisan" in l or "tractor" in l or "fasal" in l: return "Pakistani farmer tractor agriculture field harvest"
- if "ai" in l: return "artificial intelligence robot chip technology future"
- if "doctor" in l: return "doctor hospital medical professional Pakistan"
- if "finance" in l or "money" in l or "business" in l: return "finance business money office professional"
- if "islamic" in l or "quran" in l or "masjid" in l: return "beautiful islamic mosque interior light"
- w=[x for x in re.findall(r'\w+',l) if len(x)>4][:4]
- return " ".join(w)+" Pakistan professional cinematic 4k" if w else "Pakistan nature cinematic 4k"
+ if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
+ if any(x in l for x in ["elon","tesla","spacex","rocket"]): return "elon musk tesla spacex rocket"
+ if any(x in l for x in ["apple","iphone","samsung","mobile"]): return "apple iphone samsung smartphone"
+ if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
+ if any(x in l for x in ["stock","share market","trading"]): return "stock market trading business"
+ if any(x in l for x in ["money","dollar","rupee","cash","bank"]): return "money cash dollar bank"
+ if any(x in l for x in ["business","startup","company"]): return "business office company meeting"
+ if any(x in l for x in ["trump","biden","white house","president"]): return "donald trump white house politics"
+ if any(x in l for x in ["election","vote","parliament"]): return "election vote parliament government"
+ if any(x in l for x in ["war","army","soldier"]): return "army soldier military war"
+ if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
+ if any(x in l for x in ["health","fitness","gym"]): return "health fitness gym workout"
+ if any(x in l for x in ["school","student","teacher"]): return "school student teacher education"
+ if any(x in l for x in ["university","college","study"]): return "university college student study"
+ if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
+ if any(x in l for x in ["cow","buffalo","animal"]): return "cow buffalo animal farm"
+ if any(x in l for x in ["travel","tourism","vacation"]): return "travel tourism vacation beach"
+ if any(x in l for x in ["city","building","skyscraper"]): return "city building skyscraper urban"
+ if any(x in l for x in ["nature","forest","mountain"]): return "nature forest mountain river"
+ if any(x in l for x in ["food","restaurant","cooking"]): return "food restaurant cooking chef"
+ if any(x in l for x in ["cricket","football","sports"]): return "cricket football sports player stadium"
+ if any(x in l for x in ["movie","cinema","actor"]): return "movie cinema actor celebrity"
+ if any(x in l for x in ["music","song","concert"]): return "music concert singer song"
+ if any(x in l for x in ["car","vehicle","drive"]): return "car vehicle driving auto"
+ if any(x in l for x in ["plane","flight","airport"]): return "plane flight airport travel"
+ if any(x in l for x in ["islam","quran","masjid"]): return "islamic mosque quran prayer"
+ if any(x in l for x in ["construction","building","worker"]): return "construction building worker industry"
+ if any(x in l for x in ["fashion","clothes","style"]): return "fashion clothes style dress"
+ if any(x in l for x in ["cpec","gwadar"]): return "gwadar port cpec cargo ship"
+ w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
+ return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
+
+def get_category(text):
+ l=text.lower()
+ if any(x in l for x in ["ai","chatgpt","robot","tech"]): return "technology"
+ if any(x in l for x in ["bitcoin","crypto","stock","money","business"]): return "finance"
+ if any(x in l for x in ["trump","election","politics","war"]): return "news"
+ if any(x in l for x in ["doctor","hospital","health"]): return "medical"
+ if any(x in l for x in ["farmer","tractor","agriculture"]): return "farming"
+ if any(x in l for x in ["school","university","education"]): return "education"
+ if any(x in l for x in ["travel","city","nature"]): return "travel"
+ if any(x in l for x in ["food","restaurant"]): return "food"
+ if any(x in l for x in ["cricket","football","sports"]): return "sports"
+ if any(x in l for x in ["movie","music"]): return "entertainment"
+ if any(x in l for x in ["car","plane"]): return "transport"
+ if any(x in l for x in ["islam","quran","masjid"]): return "islamic"
+ if any(x in l for x in ["cpec","gwadar"]): return "cpec"
+ return "general"
+
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
  try:
@@ -83,9 +111,8 @@ def Ai(p,path,W=960,H=540):
  except:pass
  Image.new('RGB',(W,H),color=(0,0,0)).save(path)
  return path
+
 def St(k,d,W,H,cat):
- if cat in ["finance","news","islamic","medical","pakistan","cpec"]:
-  k=k.replace("girl","").replace("bikini","").replace("sexy","").replace("birthday","").replace("party","")+" professional office Pakistan"
  q=Kw(k,cat)
  for key in XK:
   try:
@@ -138,22 +165,21 @@ def St(k,d,W,H,cat):
   return ImageClip(p).set_duration(d).resize((W,H))
  except:pass
  return ColorClip((W,H),color=(0,0,0),duration=d)
+
 def MakeSEO(s):
  l=s.lower()
- if any(x in l for x in ["cpec","gwadar"]):t="CPEC & Gwadar Update"
- elif any(x in l for x in ["pakistan","islamabad","lahore"]):t="Pakistan News"
- elif any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
+ if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
  elif any(x in l for x in ["finance","money","stock","business","crypto"]):t="Business & Finance"
- elif any(x in l for x in ["islamic","quran","masjid","islam"]):t="Islamic Knowledge"
  elif any(x in l for x in ["politics","election","parliament","news","trump","elon"]):t="Politics & News"
  elif any(x in l for x in ["farm","kisan","tractor","wheat","crop"]):t="Farming & Agriculture"
- else:t="Pakistan Update"
+ else:t="General Update"
  b=s[:70].strip().replace("\n"," ")
  title=f"{b} | {t} 2026"
- desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\nStock videos from Pexels, Pixabay, Archive.org. YouTube compliant. Pakistan Focus.\n"
- ht=f"#{t.replace(' ','').replace('&','')} #Pakistan #CPEC #LatestUpdate"
- tags=f"{t}, {b}, Latest {t} 2026, Pakistan"
+ desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\nStock videos from Pexels, Pixabay, Archive.org. YouTube compliant.\n"
+ ht=f"#{t.replace(' ','').replace('&','')} #LatestUpdate #ViralVideo"
+ tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
+
 async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
 def run_tts(tx,out,vc):
  try:
@@ -163,6 +189,7 @@ def run_tts(tx,out,vc):
    if os.path.exists(out) and os.path.getsize(out)>2000:break
    time.sleep(0.4)
  except Exception as e:print(f"TTS Fail {e}")
+
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
@@ -209,19 +236,22 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    for i in range(num_clips):
     total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
     small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
-    kw_idx=min(idx,len(kws)-1);search_kw,cat_type=kws[kw_idx] if kws else (small_text,"general")
+    cat_type=get_category(small_text)
     clip_dur=per_clip if i<num_clips-1 else au.duration-(i*per_clip)
     if clip_dur<1:clip_dur=per_clip
-    base_clip=St(search_kw,clip_dur,W,H,cat_type).set_duration(clip_dur)
+    base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
     try:
-     g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',font='Arial-Black',stroke_color='black',stroke_width=4).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
-     base_clip=CompositeVideoClip([base_clip,g1])
-    except:pass
+     # FIX: font hata diya taa k error na aye
+     g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',stroke_color='black',stroke_width=5).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
+     layers=[base_clip,g1]
+    except:layers=[base_clip]
     if show_sub:
      try:
-      txt=TextClip(small_text[:90],fontsize=int(W*0.035),color='yellow',stroke_color='black',stroke_width=2.5,method='caption',size=(W*0.88,None),font='Arial-Bold').set_duration(clip_dur).set_position(('center',0.78),relative=True)
-      base_clip=CompositeVideoClip([base_clip,txt])
+      # HIGHLIGHT CAPTION
+      txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
+      layers.append(txt)
      except:pass
+    base_clip=CompositeVideoClip(layers)
     clips.append(base_clip)
    fn=concatenate_videoclips(clips,method="compose").set_audio(au)
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
@@ -238,21 +268,10 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   for c in pvs:
    try:c.close()
    except:pass
-css="""
-body{background:#000!important}
-#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important;box-shadow:0 0 30px rgba(255,215,0,0.6)!important}
-#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700,0 0 40px #FF8C00!important;letter-spacing:2px!important;margin:0!important}
-#header div{color:#FFEC8B!important;font-size:13px!important;margin-top:6px!important;font-weight:700!important;letter-spacing:1px!important}
-footer{display:none!important}
-button.primary{background:linear-gradient(90deg,#000 0%,#FFD700 50%,#000 100%)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important;box-shadow:0 0 25px rgba(255,215,0,0.8),inset 0 0 15px rgba(255,215,0,0.4)!important;text-shadow:0 1px 0 rgba(255,255,255,0.5)!important}
-button.primary:hover{transform:scale(1.02)!important;box-shadow:0 0 40px rgba(255,215,0,1)!important}
-.gr-box,.gr-panel{background:linear-gradient(180deg,#0f0e00 0%,#000 100%)!important;border:1px solid #FFD700!important;box-shadow:0 0 15px rgba(255,215,0,0.2)!important;border-radius:12px!important}
-.gr-input,textarea,.gr-dropdown{background:#0a0a00!important;border:1.5px solid #FFD700!important;color:#FFD700!important;font-weight:600!important}
-label{color:#FFD700!important;font-weight:800!important;text-transform:uppercase!important;font-size:12px!important;letter-spacing:1px!important}
-.gr-textbox,.gr-video{border:2px solid #FFD700!important;box-shadow:0 0 20px rgba(255,215,0,0.15)!important}
-"""
+
+css="body{background:#000!important}#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}"
 with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM} | PAKISTAN FOCUS</div></div>""")
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.2 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email",placeholder="your@gmail.com")
@@ -261,9 +280,9 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   with gr.Row():
    vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type")
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
-   show_sub=gr.Checkbox(label="Subtitles",value=True)
+   show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=5,label="Your Script - Sentence Wise Video - Pakistan Focus",placeholder="CPEC Gwadar Port, Pakistan Motorway, Farmer Tractor Punjab, Islamabad...")
+  script=gr.Textbox(lines=5,label="Your Script - 1 Sentence = 1 Topic Video",placeholder="Elon Musk launched rocket. Doctor checked patient. Farmer used tractor.")
   btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
   with gr.Row():
    video=gr.Video(label="Final Video - HD Download")
@@ -276,9 +295,9 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
  with gr.Tab("🔐 Admin"):
   gr.Markdown("### 🔑 Owner Access Only")
-  admin_pass=gr.Textbox(label="Owner Key",type="password",placeholder="••••••••")
+  admin_pass=gr.Textbox(label="Owner Key",type="password")
   with gr.Row():
-   user_email=gr.Textbox(label="User Email",placeholder="asif@gmail.com")
+   user_email=gr.Textbox(label="User Email")
    mins=gr.Dropdown([30,100,300,500,600,1000],value=500,label="Minutes")
    bulk_count=gr.Number(label="Bulk Count",value=1,precision=0)
   gen_btn=gr.Button("🔑 Generate Code",variant="primary")

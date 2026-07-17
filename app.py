@@ -49,6 +49,7 @@ def clean_analyze(script):
   kws.append((s[:80],"general"))
  return clean,kws
 
+# 50+ SMART CATEGORIES
 def Kw(text,cat):
  l=text.lower()
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
@@ -132,7 +133,7 @@ def St(k,d,W,H,cat):
   try:
    r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
    j=r.json()
-  if j.get('hits'):
+   if j.get('hits'):
     for hit in j['hits']:
      lk=hit['videos']['medium']['url']
      if lk in USED:continue
@@ -240,11 +241,13 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
     if clip_dur<1:clip_dur=per_clip
     base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
     try:
+     # FIX: font hata diya taa k error na aye
      g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',stroke_color='black',stroke_width=5).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
      layers=[base_clip,g1]
     except:layers=[base_clip]
     if show_sub:
      try:
+      # HIGHLIGHT CAPTION
       txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
       layers.append(txt)
      except:pass
@@ -267,8 +270,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    except:pass
 
 css="body{background:#000!important}#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.4 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
+with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.2 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email",placeholder="your@gmail.com")
@@ -304,4 +307,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
   view_out=gr.Textbox(lines=12,label="All Licenses")
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=50, default_concurrency_limit=1).launch(share=True,server_name="0.0.0.0", css=css)
+demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")

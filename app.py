@@ -29,7 +29,7 @@ def AdminView(pw):
  db=Lj(LICENSE_DB);t=""
  for k,v in db.items():t+=f"{k}|{v['bound_email'] or 'UNUSED'}|{v['used']:.1f}/{v['total']}\n"
  return t or "Empty"
-def clean(s):
+ return s,kw
  for pat in [r"sex\s*video",r"porn",r"xxx",r"nude",r"naked",r"boobs",r"bikini",r"fuck"]:s=re.sub(pat," ",s,flags=re.I)
  ss=[x.strip() for x in re.split(r'[.!?]+',s) if len(x.strip())>5];kw=[]
  for sen in ss:

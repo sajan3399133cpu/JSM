@@ -1,10 +1,10 @@
-import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime
+import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime,time
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip,ImageClip,TextClip
 from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
@@ -78,7 +78,7 @@ def Ai(p,path,W=960,H=540):
    open(path,'wb').write(r.content)
    return path
  except:pass
- Image.new('RGB',(W,H),color=(0,0,0)).save(path) # BLACK BG
+ Image.new('RGB',(W,H),color=(0,0,0)).save(path)
  return path
 
 def St(k,d,W,H,cat):
@@ -135,7 +135,7 @@ def St(k,d,W,H,cat):
   Ai(q,p,W,H)
   return ImageClip(p).set_duration(d).resize((W,H))
  except:pass
- return ColorClip((W,H),color=(0,0,0),duration=d) # BLACK BG
+ return ColorClip((W,H),color=(0,0,0),duration=d)
 
 def MakeSEO(s):
  l=s.lower()
@@ -159,7 +159,11 @@ def run_tts(tx,out,vc):
   asyncio.set_event_loop(loop)
   loop.run_until_complete(Tt(tx,out,vc))
   loop.close()
- except:pass
+  time.sleep(0.3) # FFX FIX 1: wait for file to save
+  if not os.path.exists(out) or os.path.getsize(out)<1000: # FFX FIX 2: check file
+   return False
+  return True
+ except:return False
 
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
@@ -192,8 +196,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   chs=chs[:20];need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
-   run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
-   if not os.path.exists(ap):continue
+   ok=run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
+   if not ok:continue # SKIP if TTS failed
    au=AudioFileClip(ap)
    if not au or au.duration==0:continue
    nd=au.duration/60.0;need+=nd
@@ -224,7 +228,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
    fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=8,bitrate="3000k",logger=None)
    pvs.append(VideoFileClip(vp));au.close()
-  if not pvs:return None,None,"","","","No parts"
+  if not pvs:return None,None,"","","","No parts generated. Try shorter script."
   fv=concatenate_videoclips(pvs,method="compose")
   out="/tmp/gradio";os.makedirs(out,exist_ok=True)
   vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4"
@@ -264,7 +268,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
  with gr.Tab("🔐 Admin"):
   gr.Markdown("### 🔑 Owner Access Only")
-  admin_pass=gr.Textbox(label="Owner Key",type="password",placeholder="••••••••")
+  admin_pass=gr.Textbox(label="Owner Key",type="password",placeholder="••••")
   with gr.Row():
    user_email=gr.Textbox(label="User Email",placeholder="asif@gmail.com")
    mins=gr.Dropdown([30,100,300,500,600,1000],value=500,label="Minutes")

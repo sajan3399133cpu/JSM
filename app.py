@@ -4,7 +4,7 @@ from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
@@ -241,13 +241,11 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
     if clip_dur<1:clip_dur=per_clip
     base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
     try:
-     # FIX: font hata diya taa k error na aye
      g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',stroke_color='black',stroke_width=5).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
      layers=[base_clip,g1]
     except:layers=[base_clip]
     if show_sub:
      try:
-      # HIGHLIGHT CAPTION
       txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
       layers.append(txt)
      except:pass
@@ -270,7 +268,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    except:pass
 
 css="body{background:#000!important}#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
+with gr.Blocks(title="JSM VIDEO GENERATOR") as demo: # CHANGED: css hata diya
  gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.2 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
@@ -307,4 +305,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   view_out=gr.Textbox(lines=12,label="All Licenses")
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(concurrency_count=1, max_size=50).launch(share=True,server_name="0.0.0.0", timeout=1800)
+demo.queue(max_size=50, default_concurrency_limit=1).launch(share=True,server_name="0.0.0.0", timeout=1800, css=css) # CHANGED: css yahan agaya + queue fix

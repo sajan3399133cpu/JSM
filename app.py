@@ -8,7 +8,7 @@ ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
-PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"JSM30":30,"JSM100":100,"JSMGOLD":1000,"JSM786GOLD":9999}
+PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"ASIF786":600,"JSM30":30,"JSM100":100,"JSM300":300,"JSM500":500,"JSM786":600,"JSM600":600,"JSMGOLD":1000,"JSM786GOLD":9999}
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
@@ -44,12 +44,9 @@ def AdminView(pw):
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party)"," ",script,flags=re.I)
  sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
- kws=[]
- for s in sens:
-  kws.append((s[:80],"general"))
- return clean,kws
+ return clean,sens
 
-# 50+ SMART CATEGORIES
+# TUMHARA 50+ CATEGORY WALA CODE - KOI CHANGE NAHI
 def Kw(text,cat):
  l=text.lower()
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
@@ -114,7 +111,7 @@ def Ai(p,path,W=960,H=540):
 
 def St(k,d,W,H,cat):
  q=Kw(k,cat)
- for key in XK:
+ for key in XK: # PEXELS
   try:
    r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
    j=r.json()
@@ -129,7 +126,7 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
+ for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]: # PIXABAY
   try:
    r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
    j=r.json()
@@ -144,7 +141,7 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- try:
+ try: # ARCHIVE.ORG
   r=requests.get(f"https://archive.org/advancedsearch.php?q={urllib.parse.quote(q)}+mediatype:movies&fl=identifier&rows=3&output=json",timeout=8)
   j=r.json()
   for doc in j.get('response',{}).get('docs',[]):
@@ -159,7 +156,7 @@ def St(k,d,W,H,cat):
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
     except:continue
  except:pass
- try:
+ try: # AI IMAGE FALLBACK
   p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
   Ai(q,p,W,H)
   return ImageClip(p).set_duration(d).resize((W,H))
@@ -211,43 +208,32 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  sents=[s.strip() for s in re.split(r'[.!?]+',cs) if s.strip()]
-  chs=[];cur=""
-  for s in sents:
-   if len(cur)+len(s)<500:cur+=s+". "
-   else:chs.append(cur);cur=s+". "
-  if cur:chs.append(cur)
-  if not chs:chs=[cs]
-  chs=chs[:20];need=0.0;USED.clear()
+  chs=kws[:20];need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
    run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
    if not os.path.exists(ap) or os.path.getsize(ap)<2000:continue
    try:au=AudioFileClip(ap)
    except:continue
-   if not au or au.duration==0 or au.duration is None:
-    try:au.close()
-    except:pass
-    continue
+   if not au or au.duration==0:au.close();continue
    nd=au.duration/60.0;need+=nd
    if need>rem+0.1:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
    if need>22:au.close();break
    per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
    for i in range(num_clips):
+    if i>0 and i%5==0: time.sleep(3) # CRASH FIX
     total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
     small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
-    cat_type=get_category(small_text)
+    cat_type=get_category(small_text) # HAR LINE KI ALAG CATEGORY
     clip_dur=per_clip if i<num_clips-1 else au.duration-(i*per_clip)
     if clip_dur<1:clip_dur=per_clip
     base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
     try:
-     # FIX: font hata diya taa k error na aye
      g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',stroke_color='black',stroke_width=5).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
      layers=[base_clip,g1]
     except:layers=[base_clip]
     if show_sub:
      try:
-      # HIGHLIGHT CAPTION
       txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
       layers.append(txt)
      except:pass
@@ -255,11 +241,11 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
     clips.append(base_clip)
    fn=concatenate_videoclips(clips,method="compose").set_audio(au)
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
-   fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=8,bitrate="3000k",logger=None)
+   fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="2500k",logger=None)
    pvs.append(VideoFileClip(vp));au.close()
   if not pvs:return None,None,"","","","No parts - Script check karo"
   fv=concatenate_videoclips(pvs,method="compose");out="/tmp/gradio";os.makedirs(out,exist_ok=True)
-  vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=8,bitrate="4000k",logger=None)
+  vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="3500k",logger=None)
   tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
   if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m {W}x{H} OK"
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m {W}x{H}"
@@ -269,9 +255,9 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    try:c.close()
    except:pass
 
-css="body{background:#000!important}#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.2 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
+css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important;box-shadow:0 0 20px #FFD70055!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 15px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 25px #FFD70088!important}label{color:#FFD700!important;font-weight:800!important}footer{display:none!important}"
+with gr.Blocks(title="JSM VIDEO GENERATOR V6.1",css=css) as demo:
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.1 MASTER ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email",placeholder="your@gmail.com")
@@ -282,8 +268,8 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=5,label="Your Script - 1 Sentence = 1 Topic Video",placeholder="Elon Musk launched rocket. Doctor checked patient. Farmer used tractor.")
-  btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
+  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic",placeholder="Elon Musk launched rocket. Doctor checked patient. Farmer used tractor.")
+  btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
   with gr.Row():
    video=gr.Video(label="Final Video - HD Download")
    thumb=gr.Image(label="Thumbnail")
@@ -294,7 +280,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   status=gr.Textbox(label="Status")
   btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
  with gr.Tab("🔐 Admin"):
-  gr.Markdown("### 🔑 Owner Access Only")
+  gr.Markdown("### 🔑 OWNER ACCESS ONLY")
   admin_pass=gr.Textbox(label="Owner Key",type="password")
   with gr.Row():
    user_email=gr.Textbox(label="User Email")
@@ -307,4 +293,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
   view_out=gr.Textbox(lines=12,label="All Licenses")
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")
+demo.queue(max_size=10).launch(share=True,server_name="0.0.0.0",server_port=7860)

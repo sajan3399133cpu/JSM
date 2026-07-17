@@ -50,6 +50,7 @@ def Kw(text,cat):
  if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
  if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
  if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
+ if any(x in l for x in ["money","business","income"]): return "money cash business finance"
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
  return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
 def get_category(text):
@@ -111,6 +112,7 @@ def MakeSEO(s):
  l=s.lower()
  if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
  elif any(x in l for x in ["finance","money","stock","business","crypto"]):t="Business & Finance"
+ elif any(x in l for x in ["ai","artificial"]):t="AI & Technology"
  else:t="General Update"
  b=s[:70].strip().replace("\n"," ")
  title=f"{b} | {t} 2026"
@@ -123,10 +125,12 @@ def run_tts(tx,out,vc):
  try:
   if os.path.exists(out):os.remove(out)
   loop=asyncio.new_event_loop();asyncio.set_event_loop(loop);loop.run_until_complete(Tt(tx,out,vc));loop.close()
-  for _ in range(12):
+  for _ in range(15):
    if os.path.exists(out) and os.path.getsize(out)>2000:break
    time.sleep(0.4)
  except:pass
+
+# ===== FINAL FIX: 20 MIN TAK VIDEO =====
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
@@ -148,7 +152,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws[:20];need=0.0;USED.clear()
+  chs=kws[:40];need=0.0;USED.clear() # 40 parts tak jane do
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
    run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
@@ -158,9 +162,10 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    if not au or au.duration==0:au.close();continue
    nd=au.duration/60.0;need+=nd
    if need>rem+0.1:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
-   per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
+   if need>20:au.close();break # AB 20 MIN TAK JAYE GA, 22 NAHI
+   per_clip=4.0;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
    for i in range(num_clips):
-    if i>0 and i%5==0: time.sleep(3)
+    if i>0 and i%5==0: time.sleep(2)
     total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
     small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
     cat_type=get_category(small_text)
@@ -170,7 +175,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
     layers=[base_clip]
     if show_sub:
      try:
-      txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
+      txt=TextClip(small_text[:100],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
       layers.append(txt)
      except:pass
     base_clip=CompositeVideoClip(layers)
@@ -186,9 +191,14 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m OK"
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
+ finally:
+  for c in pvs:
+   try:c.close()
+   except:pass
+
 css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 15px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}footer{display:none!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR V6.5") as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.5 MASTER ✦</h1><div>📞 OWNER {ON}: {ONUM} | MANAGER {MN}: {MNUM}</div></div>""")
+with gr.Blocks(title="JSM VIDEO GENERATOR V6.6") as demo:
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.6 FINAL 20MIN ✦</h1><div>📞 OWNER {ON}: {ONUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email")
@@ -199,7 +209,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR V6.5") as demo:
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic")
+  script=gr.Textbox(lines=6,label="Your Script - 20 Min Tak Chalega")
   btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
   with gr.Row():
    video=gr.Video(label="Final Video")

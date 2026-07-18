@@ -250,15 +250,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     gr.HTML(f"""
     <div id="header">
         <h1>✦ JSM VIDEO GENERATOR ✦</h1>
-        <div class="sub-title">AI POWERED VIDEO STUDIO - AUTO SENSOR 32 NICHES</div>
-        <div style="color:#A0A0A0; font-size:12px; margin-top:-10px; margin-bottom:15px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
-        <div class="badge-container">
-            <div class="jsm-badge">🎙️ 16 Languages</div>
-            <div class="jsm-badge">🎬 32 Categories Inside</div>
-            <div class="jsm-badge">⏱️ 20 Min Long</div>
-            <div class="jsm-badge">🔒 Safe Filter</div>
-            <div class="jsm-badge">⚡ 6 Platforms</div>
-        </div>
+        
     </div>
     """)
     

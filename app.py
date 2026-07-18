@@ -9,27 +9,8 @@ ON="JAM SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
-VOICES={
-"English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural",
-"English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural",
-"Hindi Male":"hi-IN-ArjunNeural","Hindi Female":"hi-IN-SwaraNeural",
-"Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural",
-"Russian Male":"ru-RU-DmitryNeural","Russian Female":"ru-RU-SvetlanaNeural",
-"Chinese Male":"zh-CN-YunxiNeural","Chinese Female":"zh-CN-XiaoxiaoNeural",
-"Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural",
-"Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural",
-"Portuguese Male":"pt-BR-AntonioNeural","Portuguese Female":"pt-BR-FranciscaNeural",
-"French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural",
-"German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural",
-"Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural",
-"Indonesian Male":"id-ID-ArdiNeural","Indonesian Female":"id-ID-GadisNeural",
-"Japanese Male":"ja-JP-KeitaNeural","Japanese Female":"ja-JP-NanamiNeural",
-"Korean Male":"ko-KR-InJoonNeural","Korean Female":"ko-KR-SunHiNeural",
-"Italian Male":"it-IT-DiegoNeural","Italian Female":"it-IT-ElsaNeural",
-"Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
-}
+VOICES={"English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural","English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural","Hindi Male":"hi-IN-ArjunNeural","Hindi Female":"hi-IN-SwaraNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Russian Male":"ru-RU-DmitryNeural","Russian Female":"ru-RU-SvetlanaNeural","Chinese Male":"zh-CN-YunxiNeural","Chinese Female":"zh-CN-XiaoxiaoNeural","Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural","Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural","Portuguese Male":"pt-BR-AntonioNeural","Portuguese Female":"pt-BR-FranciscaNeural","French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural","German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural","Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural","Indonesian Male":"id-ID-ArdiNeural","Indonesian Female":"id-ID-GadisNeural","Japanese Male":"ja-JP-KeitaNeural","Japanese Female":"ja-JP-NanamiNeural","Korean Male":"ko-KR-InJoonNeural","Korean Female":"ko-KR-SunHiNeural","Italian Male":"it-IT-DiegoNeural","Italian Female":"it-IT-ElsaNeural","Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"}
 
-# یہ ہیں آپ کے پیکجز، اسے بالکل نہیں چھیڑا گیا
 PACKAGES={"ASIF786":300,"JSM786":300}
 
 BASE_DIR="/data" if os.path.exists("/data") else "."
@@ -78,12 +59,10 @@ def Kw(text,cat):
   if cat == "finance": return "business finance stock market trading corporate"
   if cat == "technology": return "artificial intelligence coding developer tech"
   return "global international news studio corporate cinematic"
-
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot","coding","software"]): return "artificial intelligence robot technology"
  if any(x in l for x in ["bitcoin","crypto","blockchain","finance","money","stock","market"]): return "bitcoin crypto cryptocurrency business trading"
  if any(x in l for x in ["doctor","hospital","patient","medical","health"]): return "doctor hospital medical patient clinical"
  if any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture"]): return "farmer tractor agriculture field farming"
- 
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
  return " ".join(w)+" professional cinematic 4k" if w else "global news studio corporate cinematic 4k"
 
@@ -169,9 +148,7 @@ def run_tts(tx,out,vc):
 
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
- if len(script.strip()) > 2000:
-  return None,None,"","","", "❌ بھائی اسکرپٹ چھوٹا کر، 2000 سے زیادہ لمیٹر کی وجہ سے تیرا اسکرپٹ کٹ جائے گا۔"
-
+ if len(script.strip()) > 2000: return None,None,"","","", "❌ Limit 2000"
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
  if "TikTok" in vtype:W,H=(720,1280)
  code=code.strip().upper();today=datetime.date.today();email=email.strip().lower()
@@ -191,8 +168,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws
-  need=0.0;USED.clear()
+  chs=kws;need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
    run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural"))
@@ -232,25 +208,22 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
 
 css="""
-body { background-color: #0d0d0d !important; font-family: 'Poppins', sans-serif !important; color: #FFFFFF !important; }
-#header { text-align: center; padding: 30px 15px; background: #000000 !important; border-bottom: 2px solid #FFD700 !important; }
-#header h1 { color: #FFD700 !important; font-size: 38px !important; font-weight: 900 !important; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important; margin-bottom: 5px !important; }
-.sub-title { color: #D4AF37 !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 1px; margin-bottom: 20px !important; text-transform: uppercase; }
-.badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
-.jsm-badge { background: #000000 !important; color: #FFD700 !important; border: 1.5px solid #FFD700 !important; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2); }
-button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: 900 !important; height: 55px !important; border-radius: 12px !important; font-size: 18px !important; border: none !important; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4) !important; cursor: pointer; transition: all 0.3s ease; }
-button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 165, 0, 0.6) !important; }
-.gr-textbox, .gr-dropdown { background: #1a1a1a !important; color: #FFD700 !important; border: 1px solid #333333 !important; border-radius: 8px !important; }
-.gr-textbox:focus, .gr-dropdown:focus { border-color: #FFD700 !important; }
-label { color: #FFD700 !important; font-weight: 700 !important; font-size: 14px !important; margin-bottom: 4px; }
-footer { display: none !important; }
+body, .gradio-container { background-color: #000000 !important; color: #FFFFFF !important; }
+#header { background-color: #000000 !important; border-bottom: 2px solid #FFD700 !important; padding: 20px; text-align: center; }
+#header h1 { color: #FFD700 !important; font-size: 32px !important; font-weight: 900 !important; }
+.sub-title { color: #D4AF37 !important; }
+.gr-box, .gr-block { background-color: #000000 !important; border: 1px solid #333 !important; }
+.gr-textbox, .gr-dropdown, .gr-checkbox { background-color: #000000 !important; color: #FFD700 !important; border: 1px solid #333 !important; }
+label { color: #FFD700 !important; }
+button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: bold !important; border: none !important; }
 """
 
 with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     gr.HTML(f"""
     <div id="header">
         <h1>✦ JSM VIDEO GENERATOR ✦</h1>
-        
+        <div class="sub-title">AI POWERED VIDEO STUDIO</div>
+        <div style="color:#A0A0A0; font-size:12px; margin-top:10px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
     </div>
     """)
     
@@ -264,9 +237,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
             resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="HD")
             show_sub = gr.Checkbox(label="Subtitles ON/OFF", value=True)
             cat_hidden = gr.Textbox(value="Auto", visible=False)
-        
         script = gr.Textbox(lines=6, label="Your Script - Har Line = 1 New Topic", max_length=2000)
-        
         btn = gr.Button("✨ GENERATE GOLDEN VIDEO ✨", variant="primary")
         with gr.Row():
             video = gr.Video(label="Final Video")
@@ -277,7 +248,6 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
             h1 = gr.Textbox(lines=2, label="Hashtags + Tags")
         status = gr.Textbox(label="Status")
         btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, thumb, t1, d1, h1, status])
-        
     with gr.Tab("🔐 Admin Panel"):
         gr.Markdown("### 🔑 OWNER ACCESS ONLY")
         admin_pass = gr.Textbox(label="Owner Key", type="password")

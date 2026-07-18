@@ -51,7 +51,7 @@ def AdminView(pw):
  return t or "Koi Code Nahi"
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party)"," ",script,flags=re.I)
- sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
+ sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>3]
  return clean,sens
 def Kw(text,cat):
  l=text.lower()

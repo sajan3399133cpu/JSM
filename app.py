@@ -2,9 +2,10 @@ import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urll
 from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip,ImageClip,TextClip
 from PIL import Image
 import secrets,string
+
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="JAM SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
@@ -28,18 +29,22 @@ VOICES={
 "Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
 }
 
-PACKAGES={"JSMGOLD":1000,"JSM786GOLD":9999}
+# فالتو پیکجز صاف کر دیے گئے اور بقایا دونوں کو 300 منٹ دے دیے گئے ہیں
+PACKAGES={"ASIF786":300,"JSM786":300}
+
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
 os.makedirs(BASE_DIR,exist_ok=True)
 USED=set()
+
 def Lj(p):
  try:return json.load(open(p))
  except:return{}
 def Sj(p,d):
  try:json.dump(d,open(p,'w'))
  except:pass
+
 def AdminGen(pw,email,mins,cnt):
  if pw!=ADMIN_PASS:return "❌ Galat Owner Key","",""
  db=Lj(LICENSE_DB);o=[]
@@ -55,30 +60,43 @@ def AdminGen(pw,email,mins,cnt):
  db[c]={"bound_email":email.strip().lower(),"total":int(mins),"used":0.0,"expiry":str(datetime.date.today()+datetime.timedelta(days=30))}
  Sj(LICENSE_DB,db)
  return f"✅ Code Ban Gaya {email} ke liye",c,""
+
 def AdminView(pw):
  if pw!=ADMIN_PASS:return "Galat Owner Key"
  db=Lj(LICENSE_DB);t=""
  for k,v in db.items():t+=f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} min | Expiry: {v['expiry']}\n"
  return t or "Koi Code Nahi"
+
 def clean_analyze(script):
- clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party)"," ",script,flags=re.I)
+ # سالگرہ، غیر متعلقہ پارٹی اور ورزش والے الفاظ کو یہاں سے بلاک کیا گیا تاکہ مکسنگ نہ ہو
+ clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party|birthday|party|fitness girl|workout girl|gym exercise)"," ",script,flags=re.I)
  sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
  return clean,sens
+
 def Kw(text,cat):
  l=text.lower()
- if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
- if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
- if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
- if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
+ # اگر کوئی فالتو لفظ یا سالگرہ کے اثرات ہوں تو ان کو فنانس یا بزنس میں زبردستی بدلنے کا سخت فلٹر
+ if any(x in l for x in ["birthday","party","exercise","workout","gym"]):
+  if cat == "finance": return "business finance stock market trading corporate"
+  if cat == "technology": return "artificial intelligence coding developer tech"
+  return "global international news studio corporate cinematic"
+
+ if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot","coding","software"]): return "artificial intelligence robot technology"
+ if any(x in l for x in ["bitcoin","crypto","blockchain","finance","money","stock","market"]): return "bitcoin crypto cryptocurrency business trading"
+ if any(x in l for x in ["doctor","hospital","patient","medical","health"]): return "doctor hospital medical patient clinical"
+ if any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture"]): return "farmer tractor agriculture field farming"
+ 
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
- return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
+ return " ".join(w)+" professional cinematic 4k" if w else "global news studio corporate cinematic 4k"
+
 def get_category(text):
  l=text.lower()
- if any(x in l for x in ["ai","chatgpt","robot","tech"]): return "technology"
- if any(x in l for x in ["bitcoin","crypto","stock","money","business"]): return "finance"
- if any(x in l for x in ["doctor","hospital","health"]): return "medical"
- if any(x in l for x in ["farmer","tractor","agriculture"]): return "farming"
+ if any(x in l for x in ["ai","chatgpt","robot","tech","coding","software"]): return "technology"
+ if any(x in l for x in ["bitcoin","crypto","stock","money","business","finance"]): return "finance"
+ if any(x in l for x in ["doctor","hospital","health","medical"]): return "medical"
+ if any(x in l for x in ["farmer","tractor","agriculture","field"]): return "farming"
  return "general"
+
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
  try:
@@ -89,6 +107,7 @@ def Ai(p,path,W=960,H=540):
  except:pass
  Image.new('RGB',(W,H),color=(0,0,0)).save(path)
  return path
+
 def St(k,d,W,H,cat):
  q=Kw(k,cat)
  for key in XK:
@@ -127,6 +146,7 @@ def St(k,d,W,H,cat):
   return ImageClip(p).set_duration(d).resize((W,H))
  except:pass
  return ColorClip((W,H),color=(0,0,0),duration=d)
+
 def MakeSEO(s):
  l=s.lower()
  if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
@@ -138,6 +158,7 @@ def MakeSEO(s):
  ht=f"#{t.replace(' ','')} #LatestUpdate #ViralVideo"
  tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
+
 async def Tt(t,o,v):await edge_tts.Communicate(t,v,rate="+4%").save(o)
 def run_tts(tx,out,vc):
  try:
@@ -147,9 +168,9 @@ def run_tts(tx,out,vc):
    if os.path.exists(out) and os.path.getsize(out)>2000:break
    time.sleep(0.4)
  except:pass
+
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
- 
  if len(script.strip()) > 2000:
   return None,None,"","","", "❌ بھائی اسکرپٹ چھوٹا کر، 2000 سے زیادہ لمیٹر کی وجہ سے تیرا اسکرپٹ کٹ جائے گا۔"
 
@@ -212,46 +233,77 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
 
-css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 15px #FFD700!important}label{color:#FFD700!important;font-weight:800!important}.gr-textbox,.gr-dropdown{background:#1a1a1a!important;color:#FFD700!important;border:1px solid #FFD700!important}footer{display:none!important}"
+# خوبصورت گولڈن اور بلیک ڈیش بورڈ کی الٹرا پریمیم CSS اسٹائلنگ
+css="""
+body { background-color: #0d0d0d !important; font-family: 'Poppins', sans-serif !important; color: #FFFFFF !important; }
+#header { text-align: center; padding: 30px 15px; background: #000000 !important; border-bottom: 2px solid #FFD700 !important; }
+#header h1 { color: #FFD700 !important; font-size: 38px !important; font-weight: 900 !important; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important; margin-bottom: 5px !important; }
+.sub-title { color: #D4AF37 !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 1px; margin-bottom: 20px !important; text-transform: uppercase; }
+.badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
+.jsm-badge { background: #000000 !important; color: #FFD700 !important; border: 1.5px solid #FFD700 !important; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2); }
+button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: 900 !important; height: 55px !important; border-radius: 12px !important; font-size: 18px !important; border: none !important; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4) !important; cursor: pointer; transition: all 0.3s ease; }
+button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 165, 0, 0.6) !important; }
+.gr-textbox, .gr-dropdown { background: #1a1a1a !important; color: #FFD700 !important; border: 1px solid #333333 !important; border-radius: 8px !important; }
+.gr-textbox:focus, .gr-dropdown:focus { border-color: #FFD700 !important; }
+label { color: #FFD700 !important; font-weight: 700 !important; font-size: 14px !important; margin-bottom: 4px; }
+footer { display: none !important; }
+"""
 
-with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div style="color:#FFD700">{ON}: {ONUM} | {MN}: {MNUM}</div></div>""")
- with gr.Tab("🎬 Video Generator"):
-  with gr.Row():
-   email=gr.Textbox(label="Email")
-   code=gr.Textbox(label="License Code")
-   lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="🌍 Language + Voice Select")
-  with gr.Row():
-   vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type")
-   resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
-   show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
-   cat_hidden=gr.Textbox(value="Auto",visible=False)
-  
-  # Error wali line se show_copy_button hata diya gaya hai!
-  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic", max_length=2000)
-  
-  btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
-  with gr.Row():
-   video=gr.Video(label="Final Video")
-   thumb=gr.Image(label="AI Thumbnail")
-  with gr.Row():
-   t1=gr.Textbox(label="SEO Title")
-   d1=gr.Textbox(lines=4,label="Description")
-   h1=gr.Textbox(lines=2,label="Hashtags + Tags")
-  status=gr.Textbox(label="Status")
-  btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
- with gr.Tab("🔐 Admin Panel"):
-  gr.Markdown("### 🔑 OWNER ACCESS ONLY")
-  admin_pass=gr.Textbox(label="Owner Key",type="password")
-  with gr.Row():
-   user_email=gr.Textbox(label="User Email")
-   mins=gr.Dropdown([30,100,300,500,600,1000],value=500,label="Minutes")
-   bulk_count=gr.Number(label="Bulk Count",value=1,precision=0)
-  gen_btn=gr.Button("🔑 Generate Code",variant="primary")
-  out_msg=gr.Textbox(label="Message")
-  out_code=gr.Textbox(lines=6,label="Generated Codes")
-  view_btn=gr.Button("📋 Saare Codes + Usage Dekho")
-  view_out=gr.Textbox(lines=15,label="All Licenses")
-  gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
-  view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=10).launch(share=True,css=css)
+with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
+    # تصویر کے مطابق خوبصورت ہیڈر اور بیجز کا سیٹ اپ
+    gr.HTML(f"""
+    <div id="header">
+        <h1>✦ JSM VIDEO GENERATOR ✦</h1>
+        <div class="sub-title">AI POWERED VIDEO STUDIO - AUTO SENSOR 32 NICHES</div>
+        <div style="color:#A0A0A0; font-size:12px; margin-top:-10px; margin-bottom:15px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
+        <div class="badge-container">
+            <div class="jsm-badge">🎙️ 16 Languages</div>
+            <div class="jsm-badge">🎬 32 Categories Inside</div>
+            <div class="jsm-badge">⏱️ 20 Min Long</div>
+            <div class="jsm-badge">🔒 Safe Filter</div>
+            <div class="jsm-badge">⚡ 6 Platforms</div>
+        </div>
+    </div>
+    """)
+    
+    with gr.Tab("🎬 Video Generator"):
+        with gr.Row():
+            email = gr.Textbox(label="Email", placeholder="your@gmail.com")
+            code = gr.Textbox(label="License Code", placeholder="ASIF786 for 300min")
+            lang = gr.Dropdown(list(VOICES.keys()), value="English Male", label="🌍 Language + Voice Select")
+        with gr.Row():
+            vtype = gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Type")
+            resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="HD")
+            show_sub = gr.Checkbox(label="Subtitles ON/OFF", value=True)
+            cat_hidden = gr.Textbox(value="Auto", visible=False)
+        
+        # یہاں سے شو کاپی بٹن والا فالتو پیرامیٹر ہمیشہ کے لیے ہٹا دیا گیا ہے
+        script = gr.Textbox(lines=6, label="Your Script - Har Line = 1 New Topic", max_length=2000)
+        
+        btn = gr.Button("✨ GENERATE GOLDEN VIDEO ✨", variant="primary")
+        with gr.Row():
+            video = gr.Video(label="Final Video")
+            thumb = gr.Image(label="AI Thumbnail")
+        with gr.Row():
+            t1 = gr.Textbox(label="SEO Title")
+            d1 = gr.Textbox(lines=4, label="Description")
+            h1 = gr.Textbox(lines=2, label="Hashtags + Tags")
+        status = gr.Textbox(label="Status")
+        btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, thumb, t1, d1, h1, status])
+        
+    with gr.Tab("🔐 Admin Panel"):
+        gr.Markdown("### 🔑 OWNER ACCESS ONLY")
+        admin_pass = gr.Textbox(label="Owner Key", type="password")
+        with gr.Row():
+            user_email = gr.Textbox(label="User Email")
+            mins = gr.Dropdown([30, 100, 300, 500, 600, 1000], value=300, label="Minutes")
+            bulk_count = gr.Number(label="Bulk Count", value=1, precision=0)
+        gen_btn = gr.Button("🔑 Generate Code", variant="primary")
+        out_msg = gr.Textbox(label="Message")
+        out_code = gr.Textbox(lines=6, label="Generated Codes")
+        view_btn = gr.Button("📋 Saare Codes + Usage Dekho")
+        view_out = gr.Textbox(lines=15, label="All Licenses")
+        gen_btn.click(AdminGen, [admin_pass, user_email, mins, bulk_count], [out_msg, out_code, view_out])
+        view_btn.click(AdminView, [admin_pass], [view_out])
+
+demo.queue(max_size=10).launch(share=True)

@@ -8,7 +8,6 @@ ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
-# ===== 20 زبانیں x لڑکا + لڑکی - Natural Neural Voices =====
 VOICES={
 "English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural",
 "English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural",
@@ -29,7 +28,7 @@ VOICES={
 "Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
 }
 
-PACKAGES={"ASIF":100,"JSM786GOLD":9999}
+PACKAGES={"JSMGOLD":1000,"JSM786GOLD":9999}
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
@@ -139,7 +138,7 @@ def MakeSEO(s):
  ht=f"#{t.replace(' ','')} #LatestUpdate #ViralVideo"
  tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
-async def Tt(t,o,v):await edge_tts.Communicate(t,v,rate="+4%").save(o) # rate+4% motivational
+async def Tt(t,o,v):await edge_tts.Communicate(t,v,rate="+4%").save(o)
 def run_tts(tx,out,vc):
  try:
   if os.path.exists(out):os.remove(out)
@@ -151,7 +150,6 @@ def run_tts(tx,out,vc):
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
  
- # 2000 CHAR LIMIT CHECK
  if len(script.strip()) > 2000:
   return None,None,"","","", "❌ بھائی اسکرپٹ چھوٹا کر، 2000 سے زیادہ لمیٹر کی وجہ سے تیرا اسکرپٹ کٹ جائے گا۔"
 
@@ -174,11 +172,11 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws # کٹنگ فکس کرنے کے لیے کٹ والی لاجک ہٹا دی
+  chs=kws
   need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
-   run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural")) # 20 زبان والی آواز یہاں سے
+   run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural"))
    if not os.path.exists(ap) or os.path.getsize(ap)<2000:continue
    try:au=AudioFileClip(ap)
    except:continue
@@ -214,25 +212,23 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
 
-# ===== BLACK + GOLDEN CSS - JSM Look =====
 css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 15px #FFD700!important}label{color:#FFD700!important;font-weight:800!important}.gr-textbox,.gr-dropdown{background:#1a1a1a!important;color:#FFD700!important;border:1px solid #FFD700!important}footer{display:none!important}"
 
 with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
- # ٹائٹل بالکل صاف کر دیا ہے، اب صرف جے ایس ایم ویڈیو جرنیٹر اور نیچے آپ دونوں کے نام اور نمبر آئیں گے
  gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div style="color:#FFD700">{ON}: {ONUM} | {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email")
    code=gr.Textbox(label="License Code")
-   lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="🌍 Language + Voice Select") # 20 زبان
+   lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="🌍 Language + Voice Select")
   with gr.Row():
    vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type")
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
   
-  # لائیو کریکٹر کاؤنٹر والا باکس
-  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic", max_length=2000, show_copy_button=True)
+  # Error wali line se show_copy_button hata diya gaya hai!
+  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic", max_length=2000)
   
   btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
   with gr.Row():

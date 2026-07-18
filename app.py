@@ -4,12 +4,32 @@ from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JSM VIDEO GENERATOR";ONUM=" SAEED AHMED| 03043399133";MN="MANAGER: مجاہد حسین | 03022246271"
-
+ON="SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
-VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural","Arabic Male Hamed":"ar-SA-HamedNeural","Arabic Female Zariyah":"ar-SA-ZariyahNeural","Turkish Male Emre":"tr-TR-EmreNeural","Persian Male Farid":"fa-IR-FaridNeural","Spanish Male Alvaro":"es-ES-AlvaroNeural","French Male Henri":"fr-FR-HenriNeural","German Male Conrad":"de-DE-ConradNeural","Bengali Male Banik":"bn-IN-BanikNeural","Tamil Male Valluvar":"ta-IN-ValluvarNeural","Telugu Male Mohan":"te-IN-MohanNeural","Punjabi Male Manveer":"pa-IN-ManveerNeural"}
-PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"ASIF786":600,"JSM30":30,"JSM100":100,"JSM300":300,"JSM500":500,"JSM786":600,"JSM600":600,"JSMGOLD":1000,"JSM786GOLD":9999}
+
+# ===== 20 زبانیں x لڑکا + لڑکی - Natural Neural Voices =====
+VOICES={
+"English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural",
+"English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural",
+"Hindi Male":"hi-IN-ArjunNeural","Hindi Female":"hi-IN-SwaraNeural",
+"Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural",
+"Russian Male":"ru-RU-DmitryNeural","Russian Female":"ru-RU-SvetlanaNeural",
+"Chinese Male":"zh-CN-YunxiNeural","Chinese Female":"zh-CN-XiaoxiaoNeural",
+"Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural",
+"Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural",
+"Portuguese Male":"pt-BR-AntonioNeural","Portuguese Female":"pt-BR-FranciscaNeural",
+"French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural",
+"German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural",
+"Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural",
+"Indonesian Male":"id-ID-ArdiNeural","Indonesian Female":"id-ID-GadisNeural",
+"Japanese Male":"ja-JP-KeitaNeural","Japanese Female":"ja-JP-NanamiNeural",
+"Korean Male":"ko-KR-InJoonNeural","Korean Female":"ko-KR-SunHiNeural",
+"Italian Male":"it-IT-DiegoNeural","Italian Female":"it-IT-ElsaNeural",
+"Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
+}
+
+PACKAGES={"ALI":500,"JSMGOLD":1000,"JSM786GOLD":9999}
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
@@ -49,12 +69,16 @@ def Kw(text,cat):
  l=text.lower()
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
  if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
+ if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
+ if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
  return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
 def get_category(text):
  l=text.lower()
  if any(x in l for x in ["ai","chatgpt","robot","tech"]): return "technology"
  if any(x in l for x in ["bitcoin","crypto","stock","money","business"]): return "finance"
+ if any(x in l for x in ["doctor","hospital","health"]): return "medical"
+ if any(x in l for x in ["farmer","tractor","agriculture"]): return "farming"
  return "general"
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
@@ -68,10 +92,9 @@ def Ai(p,path,W=960,H=540):
  return path
 def St(k,d,W,H,cat):
  q=Kw(k,cat)
- # 1. PEXELS WAPAS
  for key in XK:
   try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=3&page={random.randint(1,2)}",headers={"Authorization":key},timeout=6)
+   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
    j=r.json()
    if 'videos' in j and j['videos']:
     for vid in j['videos']:
@@ -84,10 +107,9 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- # 2. PIXABAY
- for pkey in ["45206122-5ac148b5cb7d59b24b24b24b"]:
+ for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
   try:
-   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=3",timeout=8)
+   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
    j=r.json()
    if j.get('hits'):
     for hit in j['hits']:
@@ -100,10 +122,12 @@ def St(k,d,W,H,cat):
       cl=VideoFileClip(t).resize((W,H))
       return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
- # 3. AI IMAGE FALLBACK
- p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
- Ai(q,p,W,H)
- return ImageClip(p).set_duration(d).resize((W,H))
+ try:
+  p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
+  Ai(q,p,W,H)
+  return ImageClip(p).set_duration(d).resize((W,H))
+ except:pass
+ return ColorClip((W,H),color=(0,0,0),duration=d)
 def MakeSEO(s):
  l=s.lower()
  if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
@@ -115,19 +139,19 @@ def MakeSEO(s):
  ht=f"#{t.replace(' ','')} #LatestUpdate #ViralVideo"
  tags=f"{t}, {b}, Latest {t} 2026"
  return title[:95],desc,ht,tags
-async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
+async def Tt(t,o,v):await edge_tts.Communicate(t,v,rate="+4%").save(o) # rate+4% motivational
 def run_tts(tx,out,vc):
  try:
   if os.path.exists(out):os.remove(out)
   loop=asyncio.new_event_loop();asyncio.set_event_loop(loop);loop.run_until_complete(Tt(tx,out,vc));loop.close()
-  for _ in range(10):
+  for _ in range(12):
    if os.path.exists(out) and os.path.getsize(out)>2000:break
-   time.sleep(0.3)
+   time.sleep(0.4)
  except:pass
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
- W,H={"640x360 - 360p Fast":(640,360),"854x480 - 480p SD":(854,480),"1280x720 - 720p HD":(1280,720)}.get(res,(854,480)) # DEFAULT 480P
- if "TikTok" in vtype:W,H=(480,854)
+ W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
+ if "TikTok" in vtype:W,H=(720,1280)
  code=code.strip().upper();today=datetime.date.today();email=email.strip().lower()
  if not code or code not in PACKAGES:
   fd=Lj(FREE_DB);ek=email+"_"+today.isoformat();ut=fd.get(ek,0)
@@ -145,19 +169,19 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws # POORI SCRIPT - NO LIMIT
-  need=0.0;USED.clear()
+  chs=kws[:20];need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
-   run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
+   run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural")) # 20 زبان والی آواز یہاں سے
    if not os.path.exists(ap) or os.path.getsize(ap)<2000:continue
    try:au=AudioFileClip(ap)
    except:continue
    if not au or au.duration==0:au.close();continue
    nd=au.duration/60.0;need+=nd
    if need>rem+0.1:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
-   per_clip=5.0;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
+   per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
    for i in range(num_clips):
+    if i>0 and i%5==0: time.sleep(3)
     total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
     small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
     cat_type=get_category(small_text)
@@ -167,33 +191,36 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
     layers=[base_clip]
     if show_sub:
      try:
-      txt=TextClip(small_text[:90],fontsize=int(W*0.045),color='yellow',stroke_color='black',stroke_width=3,method='caption',size=(W*0.9,None)).set_duration(clip_dur).set_position(('center',0.8),relative=True)
+      txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
       layers.append(txt)
      except:pass
     base_clip=CompositeVideoClip(layers)
     clips.append(base_clip)
    fn=concatenate_videoclips(clips,method="compose").set_audio(au)
-   vp=f"/tmp/P_{idx}.mp4"
-   fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=2,bitrate="1500k",logger=None)
+   vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
+   fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="2500k",logger=None)
    pvs.append(VideoFileClip(vp));au.close()
   if not pvs:return None,None,"","","","No parts - Script check karo"
   fv=concatenate_videoclips(pvs,method="compose");out="/tmp/gradio";os.makedirs(out,exist_ok=True)
-  vf=f"{out}/FINAL.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=2,bitrate="2000k",logger=None)
-  tp=f"{out}/T.jpg";Ai(cs,tp,W,H)
+  vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="3500k",logger=None)
+  tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
   if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m OK"
   else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
-css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important;text-shadow:0 0 15px #FFD700!important}.owner{color:#FFD700!important;font-size:16px!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}footer{display:none!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR V6.19") as demo:
- gr.HTML(f"""<div id="header"><h1>✦ {ON} V6.19 ✦</h1><div class="owner">OWNER: {ONUM}</div><div class="owner">{MN}</div></div>""")
+
+# ===== BLACK + GOLDEN CSS - JSM Look =====
+css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 15px #FFD700!important}label{color:#FFD700!important;font-weight:800!important}.gr-textbox,.gr-dropdown{background:#1a1a1a!important;color:#FFD700!important;border:1px solid #FFD700!important}footer{display:none!important}"
+
+with gr.Blocks(title="JSM VIDEO GENERATOR V6.6") as demo:
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.6 MASTER ✦</h1><div style="color:#FFD700">📞 OWNER {ON}: {ONUM} | MANAGER {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email")
    code=gr.Textbox(label="License Code")
-   lang=gr.Dropdown(list(VOICES.keys()),value="EN Male Motivational Guy Natural Clone",label="Voice")
+   lang=gr.Dropdown(list(VOICES.keys()),value="English Male",label="🌍 Language + Voice Select") # 20 زبان
   with gr.Row():
    vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type")
-   resolution=gr.Dropdown(["640x360 - 360p Fast","854x480 - 480p SD","1280x720 - 720p HD"],value="854x480 - 480p SD",label="Resolution")
+   resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
   script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic")

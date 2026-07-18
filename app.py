@@ -29,8 +29,8 @@ VOICES={
 "Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
 }
 
-# تکے والے ہارڈ کوڈڈ پیکجز ختم، اب صرف سیکیور جنریٹڈ کوڈز چلیں گے
-PACKAGES={}
+# یہ ہیں آپ کے پیکجز، اسے بالکل نہیں چھیڑا گیا
+PACKAGES={"ASIF786":300,"JSM786":300}
 
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
@@ -58,7 +58,6 @@ def AdminGen(pw,email,mins,cnt):
  if not email:return "Email likho","",""
  c=f"JSM{mins}-{''.join(secrets.choice(string.ascii_uppercase+string.digits) for _ in range(6))}"
  db[c]={"bound_email":email.strip().lower(),"total":int(mins),"used":0.0,"expiry":str(datetime.date.today()+datetime.timedelta(days=30))}
- db[c]["bound_email"]=email.strip().lower()
  Sj(LICENSE_DB,db)
  return f"✅ Code Ban Gaya {email} ke liye",c,""
 
@@ -79,10 +78,12 @@ def Kw(text,cat):
   if cat == "finance": return "business finance stock market trading corporate"
   if cat == "technology": return "artificial intelligence coding developer tech"
   return "global international news studio corporate cinematic"
+
  if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot","coding","software"]): return "artificial intelligence robot technology"
  if any(x in l for x in ["bitcoin","crypto","blockchain","finance","money","stock","market"]): return "bitcoin crypto cryptocurrency business trading"
  if any(x in l for x in ["doctor","hospital","patient","medical","health"]): return "doctor hospital medical patient clinical"
  if any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture"]): return "farmer tractor agriculture field farming"
+ 
  w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
  return " ".join(w)+" professional cinematic 4k" if w else "global news studio corporate cinematic 4k"
 
@@ -168,26 +169,30 @@ def run_tts(tx,out,vc):
 
 def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
- if len(script.strip()) > 2000: return None,None,"","","", "❌ اسکرپٹ 2000 سے چھوٹا رکھیں۔"
+ if len(script.strip()) > 2000:
+  return None,None,"","","", "❌ بھائی اسکرپٹ چھوٹا کر، 2000 سے زیادہ لمیٹر کی وجہ سے تیرا اسکرپٹ کٹ جائے گا۔"
 
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
  if "TikTok" in vtype:W,H=(720,1280)
  code=code.strip().upper();today=datetime.date.today();email=email.strip().lower()
- 
- db=Lj(LICENSE_DB);lic=db.get(code)
- if not lic:
+ if not code or code not in PACKAGES:
   fd=Lj(FREE_DB);ek=email+"_"+today.isoformat();ut=fd.get(ek,0)
   if ut>=1:return None,None,"","","",f"Daily Free Khatam! {CONTACT}"
-  rem=1-ut;free=True;ft=fd;et=ek
+  rem=1-ut;free=True;ft=fd;et=ek;db=None
  else:
-  if lic["bound_email"] and lic["bound_email"]!=email:return None,None,"","","",f"LOCKED ke liye! {lic['bound_email']}"
-  if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED! {CONTACT}"
-  if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam! {lic['used']:.1f}/{lic['total']}"
+  db=Lj(LICENSE_DB);lic=db.get(code)
+  if not lic:
+   lic={"bound_email":email,"total":PACKAGES[code],"used":0.0,"expiry":str(today+datetime.timedelta(days=30))}
+   db[code]=lic;Sj(LICENSE_DB,db)
+  else:
+   if lic["bound_email"]!=email:return None,None,"","","",f"LOCKED! {lic['bound_email']}"
+   if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED! {CONTACT}"
+   if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam! {lic['used']:.1f}/{lic['total']}"
   rem=lic["total"]-lic["used"];free=False
- 
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws;need=0.0;USED.clear()
+  chs=kws
+  need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
    run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural"))
@@ -223,73 +228,76 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="3500k",logger=None)
   tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
   if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m OK"
-  else:
-   db[code]["used"]+=need
-   if not db[code]["bound_email"]: db[code]["bound_email"]=email
-   Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
- except Exception as e:return None,None,"","","","Error:"+str(e)[:100]
+  else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
+ except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
 
-# آپ کی پسند کا 100٪ فل بلیک اور گولڈن الٹرا کلاسک ڈارک CSS تھیم
 css="""
-body, .gradio-container, html { background-color: #000000 !important; color: #FFFFFF !important; }
-#header { text-align: center; padding: 25px 10px; background: #000000 !important; border-bottom: 1px solid #FFD700 !important; }
-#header h1 { color: #FFD700 !important; font-size: 36px !important; font-weight: 900 !important; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important; margin-bottom: 5px !important; }
-.sub-title { color: #D4AF37 !important; font-size: 14px !important; font-weight: bold; }
-button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: 900 !important; height: 50px !important; border-radius: 8px !important; border: none !important; box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3) !important; cursor: pointer; }
-.gr-textbox, .gr-dropdown, input, textarea, select { background-color: #111111 !important; color: #FFD700 !important; border: 1px solid #222222 !important; border-radius: 6px !important; }
-.gr-textbox:focus, .gr-dropdown:focus, input:focus { border-color: #FFD700 !important; }
-.tabs, .tab-nav { background: #000000 !important; border-bottom: 1px solid #222222 !important; }
-.tab-nav button { color: #A0A0A0 !important; }
-.tab-nav button.selected { color: #FFD700 !important; border-bottom: 2px solid #FFD700 !important; background: #111111 !important; }
-label, span { color: #FFD700 !important; font-weight: bold !important; }
+body { background-color: #0d0d0d !important; font-family: 'Poppins', sans-serif !important; color: #FFFFFF !important; }
+#header { text-align: center; padding: 30px 15px; background: #000000 !important; border-bottom: 2px solid #FFD700 !important; }
+#header h1 { color: #FFD700 !important; font-size: 38px !important; font-weight: 900 !important; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important; margin-bottom: 5px !important; }
+.sub-title { color: #D4AF37 !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 1px; margin-bottom: 20px !important; text-transform: uppercase; }
+.badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
+.jsm-badge { background: #000000 !important; color: #FFD700 !important; border: 1.5px solid #FFD700 !important; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2); }
+button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: 900 !important; height: 55px !important; border-radius: 12px !important; font-size: 18px !important; border: none !important; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4) !important; cursor: pointer; transition: all 0.3s ease; }
+button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 165, 0, 0.6) !important; }
+.gr-textbox, .gr-dropdown { background: #1a1a1a !important; color: #FFD700 !important; border: 1px solid #333333 !important; border-radius: 8px !important; }
+.gr-textbox:focus, .gr-dropdown:focus { border-color: #FFD700 !important; }
+label { color: #FFD700 !important; font-weight: 700 !important; font-size: 14px !important; margin-bottom: 4px; }
 footer { display: none !important; }
 """
 
 with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
-    # ہیڈر سے تمام فالتو بیجز غائب، صرف آپ کا نام، مینیجر کا نام اور نمبر باقی
     gr.HTML(f"""
     <div id="header">
         <h1>✦ JSM VIDEO GENERATOR ✦</h1>
-        <div class="sub-title">{ON}: {ONUM} | {MN}: {MNUM}</div>
+        <div class="sub-title">AI POWERED VIDEO STUDIO - AUTO SENSOR 32 NICHES</div>
+        <div style="color:#A0A0A0; font-size:12px; margin-top:-10px; margin-bottom:15px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
+        <div class="badge-container">
+            <div class="jsm-badge">🎙️ 16 Languages</div>
+            <div class="jsm-badge">🎬 32 Categories Inside</div>
+            <div class="jsm-badge">⏱️ 20 Min Long</div>
+            <div class="jsm-badge">🔒 Safe Filter</div>
+            <div class="jsm-badge">⚡ 6 Platforms</div>
+        </div>
     </div>
     """)
     
     with gr.Tab("🎬 Video Generator"):
         with gr.Row():
             email = gr.Textbox(label="Email", placeholder="your@gmail.com")
-            code = gr.Textbox(label="License Code", placeholder="JSM300-XXXXXX")
-            lang = gr.Dropdown(list(VOICES.keys()), value="English Male", label="🌍 Language + Voice")
+            code = gr.Textbox(label="License Code", placeholder="ASIF786 for 300min")
+            lang = gr.Dropdown(list(VOICES.keys()), value="English Male", label="🌍 Language + Voice Select")
         with gr.Row():
-            vtype = gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Format")
-            resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="Quality")
-            show_sub = gr.Checkbox(label="Subtitles", value=True)
+            vtype = gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Type")
+            resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="HD")
+            show_sub = gr.Checkbox(label="Subtitles ON/OFF", value=True)
             cat_hidden = gr.Textbox(value="Auto", visible=False)
         
-        script = gr.Textbox(lines=6, label="Your Script (Max 2000 Chars)", max_length=2000)
-        btn = gr.Button("✨ GENERATE GOLDEN VIDEO ✨", variant="primary")
+        script = gr.Textbox(lines=6, label="Your Script - Har Line = 1 New Topic", max_length=2000)
         
+        btn = gr.Button("✨ GENERATE GOLDEN VIDEO ✨", variant="primary")
         with gr.Row():
             video = gr.Video(label="Final Video")
             thumb = gr.Image(label="AI Thumbnail")
         with gr.Row():
             t1 = gr.Textbox(label="SEO Title")
-            d1 = gr.Textbox(lines=3, label="Description")
-            h1 = gr.Textbox(lines=2, label="Tags")
+            d1 = gr.Textbox(lines=4, label="Description")
+            h1 = gr.Textbox(lines=2, label="Hashtags + Tags")
         status = gr.Textbox(label="Status")
         btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, thumb, t1, d1, h1, status])
         
     with gr.Tab("🔐 Admin Panel"):
-        gr.Markdown("### 🔑 OWNER SECURITY ACCESS")
+        gr.Markdown("### 🔑 OWNER ACCESS ONLY")
         admin_pass = gr.Textbox(label="Owner Key", type="password")
         with gr.Row():
-            user_email = gr.Textbox(label="User Email (Optional for Bulk)")
+            user_email = gr.Textbox(label="User Email")
             mins = gr.Dropdown([30, 100, 300, 500, 600, 1000], value=300, label="Minutes")
             bulk_count = gr.Number(label="Bulk Count", value=1, precision=0)
-        gen_btn = gr.Button("🔑 Generate Ultra Secure Code", variant="primary")
+        gen_btn = gr.Button("🔑 Generate Code", variant="primary")
         out_msg = gr.Textbox(label="Message")
-        out_code = gr.Textbox(lines=6, label="Generated Secure Codes")
-        view_btn = gr.Button("📋 Saare Codes Dekho")
-        view_out = gr.Textbox(lines=15, label="All Active Licenses")
+        out_code = gr.Textbox(lines=6, label="Generated Codes")
+        view_btn = gr.Button("📋 Saare Codes + Usage Dekho")
+        view_out = gr.Textbox(lines=15, label="All Licenses")
         gen_btn.click(AdminGen, [admin_pass, user_email, mins, bulk_count], [out_msg, out_code, view_out])
         view_btn.click(AdminView, [admin_pass], [view_out])
 

@@ -11,7 +11,7 @@ XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
 VOICES={"English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural","English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural","Hindi Male":"hi-IN-ArjunNeural","Hindi Female":"hi-IN-SwaraNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Russian Male":"ru-RU-DmitryNeural","Russian Female":"ru-RU-SvetlanaNeural","Chinese Male":"zh-CN-YunxiNeural","Chinese Female":"zh-CN-XiaoxiaoNeural","Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural","Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural","Portuguese Male":"pt-BR-AntonioNeural","Portuguese Female":"pt-BR-FranciscaNeural","French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural","German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural","Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural","Indonesian Male":"id-ID-ArdiNeural","Indonesian Female":"id-ID-GadisNeural","Japanese Male":"ja-JP-KeitaNeural","Japanese Female":"ja-JP-NanamiNeural","Korean Male":"ko-KR-InJoonNeural","Korean Female":"ko-KR-SunHiNeural","Italian Male":"it-IT-DiegoNeural","Italian Female":"it-IT-ElsaNeural","Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"}
 
-PACKAGES={"ASIF786":300,"JSM786":300}
+PACKAGES={"ALI786":300,"JSM786":300}
 
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")

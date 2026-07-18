@@ -4,8 +4,8 @@ from PIL import Image
 import secrets,string
 CONTACT="03043399133|03022246271"
 ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JAM SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
-K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
+ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
 # ===== 20 زبانیں x لڑکا + لڑکی - Natural Neural Voices =====
@@ -29,7 +29,7 @@ VOICES={
 "Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
 }
 
-PACKAGES={"ASIF":100,"JSMGOLD":1000,"JSM786GOLD":9999}
+PACKAGES={"ASIF":100,"JSM786GOLD":9999}
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
@@ -83,7 +83,7 @@ def get_category(text):
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
  try:
-  r=requests.get(f"https://image.pollinations.ai/prompt/{q}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,9999)}",timeout=12)
+  r=requests.get(f"https://image.pollinations.ai/prompt/{q}?width={W}?height={H}&model=flux&nologo=true&seed={random.randint(1,9999)}",timeout=12)
   if r.status_code==200 and len(r.content)>3000:
    open(path,'wb').write(r.content)
    return path
@@ -153,7 +153,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  
  # 2000 CHAR LIMIT CHECK
  if len(script.strip()) > 2000:
-    return None,None,"","","",f"Script limit exceed! (Max 2000 chars)"
+  return None,None,"","","", "❌ بھائی اسکرپٹ چھوٹا کر، 2000 سے زیادہ لمیٹر کی وجہ سے تیرا اسکرپٹ کٹ جائے گا۔"
 
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
  if "TikTok" in vtype:W,H=(720,1280)
@@ -174,7 +174,7 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
   rem=lic["total"]-lic["used"];free=False
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
  try:
-  chs=kws # Changed from kws[:20] to kws to fix video cut
+  chs=kws # کٹنگ فکس کرنے کے لیے کٹ والی لاجک ہٹا دی
   need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
    ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
@@ -217,9 +217,9 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
 # ===== BLACK + GOLDEN CSS - JSM Look =====
 css="body{background:#000!important}#header{text-align:center;padding:20px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:44px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important;box-shadow:0 0 15px #FFD700!important}label{color:#FFD700!important;font-weight:800!important}.gr-textbox,.gr-dropdown{background:#1a1a1a!important;color:#FFD700!important;border:1px solid #FFD700!important}footer{display:none!important}"
 
-with gr.Blocks(title="JSM VIDEO GENERATOR V6.6") as demo:
- # Header changed to show only names and numbers
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.6 MASTER ✦</h1><div style="color:#FFD700">{ON}: {ONUM} | {MN}: {MNUM}</div></div>""")
+with gr.Blocks(title="JSM VIDEO GENERATOR") as demo:
+ # ٹائٹل بالکل صاف کر دیا ہے، اب صرف جے ایس ایم ویڈیو جرنیٹر اور نیچے آپ دونوں کے نام اور نمبر آئیں گے
+ gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR ✦</h1><div style="color:#FFD700">{ON}: {ONUM} | {MN}: {MNUM}</div></div>""")
  with gr.Tab("🎬 Video Generator"):
   with gr.Row():
    email=gr.Textbox(label="Email")
@@ -230,8 +230,10 @@ with gr.Blocks(title="JSM VIDEO GENERATOR V6.6") as demo:
    resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
    show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
    cat_hidden=gr.Textbox(value="Auto",visible=False)
-  # Input with max_length limit added
-  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic", max_lines=10)
+  
+  # لائیو کریکٹر کاؤنٹر والا باکس
+  script=gr.Textbox(lines=6,label="Your Script - Har Line = 1 New Topic", max_length=2000, show_copy_button=True)
+  
   btn=gr.Button("✨ GENERATE GOLDEN VIDEO ✨",variant="primary")
   with gr.Row():
    video=gr.Video(label="Final Video")
@@ -257,4 +259,3 @@ with gr.Blocks(title="JSM VIDEO GENERATOR V6.6") as demo:
   gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
   view_btn.click(AdminView,[admin_pass],[view_out])
 demo.queue(max_size=10).launch(share=True,css=css)
- 

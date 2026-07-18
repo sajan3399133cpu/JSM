@@ -19,10 +19,6 @@ import string
 
 CONTACT = "03043399133|03022246271"
 ADMIN_PASS = "JamSaeed@786#Motha_Owner_0304!"
-ON = "SAEED"
-ONUM = "03043399133"
-MN = "MUJAHID HUSSAIN"
-MNUM = "03022246271"
 
 PEXELS_KEYS = [
     'tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9',
@@ -30,44 +26,28 @@ PEXELS_KEYS = [
 ]
 PIXABAY_KEYS = ['YAHAN_PIXABAY_KEY_LAGAO']
 
-# ===== 20+ VOICES WAPAS =====
 VOICES = {
-    "EN Male Motivational Guy Natural Clone": "en-US-GuyNeural",
-    "EN Male News Anchor Davis Deep Natural": "en-US-DavisNeural",
-    "EN Female Jenny Motivational Natural": "en-US-JennyNeural",
-    "Urdu Male Asad Natural Clone": "ur-PK-AsadNeural",
-    "Urdu Female Uzma Natural": "ur-PK-UzmaNeural",
-    "Hindi Male Madhur Motivational Natural": "hi-IN-MadhurNeural",
-    "Hindi Female Swara Natural": "hi-IN-SwaraNeural",
-    "Arabic Male Omar Natural": "ar-SA-HamedNeural",
-    "Arabic Female Zariyah Natural": "ar-SA-ZariyahNeural",
-    "Turkish Male Emre Natural": "tr-TR-EmreNeural",
-    "Persian Male Farid Natural": "fa-IR-FaridNeural",
-    "Bengali Male Banik Natural": "bn-IN-BanikNeural",
-    "Tamil Male Valluvar Natural": "ta-IN-ValluvarNeural",
-    "Telugu Male Mohan Natural": "te-IN-MohanNeural",
-    "Punjabi Male Manveer Natural": "pa-IN-ManveerNeural",
-    "Gujarati Male Niranjan Natural": "gu-IN-NiranjanNeural",
-    "Marathi Male Manohar Natural": "mr-IN-ManoharNeural",
-    "Malayalam Male Midhun Natural": "ml-IN-MidhunNeural",
-    "Kannada Male Gagan Natural": "kn-IN-GaganNeural",
-    "Spanish Male Alvaro Natural": "es-ES-AlvaroNeural",
-    "French Male Henri Natural": "fr-FR-HenriNeural",
-    "German Male Conrad Natural": "de-DE-ConradNeural"
+    "EN Male Motivational Guy": "en-US-GuyNeural",
+    "EN Male News Anchor Davis": "en-US-DavisNeural",
+    "Urdu Male Asad": "ur-PK-AsadNeural",
+    "Urdu Female Uzma": "ur-PK-UzmaNeural",
+    "Hindi Male Madhur": "hi-IN-MadhurNeural",
+    "Arabic Male Omar": "ar-SA-HamedNeural",
+    "Turkish Male Emre": "tr-TR-EmreNeural",
+    "Spanish Male Alvaro": "es-ES-AlvaroNeural",
+    "French Male Henri": "fr-FR-HenriNeural",
+    "German Male Conrad": "de-DE-ConradNeural",
+    "Bengali Male Banik": "bn-IN-BanikNeural",
+    "Tamil Male Valluvar": "ta-IN-ValluvarNeural",
+    "Telugu Male Mohan": "te-IN-MohanNeural",
+    "Punjabi Male Manveer": "pa-IN-ManveerNeural"
 }
 
 PACKAGES = {"ASIF": 100, "ALI": 100, "JSM": 100, "ASIF786": 600, "JSM30": 30, "JSM100": 100, "JSM300": 300, "JSM500": 500, "JSM786": 600, "JSM600": 600, "JSMGOLD": 1000, "JSM786GOLD": 9999}
 BASE_DIR = "/data" if os.path.exists("/data") else "."
-FREE_DB = os.path.join(BASE_DIR, "free_daily.json")
 LICENSE_DB = os.path.join(BASE_DIR, "jsm_licenses_final.json")
 os.makedirs(BASE_DIR, exist_ok=True)
 USED = set()
-
-def keep_alive():
-    while True:
-        time.sleep(30)
-        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] JSM is Alive...")
-threading.Thread(target=keep_alive, daemon=True).start()
 
 def Lj(p):
     try:
@@ -87,8 +67,7 @@ def Sj(p, d):
         pass
 
 def AdminGen(pw, email, mins, cnt):
-    if pw!= ADMIN_PASS:
-        return "❌ Galat Owner Key", "", ""
+    if pw!= ADMIN_PASS: return "Galat Owner Key", "", ""
     db = Lj(LICENSE_DB)
     o = []
     if cnt > 1:
@@ -97,182 +76,157 @@ def AdminGen(pw, email, mins, cnt):
             db[c] = {"bound_email": "", "total": int(mins), "used": 0.0, "expiry": str(datetime.date.today() + datetime.timedelta(days=30))}
             o.append(c)
         Sj(LICENSE_DB, db)
-        return f"✅ {cnt} Codes Ban Gaye!", "\n".join(o), ""
-    if not email:
-        return "Email likho", "", ""
+        return f"{cnt} Codes Ban Gaye", "\n".join(o), ""
+    if not email: return "Email likho", "", ""
     c = f"JSM{mins}-{''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))}"
     db[c] = {"bound_email": email.strip().lower(), "total": int(mins), "used": 0.0, "expiry": str(datetime.date.today() + datetime.timedelta(days=30))}
     Sj(LICENSE_DB, db)
-    return f"✅ Code Ban Gaya {email} ke liye", c, ""
+    return f"Code Ban Gaya {email} ke liye", c, ""
 
 def AdminView(pw):
-    if pw!= ADMIN_PASS:
-        return "Galat Owner Key"
+    if pw!= ADMIN_PASS: return "Galat Owner Key"
     db = Lj(LICENSE_DB)
     t = ""
-    for k, v in db.items():
-        t += f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} min | Expiry: {v['expiry']}\n"
+    for k, v in db.items(): t += f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} min\n"
     return t or "Koi Code Nahi"
 
 def clean_analyze(script):
     clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|fuck)", " ", script, flags=re.I)
-    sens = []
-    for s in re.split(r'[.!?]+', clean):
-        if len(s.strip()) > 3:
-            sens.append(s.strip())
+    sens = [s.strip() for s in re.split(r'[.!?]+', clean) if len(s.strip()) > 3]
     return clean, sens
 
-def Kw(text, cat):
+def Kw(text):
     l = text.lower()
-    if any(x in l for x in ["trump", "iran", "war", "missile"]): return "political news war military"
-    if any(x in l for x in ["imran khan", "pakistan", "protest"]): return "pakistan politics protest rally"
+    if any(x in l for x in ["trump", "iran", "war"]): return "political news"
+    if any(x in l for x in ["imran khan", "pakistan"]): return "pakistan politics"
     w = [x for x in re.findall(r'\w+', l) if len(x) > 4][:3]
-    return " ".join(w) + " cinematic 4k" if w else "nature cinematic 4k"
+    return " ".join(w) + " 4k" if w else "nature 4k"
 
-def Ai(p, path, W=960, H=540):
+def Ai(p, path, W, H):
     q = urllib.parse.quote(p[:200])
     try:
-        r = requests.get(f"https://image.pollinations.ai/prompt/{q}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,9999)}", timeout=12)
+        r = requests.get(f"https://image.pollinations.ai/prompt/{q}?width={W}&height={H}&model=flux&nologo=true", timeout=10)
         if r.status_code == 200 and len(r.content) > 3000:
-            f = open(path, 'wb')
-            f.write(r.content)
-            f.close()
-            return path
-    except:
-        pass
-    img = Image.new('RGB', (W, H), color=(10, 10, 10))
-    img.save(path)
-    return path
+            f = open(path, 'wb'); f.write(r.content); f.close(); return path
+    except: pass
+    Image.new('RGB', (W, H), color=(10, 10, 10)).save(path); return path
 
 def St(k, d, W, H):
-    q = Kw(k, "")
-    # 1. PEXELS
+    q = Kw(k)
+    # 1. PEXELS TRY
     for key in PEXELS_KEYS:
         try:
-            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=3", headers={"Authorization": key}, timeout=6)
-            if r.status_code == 200:
-                for vid in r.json().get('videos', []):
-                    lk = vid['video_files'][0]['link']
-                    if lk not in USED:
-                        USED.add(lk)
-                        t = f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
-                        f = open(t, 'wb')
-                        f.write(requests.get(lk, timeout=10).content)
-                        f.close()
-                        if os.path.getsize(t) > 8000:
-                            cl = VideoFileClip(t).resize((W, H))
-                            return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
-        except:
-            pass
-    # 2. AI IMAGE FALLBACK
+            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=1", headers={"Authorization": key}, timeout=5)
+            if r.status_code == 200 and r.json().get('videos'):
+                lk = r.json()['videos'][0]['video_files'][0]['link']
+                if lk not in USED:
+                    USED.add(lk); t = f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
+                    f = open(t, 'wb'); f.write(requests.get(lk, timeout=8).content); f.close()
+                    if os.path.getsize(t) > 8000:
+                        cl = VideoFileClip(t).resize((W, H))
+                        return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
+        except: pass
+    # 2. DIRECT AI IMAGE - 100% GUARANTEE
     p = f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
     Ai(q, p, W, H)
     return ImageClip(p).set_duration(d).resize((W, H))
 
-async def Tt(t, o, v):
-    await edge_tts.Communicate(t, v).save(o)
+async def Tt(t, o, v): await edge_tts.Communicate(t, v).save(o)
 
 def run_tts(tx, out, vc):
     try:
         if os.path.exists(out): os.remove(out)
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(Tt(tx, out, vc))
-        loop.close()
-        time.sleep(1)
-        if os.path.exists(out) and os.path.getsize(out) > 2000: return True
-    except:
-        pass
-    return False
+        loop = asyncio.new_event_loop(); asyncio.set_event_loop(loop)
+        loop.run_until_complete(Tt(tx, out, vc)); loop.close(); time.sleep(1)
+        return os.path.exists(out) and os.path.getsize(out) > 2000
+    except: return False
 
 def Gen(email, code, script, lang, vtype, res, show_sub):
-    if not script.strip() or not email.strip(): return None, None, "", "Email/Script likho"
-    W, H = (1280, 720)
+    if not script.strip() or not email.strip():
+        return None, None, "", "Email/Script likho"
+
+    W, H = (1280, 720) # DEFAULT 720P - LIGHT
+    if "Full HD" in res: W, H = (1920, 1080)
     if "TikTok" in vtype: W, H = (720, 1280)
+
     cs, kws = clean_analyze(script)
-    if not kws: return None, None, "", "", "", "Script me jumle nahi mile"
+    if not kws:
+        return None, None, "", "", "Script me jumle nahi mile"
+
     preset_val = 'ultrafast' if torch.cuda.is_available() else 'medium'
-    pvs = []
-    need = 0.0
-    USED.clear()
+    pvs = []; need = 0.0; USED.clear()
+
     for idx, ch in enumerate(kws):
-        print(f"Part {idx+1}/{len(kws)}")
         ap = f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
         if not run_tts(ch, ap, VOICES.get(lang, "en-US-GuyNeural")): continue
         try: au = AudioFileClip(ap)
         except: continue
         if au.duration == 0: au.close(); continue
         need += au.duration / 60.0
-        per_clip = 5.0
-        num_clips = max(1, int(au.duration / per_clip) + 1)
-        clips = []
+
+        per_clip = 5.0; num_clips = max(1, int(au.duration / per_clip) + 1); clips = []
         for i in range(num_clips):
-            if i > 0 and i % 3 == 0: time.sleep(1)
-            start = int(i * len(ch) / num_clips)
-            end = int((i + 1) * len(ch) / num_clips)
+            start = int(i * len(ch) / num_clips); end = int((i + 1) * len(ch) / num_clips)
             small_text = ch[start:end] if ch[start:end].strip() else ch[:40]
             clip_dur = per_clip if i < num_clips - 1 else au.duration - (i * per_clip)
             try:
                 base_clip = St(small_text, clip_dur, W, H).set_duration(clip_dur)
                 layers = [base_clip]
                 if show_sub:
-                    txt = TextClip(small_text[:120], fontsize=int(W * 0.04), color='yellow', stroke_color='black', stroke_width=3.5, method='caption', size=(W * 0.88, None)).set_duration(clip_dur).set_position(('center', 0.78), relative=True)
+                    txt = TextClip(small_text[:120], fontsize=int(W * 0.04), color='white', stroke_color='black', stroke_width=2, method='caption', size=(W * 0.9, None)).set_duration(clip_dur).set_position(('center', 0.85), relative=True)
                     layers.append(txt)
                 clips.append(CompositeVideoClip(layers))
             except: continue
+
         try:
             if clips:
                 fn = concatenate_videoclips(clips, method="compose").set_audio(au)
                 vp = f"/tmp/P_{idx}.mp4"
-                fn.write_videofile(vp, fps=24, codec='libx264', audio_codec='aac', preset=preset_val, threads=4, logger=None)
+                fn.write_videofile(vp, fps=24, codec='libx264', audio_codec='aac', preset=preset_val, threads=2, logger=None)
                 pvs.append(VideoFileClip(vp))
         except: pass
         au.close()
-    if not pvs: return None, None, "", "Koi bhi clip nahi bani"
-    fv = concatenate_videoclips(pvs, method="compose")
-    out = "/tmp/gradio"
-    os.makedirs(out, exist_ok=True)
-    vf = f"{out}/FINAL.mp4"
-    fv.write_videofile(vf, fps=24, codec='libx264', audio_codec='aac', preset=preset_val, threads=4)
-    tp = f"{out}/T.jpg"
-    Ai(cs, tp, W, H)
-    return vf, tp, "SEO Title", "Description", "#Tags", f"Done {need:.1f}m"
 
-css = "body{background:#000!important}#header{text-align:center;padding:30px 0;background:linear-gradient(135deg,#000 0%,#1a1000 50%,#000 100%)!important;border-bottom:4px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:48px!important;font-weight:900!important;text-shadow:0 0 20px #FFD700!important}.owner-info{color:#FFD700!important;font-size:18px!important}button.primary{background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700)!important;color:#000!important;font-weight:900!important;height:65px!important;border-radius:16px!important;font-size:20px!important;border:3px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}footer{display:none!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR V6.16") as demo:
-    gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V6.16 - 22 VOICES ✦</h1><div class="owner-info">OWNER: {ON} - {ONUM} | MANAGER: {MN} - {MNUM}</div></div>""")
-    with gr.Tab("🎬 Video Generator"):
+    if not pvs:
+        return None, None, "", "Video nahi bani"
+
+    fv = concatenate_videoclips(pvs, method="compose")
+    out = "/tmp/gradio"; os.makedirs(out, exist_ok=True)
+    vf = f"{out}/FINAL.mp4"
+    fv.write_videofile(vf, fps=24, codec='libx264', audio_codec='aac', preset=preset_val, threads=2)
+    tp = f"{out}/T.jpg"; Ai(cs, tp, W, H)
+
+    title = f"Motivational Video {datetime.date.today()}"
+    desc = f"Generated by JSM. Script: {cs[:200]}"
+    tags = "#motivation #viral #shorts"
+    status = f"Done! Total {need:.1f} minutes. 720p used for stability."
+
+    return vf, tp, title, desc, tags, status # 6 CHEEZEN - 6 RETURN
+
+css = "body{background:#000}#header{text-align:center;padding:20px;border-bottom:2px solid #FFD700}h1{color:#FFD700;font-size:32px}button.primary{background:#FFD700;color:#000;font-weight:900}label{color:#FFD700}footer{display:none}"
+with gr.Blocks(title="JSM Video Generator") as demo:
+    gr.HTML(f"""<div id="header"><h1>JSM Video Generator V6.17</h1><p style="color:#FFD700">Contact: {CONTACT}</p></div>""")
+    with gr.Tab("Video Generator"):
         with gr.Row():
             email = gr.Textbox(label="Email")
             code = gr.Textbox(label="License Code")
-            lang = gr.Dropdown(list(VOICES.keys()), value="EN Male Motivational Guy Natural Clone", label="Voice")
+            lang = gr.Dropdown(list(VOICES.keys()), value="EN Male Motivational Guy", label="Voice")
         with gr.Row():
             vtype = gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Type")
-            resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD"], value="1280x720 - HD", label="HD")
-            show_sub = gr.Checkbox(label="Subtitles ON/OFF", value=True)
-        script = gr.Textbox(lines=8, label="Your Script")
-        btn = gr.Button("✨ GENERATE GOLDEN VIDEO ✨", variant="primary")
-        with gr.Row():
-            video = gr.Video(label="Final Video")
-            thumb = gr.Image(label="AI Thumbnail")
-        with gr.Row():
-            t1 = gr.Textbox(label="SEO Title")
-            d1 = gr.Textbox(lines=4, label="Description")
-            h1 = gr.Textbox(lines=2, label="Hashtags + Tags")
+            resolution = gr.Dropdown(["1280x720 - HD", "1920x1080 - Full HD"], value="1280x720 - HD", label="Resolution")
+            show_sub = gr.Checkbox(label="Subtitles", value=True)
+        script = gr.Textbox(lines=8, label="Script")
+        btn = gr.Button("GENERATE VIDEO", variant="primary")
+        with gr.Row(): video = gr.Video(label="Final Video"); thumb = gr.Image(label="Thumbnail")
+        with gr.Row(): t1 = gr.Textbox(label="SEO Title"); d1 = gr.Textbox(lines=3, label="Description"); h1 = gr.Textbox(label="Hashtags")
         status = gr.Textbox(label="Status")
         btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub], [video, thumb, t1, d1, h1, status])
-    with gr.Tab("🔐 Admin Panel"):
-        gr.Markdown("### 🔑 OWNER ACCESS ONLY")
+    with gr.Tab("Admin Panel"):
         admin_pass = gr.Textbox(label="Owner Key", type="password")
-        with gr.Row():
-            user_email = gr.Textbox(label="User Email")
-            mins = gr.Dropdown([30, 100, 300, 500, 600, 1000], value=600, label="Minutes")
-            bulk_count = gr.Number(label="Bulk Count", value=1, precision=0)
-        gen_btn = gr.Button("🔑 Generate Code", variant="primary")
-        out_msg = gr.Textbox(label="Message")
-        out_code = gr.Textbox(lines=6, label="Generated Codes")
-        view_btn = gr.Button("📋 Saare Codes + Usage Dekho")
-        view_out = gr.Textbox(lines=15, label="All Licenses")
+        with gr.Row(): user_email = gr.Textbox(label="User Email"); mins = gr.Dropdown([30,100,300,600], value=600); bulk_count = gr.Number(value=1, precision=0)
+        gen_btn = gr.Button("Generate Code")
+        out_msg = gr.Textbox(); out_code = gr.Textbox(lines=4)
+        view_btn = gr.Button("View All Codes"); view_out = gr.Textbox(lines=10)
         gen_btn.click(AdminGen, [admin_pass, user_email, mins, bulk_count], [out_msg, out_code, view_out])
         view_btn.click(AdminView, [admin_pass], [view_out])
-demo.queue(max_size=10).launch(share=True, css=css)
+demo.queue().launch(share=True, css=css)

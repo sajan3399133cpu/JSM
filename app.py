@@ -29,8 +29,8 @@ VOICES={
 "Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"
 }
 
-# تکے والے ہارڈ کوڈڈ پیکجز، سیکیور جنریٹڈ کوڈز چلیں گے
-PACKAGES={ALI"300"٫ALI786"250"}
+# تکے والے ہارڈ کوڈڈ پیکجز ختم، اب صرف سیکیور جنریٹڈ کوڈز چلیں گے
+PACKAGES={}
 
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")

@@ -5,9 +5,8 @@ from PIL import Image
 import secrets,string
 
 CONTACT="03043399133|03022246271"
-ON="JAM SAEED";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
+ON="SAEED";ONUM="03043399133";MN="MUJAHID";MNUM="03022246271"
 
-# ملٹی سورس اے پی آئیز اور لنکس سٹرکچر
 K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
 XK=[base64.b64decode(k.encode()).decode() for k in K4]
 PIXABAY_KEY = "38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"
@@ -29,6 +28,40 @@ FIXED_LICENSES = {
     "JSM1000": {"bound_email": "", "total": 1000.0, "used": 0.0, "expiry": "2030-12-31"}
 }
 
+# الگ الگ کیٹیگریز کے لیے ڈائنامک فال بیک ویڈیوز کا پول (تاکہ ویڈیو کبھی بھی ریپیٹ نہ ہو)
+DYNAMIC_FALLBACKS = {
+    "technology": [
+        "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165",
+        "https://player.vimeo.com/external/538569350.sd.mp4?s=8b652ee97d8b36a19f5617bfd69106ec2b9cb525&profile_id=165",
+        "https://player.vimeo.com/external/409132226.sd.mp4?s=ebd04cb5038c353b3b194519543e33c7dae2051f&profile_id=165"
+    ],
+    "finance": [
+        "https://player.vimeo.com/external/435649383.sd.mp4?s=7b9a52bc23924df50f3c0e1fc84241e06fa4d5de&profile_id=165",
+        "https://player.vimeo.com/external/394142711.sd.mp4?s=7342fbfa7b494d4d3a04297b48a1a364bb2fa02a&profile_id=165"
+    ],
+    "medical": [
+        "https://player.vimeo.com/external/405461244.sd.mp4?s=6c2ef50f32997c4fcfa6d0130f14a60155627f12&profile_id=165",
+        "https://player.vimeo.com/external/460144670.sd.mp4?s=5481d6541f6e21aa85aa0ee49fa6b2d2f447f5cf&profile_id=165"
+    ],
+    "farming": [
+        "https://player.vimeo.com/external/390975619.sd.mp4?s=73ef6233a0b5a32ba06d91da3c0c1b489bc37f59&profile_id=165",
+        "https://player.vimeo.com/external/517614131.sd.mp4?s=6a51d02c082729a997ef3eb905fb57f6f1943bf1&profile_id=165"
+    ],
+    "news": [
+        "https://player.vimeo.com/external/416487195.sd.mp4?s=319a27f677b02db7b4618e001859e9a65f9ca22a&profile_id=165",
+        "https://player.vimeo.com/external/384761655.sd.mp4?s=c6790a316b23b49f96b27d42cf38f9024f8d4380&profile_id=165"
+    ],
+    "crime": [
+        "https://player.vimeo.com/external/510848375.sd.mp4?s=1f7de7b938c4749f50e82da1dfdfec451ef9fc3e&profile_id=165",
+        "https://player.vimeo.com/external/507421526.sd.mp4?s=c882855140d7c71f544975e5be2d5eb16e4544b8&profile_id=165"
+    ],
+    "general": [
+        "https://images.pexels.com/videos/4482/motion-background-pms-1.mp4",
+        "https://images.pexels.com/videos/3125396/free-video-3125396.mp4",
+        "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165"
+    ]
+}
+
 def Lj(p):
  try:
   data = json.load(open(p))
@@ -47,7 +80,7 @@ def Sj(p,d):
 
 def clean_analyze(script):
  clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini)"," ",script,flags=re.I)
- sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
+ sens=[s.strip() for s in re.split(r'[.!?\n]+',clean) if len(s.strip())>8]
  return clean,sens
 
 def Kw(text,cat):
@@ -86,47 +119,50 @@ def get_niche_music(cat):
  except:pass
  return None
 
-# ملٹی سورس ویڈیو انجن جو 6 الگ الگ پلیٹ فارمز کو ہٹ کرتا ہے
-def St(k,d,W,H,cat):
+# بہتر ملٹی سورس ویڈیو انجن (اب ہر پارٹ کی الگ الگ ویڈیو فیسچ ہوگی)
+def St(k,d,W,H,cat, part_idx=0):
  q=Kw(k,cat)
  q_encoded = urllib.parse.quote(q)
  
  # سورس 1: Pexels API
  for key in XK:
   try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=3",headers={"Authorization":key},timeout=5)
+   r=requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=5",headers={"Authorization":key},timeout=6)
    if 'videos' in r.json() and r.json()['videos']:
-    lk=r.json()['videos'][0]['video_files'][0]['link']
+    # ہر پارٹ کے انڈیکس کے حساب سے لسٹ میں سے الگ ویڈیو اٹھانا تاکہ ریپیٹ نہ ہو
+    v_list = r.json()['videos']
+    v_obj = v_list[part_idx % len(v_list)]
+    lk=v_obj['video_files'][0]['link']
     t= f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.mp4"
-    open(t,'wb').write(requests.get(lk,timeout=10).content)
+    open(t,'wb').write(requests.get(lk,timeout=12).content)
     cl=VideoFileClip(t).resize((W,H))
     return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
   except:continue
 
  # سورس 2: Pixabay API
  try:
-  r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_encoded}&per_page=3", timeout=5)
+  r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_encoded}&per_page=5", timeout=6)
   if r.json().get('hits'):
-   lk = r.json()['hits'][0]['videos']['medium']['url']
+   v_list = r.json()['hits']
+   v_obj = v_list[part_idx % len(v_list)]
+   lk = v_obj['videos']['medium']['url']
    t = f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.mp4"
-   open(t,'wb').write(requests.get(lk,timeout=10).content)
+   open(t,'wb').write(requests.get(lk,timeout=12).content)
    cl = VideoFileClip(t).resize((W,H))
    return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
  except:pass
 
- # سورس 3 سے 6: (Mixkit, Coverr, Videezy, Archive.org Scraper/Backup Interface)
- fallback_queries = [
-    f"https://images.pexels.com/videos/4482/motion-background-pms-{random.randint(1,100)}.mp4",
-    "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165&oauth2_token_id=57447761"
- ]
+ # سورس 3 سے 6: ڈائنامک پول فال بیک (تاکہ اگر لنک فیل بھی ہوں تو ویڈیو تبدیل ہو)
+ pool = DYNAMIC_FALLBACKS.get(cat, DYNAMIC_FALLBACKS["general"])
+ fallback_url = pool[part_idx % len(pool)]
  try:
   t = f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.mp4"
-  open(t,'wb').write(requests.get(random.choice(fallback_queries),timeout=10).content)
+  open(t,'wb').write(requests.get(fallback_url,timeout=12).content)
   cl = VideoFileClip(t).resize((W,H))
   return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
  except:pass
 
- return ColorClip((W,H),color=(0,0,0),duration=d)
+ return ColorClip((W,H),color=(random.randint(10,40),random.randint(10,40),random.randint(10,40)),duration=d)
 
 async def Tt(t,o,v):await edge_tts.Communicate(t,v,rate="+4%").save(o)
 def run_tts(tx,out,vc):
@@ -158,7 +194,6 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden, pr=gr.Progress()):
   rem=lic["total"]-lic["used"];free=False
 
  cs,kws=clean_analyze(script);pvs=[]
- main_cat = get_category(kws[0] if kws else "general")
  
  try:
   chs=kws;need=0.0
@@ -166,6 +201,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden, pr=gr.Progress()):
   
   for idx,ch in enumerate(chs):
    pr(idx/total_steps, desc=f"Processing Part {idx+1}/{total_steps}...")
+   current_cat = get_category(ch)
+   
    ap=f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
    run_tts(ch,ap,VOICES.get(lang,"en-US-AndrewNeural"))
    if not os.path.exists(ap):continue
@@ -175,7 +212,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden, pr=gr.Progress()):
    need+=au.duration/60.0
    if need>rem+0.01:au.close();return None, None, f"Need {need:.1f}m Baki {rem:.1f}m"
    
-   base_clip=St(ch,au.duration,W,H,main_cat).set_duration(au.duration)
+   # انڈیکس پاس کیا گیا ہے تاکہ ہر لائن پر الگ ویڈیو فیسچ ہو
+   base_clip=St(ch,au.duration,W,H,current_cat, part_idx=idx).set_duration(au.duration)
    layers=[base_clip]
    if show_sub:
     try:
@@ -193,6 +231,8 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden, pr=gr.Progress()):
   fv=concatenate_videoclips(pvs,method="compose")
   video_duration = fv.duration
   original_audio = fv.audio
+  
+  main_cat = get_category(chs[0] if chs else "general")
   bgm_path = get_niche_music(main_cat)
   
   if bgm_path and os.path.exists(bgm_path):
@@ -224,7 +264,6 @@ label { color: #FFD700 !important; }
 button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: bold !important; border: none !important; }
 """
 
-# ایڈمن پینل مکمل ہٹا دیا گیا ہے، صرف صاف انٹرفیس باقی ہے
 with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     gr.HTML(f"""
     <div id="header">

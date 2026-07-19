@@ -1,5 +1,6 @@
 import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime,time
-from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip,ImageClip,TextClip
+from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip,ImageClip,TextClip,CompositeAudioClip
+from moviepy.audio.fx.volumex import volumex
 from PIL import Image
 import secrets,string
 
@@ -11,13 +12,13 @@ XK=[base64.b64decode(k.encode()).decode() for k in K4]
 
 VOICES={"English Male":"en-US-AndrewNeural","English Female":"en-US-JennyNeural","English UK Male":"en-GB-RyanNeural","English UK Female":"en-GB-SoniaNeural","Hindi Male":"hi-IN-ArjunNeural","Hindi Female":"hi-IN-SwaraNeural","Urdu Male":"ur-PK-AsadNeural","Urdu Female":"ur-PK-UzmaNeural","Russian Male":"ru-RU-DmitryNeural","Russian Female":"ru-RU-SvetlanaNeural","Chinese Male":"zh-CN-YunxiNeural","Chinese Female":"zh-CN-XiaoxiaoNeural","Arabic Male":"ar-SA-HamedNeural","Arabic Female":"ar-SA-ZariyahNeural","Spanish Male":"es-ES-AlvaroNeural","Spanish Female":"es-ES-ElviraNeural","Portuguese Male":"pt-BR-AntonioNeural","Portuguese Female":"pt-BR-FranciscaNeural","French Male":"fr-FR-HenriNeural","French Female":"fr-FR-DeniseNeural","German Male":"de-DE-ConradNeural","German Female":"de-DE-KatjaNeural","Turkish Male":"tr-TR-AhmetNeural","Turkish Female":"tr-TR-EmelNeural","Indonesian Male":"id-ID-ArdiNeural","Indonesian Female":"id-ID-GadisNeural","Japanese Male":"ja-JP-KeitaNeural","Japanese Female":"ja-JP-NanamiNeural","Korean Male":"ko-KR-InJoonNeural","Korean Female":"ko-KR-SunHiNeural","Italian Male":"it-IT-DiegoNeural","Italian Female":"it-IT-ElsaNeural","Bengali Male":"bn-IN-BashkarNeural","Bengali Female":"bn-IN-TanishaaNeural"}
 
-PACKAGES={"ALI786":300,"JSM786":300}
-
 BASE_DIR="/data" if os.path.exists("/data") else "."
 FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
 LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
 os.makedirs(BASE_DIR,exist_ok=True)
 USED=set()
+
+STOP_WORDS = {"about", "today", "video", "talk", "karenge", "baat", "shuru", "please", "subscribe", "channel", "welcome", "dosto", "bhai", "hello", "everyone", "there", "their", "these", "would", "could", "should"}
 
 def Lj(p):
  try:return json.load(open(p))
@@ -55,24 +56,67 @@ def clean_analyze(script):
 
 def Kw(text,cat):
  l=text.lower()
+ if any(x in l for x in ["farmer", "kisan", "kheti", "tractor", "gandum", "wheat", "crop", "agriculture", "pind", "gaon"]):
+  return "pakistan village farmer tractor agriculture field farming organic crops"
+ if any(x in l for x in ["bitcoin", "crypto", "blockchain", "finance", "money", "stock", "market", "paisa", "kamana", "trading", "business", "rich", "ameer"]):
+  return "stock market chart crypto trading money counting business man corporate"
+ if any(x in l for x in ["doctor", "hospital", "patient", "medical", "health", "sehat", "bimari", "ilaj", "medicine", "clinic"]):
+  return "doctor treating patient hospital corridor medical checkup healthcare"
+ if any(x in l for x in ["ai", "artificial", "intelligence", "chatgpt", "robot", "coding", "software", "computer", "laptop", "programming"]):
+  return "cyberpunk tech coding matrix glowing screen developer typing hands"
+ if any(x in l for x in ["news", "khabar", "breaking", "update", "wazir", "imran", "nawaz", "pakistan", "america", "election", "police", "court"]):
+  return "news studio background global map matrix digital newsroom network cinematic"
+ if any(x in l for x in ["kahani", "shaitan", "jinn", "bhoot", "crime", "qatal", "police", "jail", "khofnak", "scary", "mystery", "history", "purani"]):
+  return "dark cinematic mystery foggy night dramatic smoke old ancient ruins"
  if any(x in l for x in ["birthday","party","exercise","workout","gym"]):
   if cat == "finance": return "business finance stock market trading corporate"
   if cat == "technology": return "artificial intelligence coding developer tech"
   return "global international news studio corporate cinematic"
- if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot","coding","software"]): return "artificial intelligence robot technology"
- if any(x in l for x in ["bitcoin","crypto","blockchain","finance","money","stock","market"]): return "bitcoin crypto cryptocurrency business trading"
- if any(x in l for x in ["doctor","hospital","patient","medical","health"]): return "doctor hospital medical patient clinical"
- if any(x in l for x in ["farmer","kisan","tractor","wheat","crop","agriculture"]): return "farmer tractor agriculture field farming"
- w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
- return " ".join(w)+" professional cinematic 4k" if w else "global news studio corporate cinematic 4k"
+ clean_text = re.sub(r'[^\w\s]', '', l)
+ words = clean_text.split()
+ meaningful_words = [w for w in words if len(w) > 4 and w not in STOP_WORDS]
+ if len(meaningful_words) >= 2:
+  return " ".join(meaningful_words[:3]) + " professional cinematic 4k"
+ elif meaningful_words:
+  return meaningful_words[0] + " professional cinematic 4k"
+ return "beautiful cinematic nature landscape abstract backgrounds slow motion"
 
 def get_category(text):
  l=text.lower()
- if any(x in l for x in ["ai","chatgpt","robot","tech","coding","software"]): return "technology"
- if any(x in l for x in ["bitcoin","crypto","stock","money","business","finance"]): return "finance"
- if any(x in l for x in ["doctor","hospital","health","medical"]): return "medical"
- if any(x in l for x in ["farmer","tractor","agriculture","field"]): return "farming"
+ if any(x in l for x in ["ai","chatgpt","robot","tech","coding","software","artificial","intelligence","computer","laptop","programming"]): return "technology"
+ if any(x in l for x in ["bitcoin","crypto","stock","money","business","finance","blockchain","market","paisa","kamana","trading","rich","ameer"]): return "finance"
+ if any(x in l for x in ["doctor","hospital","health","medical","sehat","bimari","ilaj","medicine","clinic"]): return "medical"
+ if any(x in l for x in ["farmer","tractor","agriculture","field","kisan","kheti","gandum","wheat","crop","pind","gaon"]): return "farming"
+ if any(x in l for x in ["news","khabar","breaking","update","wazir","imran","nawaz","pakistan","america","election","police","court"]): return "news"
+ if any(x in l for x in ["kahani","shaitan","jinn","bhoot","crime","qatal","jail","khofnak","scary","mystery","history","purani"]): return "crime"
  return "general"
+
+def get_niche_music(cat):
+ music_keywords = {
+  "finance": "corporate business motivation upbeat",
+  "technology": "ambient tech electronic future",
+  "medical": "calm cinematic soft ambient",
+  "farming": "acoustic guitar country inspiring",
+  "general": "cinematic inspiring background",
+  "news": "news corporate dramatic energetic",
+  "crime": "dark suspense mystery ambient"
+ }
+ q = music_keywords.get(cat, "cinematic inspiring background")
+ pkey = "38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"
+ url = f"https://pixabay.com/api/soundeffects/?key={pkey}&q={urllib.parse.quote(q)}&per_page=10"
+ try:
+  r = requests.get(url, timeout=7)
+  j = r.json()
+  if j.get('hits'):
+   hit = random.choice(j['hits'])
+   lk = hit['download_url']
+   mp = f"/tmp/bgm_{uuid.uuid4().hex[:4]}.mp3"
+   res = requests.get(lk, timeout=15)
+   if res.status_code == 200:
+    open(mp, 'wb').write(res.content)
+    return mp
+ except:pass
+ return None
 
 def Ai(p,path,W=960,H=540):
  q=urllib.parse.quote(p[:200])
@@ -152,21 +196,27 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
  W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
  if "TikTok" in vtype:W,H=(720,1280)
  code=code.strip().upper();today=datetime.date.today();email=email.strip().lower()
- if not code or code not in PACKAGES:
+ 
+ if not code:
   fd=Lj(FREE_DB);ek=email+"_"+today.isoformat();ut=fd.get(ek,0)
   if ut>=1:return None,None,"","","",f"Daily Free Khatam! {CONTACT}"
   rem=1-ut;free=True;ft=fd;et=ek;db=None
  else:
-  db=Lj(LICENSE_DB);lic=db.get(code)
-  if not lic:
-   lic={"bound_email":email,"total":PACKAGES[code],"used":0.0,"expiry":str(today+datetime.timedelta(days=30))}
-   db[code]=lic;Sj(LICENSE_DB,db)
-  else:
-   if lic["bound_email"]!=email:return None,None,"","","",f"LOCKED! {lic['bound_email']}"
-   if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED! {CONTACT}"
-   if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam! {lic['used']:.1f}/{lic['total']}"
+  db=Lj(LICENSE_DB)
+  if code not in db:
+   return None,None,"","","",f"❌ Invalid Code! {CONTACT}"
+  lic=db[code]
+  if lic["bound_email"] and lic["bound_email"]!=email:
+   return None,None,"","","",f"LOCKED! {lic['bound_email']}"
+  if not lic["bound_email"]:
+   lic["bound_email"] = email
+  if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED! {CONTACT}"
+  if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam! {lic['used']:.1f}/{lic['total']}"
   rem=lic["total"]-lic["used"];free=False
+
  cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
+ main_cat = get_category(kws[0] if kws else "general")
+ 
  try:
   chs=kws;need=0.0;USED.clear()
   for idx,ch in enumerate(chs):
@@ -176,8 +226,12 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    try:au=AudioFileClip(ap)
    except:continue
    if not au or au.duration==0:au.close();continue
+   
+   if au.duration > 0.4:
+    au = au.subclip(0, au.duration - 0.2)
+    
    nd=au.duration/60.0;need+=nd
-   if need>rem+0.1:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
+   if need>rem+0.01:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
    per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
    for i in range(num_clips):
     if i>0 and i%5==0: time.sleep(3)
@@ -199,12 +253,35 @@ def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
    vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
    fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="2500k",logger=None)
    pvs.append(VideoFileClip(vp));au.close()
+   
   if not pvs:return None,None,"","","","No parts - Script check karo"
-  fv=concatenate_videoclips(pvs,method="compose");out="/tmp/gradio";os.makedirs(out,exist_ok=True)
+  
+  fv=concatenate_videoclips(pvs,method="compose")
+  video_duration = fv.duration
+  original_audio = fv.audio
+  bgm_path = get_niche_music(main_cat)
+  
+  if bgm_path and os.path.exists(bgm_path):
+   try:
+    bgm = AudioFileClip(bgm_path)
+    if bgm.duration < video_duration:
+     bgm = bgm.loop(duration=video_duration)
+    else:
+     bgm = bgm.subclip(0, video_duration)
+    bgm = bgm.fx(volumex, 0.12)
+    final_audio = CompositeAudioClip([original_audio, bgm])
+    fv = fv.set_audio(final_audio)
+   except:pass
+   
+  out="/tmp/gradio";os.makedirs(out,exist_ok=True)
   vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=4,bitrate="3500k",logger=None)
   tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
-  if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m OK"
-  else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
+  for pv in pvs: pv.close()
+  
+  if free:
+   ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m OK"
+  else:
+   db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m"
  except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
 
 css="""

@@ -14,15 +14,23 @@ K4 = ['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKT
 XK = [base64.b64decode(k.encode()).decode() for k in K4]
 PIXABAY_KEY = "38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"
 
+# 🎙️ Top Motivational / YouTuber Style Voice Presets
 VOICES = {
-    "English Male": "en-US-AndrewNeural", "English Female": "en-US-JennyNeural",
-    "English UK Male": "en-GB-RyanNeural", "English UK Female": "en-GB-SoniaNeural",
-    "Hindi Male": "hi-IN-ArjunNeural", "Hindi Female": "hi-IN-SwaraNeural",
-    "Urdu Male": "ur-PK-AsadNeural", "Urdu Female": "ur-PK-UzmaNeural",
-    "Russian Male": "ru-RU-DmitryNeural", "Russian Female": "ru-RU-SvetlanaNeural",
-    "Chinese Male": "zh-CN-YunxiNeural", "Chinese Female": "zh-CN-XiaoxiaoNeural",
-    "Arabic Male": "ar-SA-HamedNeural", "Arabic Female": "ar-SA-ZariyahAryan",
-    "Spanish Male": "es-ES-AlvaroNeural", "Spanish Female": "es-ES-ElviraNeural"
+    "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
+    "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
+    "English Male (Ryan - UK Storyteller)": "en-GB-RyanNeural",
+    "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
+    "English Female (Sonia - UK Accent)": "en-GB-SoniaNeural",
+    "Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural",
+    "Urdu Female (Uzma - Soft & Clear)": "ur-PK-UzmaNeural",
+    "Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural",
+    "Hindi Female (Swara - Dynamic & Crisp)": "hi-IN-SwaraNeural",
+    "Russian Male (Dmitry - Strong Studio Voice)": "ru-RU-DmitryNeural",
+    "Russian Female (Svetlana - Expressive)": "ru-RU-SvetlanaNeural",
+    "Arabic Male (Hamed - Classic Powerful Voice)": "ar-SA-HamedNeural",
+    "Arabic Female (Zariyah - Smooth Tone)": "ar-SA-ZariyahNeural",
+    "Spanish Male (Alvaro - High Energy)": "es-ES-AlvaroNeural",
+    "Spanish Female (Elvira - Expressive)": "es-ES-ElviraNeural"
 }
 
 BASE_DIR = "./JSM_Outputs"
@@ -40,7 +48,6 @@ FIXED_LICENSES = {
     "JSM1000": {"bound_email": "", "total": 1000.0, "used": 0.0, "expiry": "2030-12-31"}
 }
 
-# 6 سٹوک ویڈیو ہوسٹنگ فال بیک پول (Mixkit, Coverr, Videezy, Archive.org support)
 DYNAMIC_FALLBACKS = {
     "technology": [
         "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165",
@@ -119,12 +126,10 @@ def get_niche_music(cat):
     except: pass
     return None
 
-# 6 سورسز پر مشتمل سمارٹ ویڈیو فیچر
 def St(k, d, W, H, cat, part_idx=0):
     q = Kw(k, cat)
     q_encoded = urllib.parse.quote(q)
     
-    # 1. Pexels API
     for key in XK:
         try:
             r = requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=20", headers={"Authorization": key}, timeout=6)
@@ -138,7 +143,6 @@ def St(k, d, W, H, cat, part_idx=0):
                 return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
         except: continue
 
-    # 2. Pixabay API
     try:
         r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_encoded}&per_page=20", timeout=6)
         if r.json().get('hits'):
@@ -151,7 +155,6 @@ def St(k, d, W, H, cat, part_idx=0):
             return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
     except: pass
 
-    # 3-6. Mixkit, Coverr, Videezy, Archive.org Fallback
     pool = DYNAMIC_FALLBACKS.get(cat, DYNAMIC_FALLBACKS["general"])
     fallback_url = pool[part_idx % len(pool)]
     try:
@@ -171,8 +174,7 @@ def run_tts(tx, out, vc):
 
 def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progress()):
     if not script.strip() or not email.strip(): return None, None, "Email/Script likho"
-    W, H = {"1920x1080 - Full HD": (1920, 1080), "1280x720 - HD": (1280, 720), "854x480 - SD Fast": (854, 480)}.get(res, (1280, 720))
-    if "TikTok" in vtype: W, H = (720, 1280)
+    
     code = code.strip().upper(); today = datetime.date.today(); email = email.strip().lower()
     
     db = Lj(LICENSE_DB)
@@ -192,8 +194,36 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
         if lic["used"] >= lic["total"]: return None, None, f"Khatam! {lic['used']:.1f}/{lic['total']}"
         rem = lic["total"] - lic["used"]; free = False
 
-    cs, kws = clean_analyze(script); pvs = []
-    
+    cs, kws = clean_analyze(script)
+    voice_code = VOICES.get(lang, "en-US-AndrewNeural")
+
+    # 🎵 1. MP3 ONLY AUDIO MODE
+    if res == "MP3 Only (Audio Voice)":
+        pr(0.3, desc="Generating Speech Audio...")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        audio_file = f"./JSM_Audio_{timestamp}.mp3"
+        run_tts(cs, audio_file, voice_code)
+        
+        if os.path.exists(audio_file):
+            au = AudioFileClip(audio_file)
+            duration_mins = au.duration / 60.0
+            au.close()
+            
+            if free:
+                ft[et] = ut + duration_mins; Sj(FREE_DB, ft)
+            else:
+                db[code]["used"] += duration_mins; Sj(LICENSE_DB, db)
+                
+            return None, audio_file, f"✅ Audio Generated Successfully! ({duration_mins:.1f} mins)"
+        else:
+            return None, None, "❌ Audio Generation Failed!"
+
+    # 🎬 2. VIDEO MODE
+    res_map = {"1280x720 - HD": (1280, 720), "854x480 - SD Fast": (854, 480)}
+    W, H = res_map.get(res, (1280, 720))
+    if "TikTok" in vtype: W, H = (720, 1280)
+
+    pvs = []
     try:
         chs = kws; need = 0.0
         total_steps = len(chs)
@@ -203,7 +233,7 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             current_cat = get_category(ch)
             
             ap = f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
-            run_tts(ch, ap, VOICES.get(lang, "en-US-AndrewNeural"))
+            run_tts(ch, ap, voice_code)
             if not os.path.exists(ap): continue
             au = AudioFileClip(ap)
             if au.duration > 0.4: au = au.subclip(0, au.duration - 0.2)
@@ -211,7 +241,6 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             need += au.duration / 60.0
             if need > rem + 0.01: au.close(); return None, None, f"Need {need:.1f}m Baki {rem:.1f}m"
             
-            # --- اسمارٹ 5-سیکنڈ کلپ سوئچنگ لاجک ---
             max_clip_dur = 5.0
             sub_clips = []
             dur_left = au.duration
@@ -248,14 +277,12 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
         main_cat = get_category(chs[0] if chs else "general")
         bgm_path = get_niche_music(main_cat)
         
-        # --- بیک گراؤنڈ میوزک 32% (0.32) والیم کے ساتھ ---
         if bgm_path and os.path.exists(bgm_path):
             try:
                 bgm = AudioFileClip(bgm_path).loop(duration=video_duration).fx(volumex, 0.32)
                 fv = fv.set_audio(CompositeAudioClip([original_audio, bgm]))
             except: pass
             
-        # --- یونیک نام (Dynamic File Name) تاکہ ڈوپلیکیٹ آئیکن/ڈاؤن لوڈ اگین ختم ہو ---
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         vf = f"./JSM_Video_{timestamp}.mp4"
         fv.write_videofile(vf, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=4, logger=None)
@@ -284,7 +311,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     gr.HTML(f"""
     <div id="header">
         <h1>✦ JSM VIDEO GENERATOR ✦</h1>
-        <div class="sub-title">AI POWERED VIDEO STUDIO (UP TO 8 MINS)</div>
+        <div class="sub-title">AI POWERED VIDEO & AUDIO STUDIO</div>
         <div style="color:#A0A0A0; font-size:12px; margin-top:10px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
     </div>
     """)
@@ -292,22 +319,22 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     with gr.Row():
         email = gr.Textbox(label="Email", placeholder="your@gmail.com")
         code = gr.Textbox(label="License Code", placeholder="Enter valid key")
-        lang = gr.Dropdown(list(VOICES.keys()), value="English Male", label="🌍 Language + Voice Select")
+        lang = gr.Dropdown(list(VOICES.keys()), value="English Male (Andrew - Professional Studio)", label="🌍 Voice & Speaker Style Select")
     with gr.Row():
         vtype = gr.Dropdown(["YouTube 16:9", "TikTok 9:16"], value="YouTube 16:9", label="Type")
-        resolution = gr.Dropdown(["1920x1080 - Full HD", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="HD")
+        resolution = gr.Dropdown(["MP3 Only (Audio Voice)", "1280x720 - HD", "854x480 - SD Fast"], value="1280x720 - HD", label="Output Mode / Quality")
         show_sub = gr.Checkbox(label="Subtitles ON/OFF", value=True)
         cat_hidden = gr.Textbox(value="Auto", visible=False)
-    # اسکرپٹ ٹیکسٹ باکس 12,000 حروف کے ساتھ (5 سے 8 منٹ کی ویڈیو کے لیے)
+        
     script = gr.Textbox(lines=8, label="Your Long Script (Up to 8 Mins) - Har Line = New Visual Scene", max_length=12000)
-    btn = gr.Button("✨ GENERATE MASTER GOLDEN VIDEO ✨", variant="primary")
+    btn = gr.Button("✨ GENERATE VIDEO / AUDIO ✨", variant="primary")
     
     with gr.Row():
         video = gr.Video(label="Player View")
-        download_btn = gr.File(label="📥 DOWNLOAD VIDEO")
+        download_btn = gr.File(label="📥 DOWNLOAD FILE (Video/MP3)")
         
     status = gr.Textbox(label="Status")
     btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, download_btn, status])
 
-demo.queue(max_size=5).launch(share=True, show_error=True)
-                  
+demo.queue(max_size=10).launch(share=True, show_error=True)
+              

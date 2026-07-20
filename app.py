@@ -4,17 +4,27 @@ from moviepy.audio.fx.volumex import volumex
 
 CONTACT = "03043399133 | 03022246271"
 ON = "SAEED"; ONUM = "03043399133"; MN = "MUJAHID"; MNUM = "03022246271"
+BRAND_NAME = "JSM AI BY SAEED"
 
-# API Keys & Sources
-K4 = ['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2',
-      'em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=',
-      'ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=',
-      'MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=',
-      'dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
+# 🔑 APIs & Keys Configuration
+SUPABASE_KEY = "sb_publishable_1W4NK6X7Edacm_eSB1cFDQ_CkT6c4EY"
+PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
+COVERR_API_KEY = "8c8c592b07a57e05dc49368c399b7659"
+
+K4 = [
+    'Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2',
+    'em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=',
+    'ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaELJNGQ0Q2VuUlRaWENrcENXRDk=',
+    'MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=',
+    'dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk='
+]
 XK = [base64.b64decode(k.encode()).decode() for k in K4]
-PIXABAY_KEY = "38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"
 
-# 🎙️ Top Motivational / YouTuber Style Voice Presets
+HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}"
+}
+
 VOICES = {
     "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
     "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
@@ -48,30 +58,52 @@ FIXED_LICENSES = {
     "JSM1000": {"bound_email": "", "total": 1000.0, "used": 0.0, "expiry": "2030-12-31"}
 }
 
-DYNAMIC_FALLBACKS = {
-    "technology": [
-        "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165",
-        "https://player.vimeo.com/external/538569350.sd.mp4?s=8b652ee97d8b36a19f5617bfd69106ec2b9cb525&profile_id=165",
-        "https://player.vimeo.com/external/409132226.sd.mp4?s=ebd04cb5038c353b3b194519543e33c7dae2051f&profile_id=165"
-    ],
-    "finance": [
-        "https://player.vimeo.com/external/435649383.sd.mp4?s=7b9a52bc23924df50f3c0e1fc84241e06fa4d5de&profile_id=165",
-        "https://player.vimeo.com/external/394142711.sd.mp4?s=7342fbfa7b494d4d3a04297b48a1a364bb2fa02a&profile_id=165"
-    ],
-    "medical": [
-        "https://player.vimeo.com/external/405461244.sd.mp4?s=6c2ef50f32997c4fcfa6d0130f14a60155627f12&profile_id=165",
-        "https://player.vimeo.com/external/460144670.sd.mp4?s=5481d6541f6e21aa85aa0ee49fa6b2d2f447f5cf&profile_id=165"
-    ],
-    "farming": [
-        "https://player.vimeo.com/external/390975619.sd.mp4?s=73ef6233a0b5a32ba06d91da3c0c1b489bc37f59&profile_id=165",
-        "https://player.vimeo.com/external/517614131.sd.mp4?s=6a51d02c082729a997ef3eb905fb57f6f1943bf1&profile_id=165"
-    ],
-    "general": [
-        "https://images.pexels.com/videos/4482/motion-background-pms-1.mp4",
-        "https://images.pexels.com/videos/3125396/free-video-3125396.mp4",
-        "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165"
-    ]
+# 🌐 35+ Comprehensive Niche Categories Mapping
+CATEGORIES_MAP = {
+    "medical": ["doctor", "hospital", "patient", "medical", "health", "surgery", "clinic", "nurse", "medicine"],
+    "engineering": ["engineer", "construction", "architect", "building", "bridge", "blueprint", "site"],
+    "software": ["coding", "software", "developer", "programmer", "python", "computer", "laptop", "code"],
+    "ai_tech": ["ai", "robot", "artificial intelligence", "cyberpunk", "future", "technology", "data"],
+    "finance": ["bitcoin", "crypto", "trading", "stock market", "money", "investing", "bank", "wealth"],
+    "business": ["corporate", "office", "meeting", "business", "presentation", "boss", "strategy"],
+    "e_commerce": ["shopping", "product", "delivery", "ecommerce", "store", "online shopping", "package"],
+    "farming": ["farmer", "kisan", "tractor", "agriculture", "field", "crop", "village", "harvest"],
+    "real_estate": ["house", "property", "mansion", "apartment", "real estate", "interior design", "realtor"],
+    "storytelling": ["history", "ancient", "mystery", "dark", "kingdom", "warrior", "legend", "castle"],
+    "fitness": ["gym", "workout", "fitness", "bodybuilding", "exercise", "running", "yoga", "athlete"],
+    "food": ["cooking", "chef", "food", "kitchen", "restaurant", "recipe", "delicious", "baking"],
+    "travel": ["travel", "tourism", "airplane", "beach", "mountains", "vacation", "hotel", "adventure"],
+    "education": ["student", "school", "university", "book", "library", "learning", "teacher", "study"],
+    "gaming": ["gaming", "gamer", "esports", "playstation", "xbox", "controller", "streamer"],
+    "fashion": ["fashion", "model", "clothing", "style", "runway", "photoshoot", "dress"],
+    "automotive": ["car", "supercar", "driving", "mechanic", "engine", "vehicle", "racing"],
+    "nature": ["forest", "river", "ocean", "landscape", "sunset", "sky", "wildlife", "flowers"],
+    "space": ["space", "galaxy", "astronaut", "planet", "stars", "universe", "nasa", "rocket"],
+    "law": ["lawyer", "court", "judge", "justice", "legal", "law", "handcuffs"],
+    "science": ["laboratory", "chemistry", "microscope", "science", "experiment", "research", "physics"],
+    "music": ["musician", "guitar", "piano", "studio", "singing", "concert", "dj"],
+    "art": ["painting", "artist", "drawing", "design", "creative", "sculpture", "exhibition"],
+    "pets": ["dog", "cat", "animals", "cute pets", "puppy", "veterinary"],
+    "beauty": ["makeup", "skincare", "salon", "barber", "haircut", "spa"],
+    "security": ["cybersecurity", "hacker", "police", "security camera", "cctv", "guard"],
+    "crypto": ["blockchain", "ethereum", "nft", "digital currency", "wallet"],
+    "marketing": ["social media", "marketing", "seo", "branding", "advertising", "content creation"],
+    "motivational": ["success", "inspiration", "motivation", "hard work", "goal", "trophy"],
+    "mindfulness": ["meditation", "mindfulness", "peace", "nature relax", "calm"],
+    "news": ["breaking news", "journalism", "reporter", "studio news", "media"],
+    "military": ["army", "military", "soldier", "weapon", "navy", "airforce"],
+    "logistics": ["truck", "shipping", "cargo", "warehouse", "logistics", "freight"],
+    "energy": ["solar energy", "wind turbine", "electricity", "green energy", "power plant"],
+    "general": ["abstract motion background", "cinematic timelapse", "modern aesthetic"]
 }
+
+DYNAMIC_FALLBACKS = [
+    "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c02230b0e5170d9a617651a029c29c8e&profile_id=165",
+    "https://player.vimeo.com/external/538569350.sd.mp4?s=8b652ee97d8b36a19f5617bfd69106ec2b9cb525&profile_id=165",
+    "https://player.vimeo.com/external/409132226.sd.mp4?s=ebd04cb5038c353b3b194519543e33c7dae2051f&profile_id=165",
+    "https://player.vimeo.com/external/435649383.sd.mp4?s=7b9a52bc23924df50f3c0e1fc84241e06fa4d5de&profile_id=165",
+    "https://images.pexels.com/videos/4482/motion-background-pms-1.mp4"
+]
 
 def Lj(p):
     try:
@@ -91,32 +123,27 @@ def Sj(p, d):
 
 def clean_analyze(script):
     clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini)", " ", script, flags=re.I)
-    sens = [s.strip() for s in re.split(r'[.!?\n]+', clean) if len(s.strip()) > 8]
+    sens = [s.strip() for s in re.split(r'[.!?\n]+', clean) if len(s.strip()) > 5]
     return clean, sens
 
-def Kw(text, cat):
+def Kw(text):
     l = text.lower()
-    if any(x in l for x in ["farmer", "kisan", "tractor", "agriculture", "field"]): return "pakistan village farmer tractor agriculture field"
-    if any(x in l for x in ["bitcoin", "crypto", "finance", "money", "trading"]): return "stock market trading money business corporate"
-    if any(x in l for x in ["doctor", "hospital", "patient", "medical", "health"]): return "doctor treating patient hospital medical checkup"
-    if any(x in l for x in ["ai", "robot", "coding", "software", "computer", "programming"]): return "cyberpunk tech coding developer typing hands"
+    for cat, words in CATEGORIES_MAP.items():
+        if any(w in l for w in words):
+            return f"{cat} {random.choice(words)} cinematic 4k"
+    
     clean_text = re.sub(r'[^\w\s]', '', l)
-    words = clean_text.split()
-    meaningful_words = [w for w in words if len(w) > 4 and w not in STOP_WORDS]
-    if len(meaningful_words) >= 2: return " ".join(meaningful_words[:3]) + " professional cinematic 4k"
-    return "beautiful cinematic nature landscape abstract backgrounds"
+    meaningful = [w for w in clean_text.split() if len(w) > 3 and w not in STOP_WORDS]
+    if len(meaningful) >= 1:
+        return f"{' '.join(meaningful[:2])} professional cinematic 4k"
+    return "cinematic dynamic motion background 4k"
 
-def get_category(text):
+def get_niche_music(text):
+    q = "cinematic inspiring background"
     l = text.lower()
-    if any(x in l for x in ["ai", "robot", "tech", "coding", "software"]): return "technology"
-    if any(x in l for x in ["bitcoin", "crypto", "stock", "money", "business", "finance"]): return "finance"
-    if any(x in l for x in ["doctor", "hospital", "health", "medical"]): return "medical"
-    if any(x in l for x in ["farmer", "tractor", "agriculture", "field"]): return "farming"
-    return "general"
-
-def get_niche_music(cat):
-    music_keywords = {"finance": "corporate business motivation", "technology": "ambient tech electronic", "medical": "calm cinematic soft", "farming": "acoustic guitar country", "general": "cinematic inspiring background"}
-    q = music_keywords.get(cat, "cinematic inspiring background")
+    if any(x in l for x in ["tech", "coding", "ai"]): q = "ambient tech electronic"
+    elif any(x in l for x in ["finance", "money", "business"]): q = "corporate business motivation"
+    elif any(x in l for x in ["gym", "fitness", "workout"]): q = "energetic rock sports"
     try:
         r = requests.get(f"https://pixabay.com/api/soundeffects/?key={PIXABAY_KEY}&q={urllib.parse.quote(q)}&per_page=10", timeout=6)
         if r.json().get('hits'):
@@ -126,13 +153,15 @@ def get_niche_music(cat):
     except: pass
     return None
 
-def St(k, d, W, H, cat, part_idx=0):
-    q = Kw(k, cat)
+# 🎥 Dynamic 3-4 Sec Clip Multi-Source Fetcher Engine
+def St(text, d, W, H, part_idx=0):
+    q = Kw(text)
     q_encoded = urllib.parse.quote(q)
     
+    # 1. Pexels Multi-Key Search (Rotates through 5 keys & indexes for unique clips)
     for key in XK:
         try:
-            r = requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=20", headers={"Authorization": key}, timeout=6)
+            r = requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=30", headers={"Authorization": key}, timeout=6)
             if 'videos' in r.json() and r.json()['videos']:
                 v_list = r.json()['videos']
                 v_obj = v_list[part_idx % len(v_list)]
@@ -143,8 +172,9 @@ def St(k, d, W, H, cat, part_idx=0):
                 return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
         except: continue
 
+    # 2. Pixabay API Search
     try:
-        r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_encoded}&per_page=20", timeout=6)
+        r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_encoded}&per_page=30", timeout=6)
         if r.json().get('hits'):
             v_list = r.json()['hits']
             v_obj = v_list[part_idx % len(v_list)]
@@ -155,8 +185,21 @@ def St(k, d, W, H, cat, part_idx=0):
             return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
     except: pass
 
-    pool = DYNAMIC_FALLBACKS.get(cat, DYNAMIC_FALLBACKS["general"])
-    fallback_url = pool[part_idx % len(pool)]
+    # 3. Coverr API Search
+    try:
+        r = requests.get(f"https://api.coverr.co/videos?query={q_encoded}&api_key={COVERR_API_KEY}", timeout=6)
+        if r.json().get('hits'):
+            v_list = r.json()['hits']
+            v_obj = v_list[part_idx % len(v_list)]
+            lk = v_obj['urls']['mp4']
+            t = f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.mp4"
+            open(t, 'wb').write(requests.get(lk, timeout=12).content)
+            cl = VideoFileClip(t).resize((W, H))
+            return cl.loop(duration=d) if cl.duration < d else cl.subclip(0, d)
+    except: pass
+
+    # 4. Dynamic Fallback
+    fallback_url = DYNAMIC_FALLBACKS[part_idx % len(DYNAMIC_FALLBACKS)]
     try:
         t = f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.mp4"
         open(t, 'wb').write(requests.get(fallback_url, timeout=12).content)
@@ -173,7 +216,7 @@ def run_tts(tx, out, vc):
     except: pass
 
 def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progress()):
-    if not script.strip() or not email.strip(): return None, None, "Email/Script likho"
+    if not script.strip() or not email.strip(): return None, None, "Email / Script likho"
     
     code = code.strip().upper(); today = datetime.date.today(); email = email.strip().lower()
     
@@ -197,7 +240,7 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
     cs, kws = clean_analyze(script)
     voice_code = VOICES.get(lang, "en-US-AndrewNeural")
 
-    # 🎵 1. MP3 ONLY AUDIO MODE
+    # 🎵 MP3 ONLY MODE
     if res == "MP3 Only (Audio Voice)":
         pr(0.3, desc="Generating Speech Audio...")
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -209,16 +252,14 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             duration_mins = au.duration / 60.0
             au.close()
             
-            if free:
-                ft[et] = ut + duration_mins; Sj(FREE_DB, ft)
-            else:
-                db[code]["used"] += duration_mins; Sj(LICENSE_DB, db)
+            if free: ft[et] = ut + duration_mins; Sj(FREE_DB, ft)
+            else: db[code]["used"] += duration_mins; Sj(LICENSE_DB, db)
                 
             return None, audio_file, f"✅ Audio Generated Successfully! ({duration_mins:.1f} mins)"
         else:
             return None, None, "❌ Audio Generation Failed!"
 
-    # 🎬 2. VIDEO MODE
+    # 🎬 VIDEO GENERATION MODE
     res_map = {"1280x720 - HD": (1280, 720), "854x480 - SD Fast": (854, 480)}
     W, H = res_map.get(res, (1280, 720))
     if "TikTok" in vtype: W, H = (720, 1280)
@@ -227,10 +268,10 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
     try:
         chs = kws; need = 0.0
         total_steps = len(chs)
+        global_clip_counter = 0
         
         for idx, ch in enumerate(chs):
-            pr(idx / total_steps, desc=f"Processing Part {idx+1}/{total_steps}...")
-            current_cat = get_category(ch)
+            pr(idx / total_steps, desc=f"Processing Scene {idx+1}/{total_steps}...")
             
             ap = f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
             run_tts(ch, ap, voice_code)
@@ -241,17 +282,17 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             need += au.duration / 60.0
             if need > rem + 0.01: au.close(); return None, None, f"Need {need:.1f}m Baki {rem:.1f}m"
             
-            max_clip_dur = 5.0
+            # ⏱️ Enforce 3.5-second max clip duration for high video dynamic switching
+            max_clip_dur = 3.5
             sub_clips = []
             dur_left = au.duration
-            sub_idx = 0
             
             while dur_left > 0:
                 cur_sub_dur = min(max_clip_dur, dur_left)
-                sc = St(ch, cur_sub_dur, W, H, current_cat, part_idx=(idx * 25) + sub_idx)
+                sc = St(ch, cur_sub_dur, W, H, part_idx=global_clip_counter)
                 sub_clips.append(sc)
                 dur_left -= cur_sub_dur
-                sub_idx += 1
+                global_clip_counter += 1
                 
             base_clip = concatenate_videoclips(sub_clips, method="compose") if len(sub_clips) > 1 else sub_clips[0]
             base_clip = base_clip.set_duration(au.duration)
@@ -269,17 +310,15 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             
         if not pvs: return None, None, "Script check karo"
         
-        pr(0.9, desc="Merging and adding background music...")
+        pr(0.9, desc="Merging scenes and adding background music...")
         fv = concatenate_videoclips(pvs, method="compose")
         video_duration = fv.duration
         original_audio = fv.audio
         
-        main_cat = get_category(chs[0] if chs else "general")
-        bgm_path = get_niche_music(main_cat)
-        
+        bgm_path = get_niche_music(script)
         if bgm_path and os.path.exists(bgm_path):
             try:
-                bgm = AudioFileClip(bgm_path).loop(duration=video_duration).fx(volumex, 0.32)
+                bgm = AudioFileClip(bgm_path).loop(duration=video_duration).fx(volumex, 0.25)
                 fv = fv.set_audio(CompositeAudioClip([original_audio, bgm]))
             except: pass
             
@@ -307,11 +346,11 @@ label { color: #FFD700 !important; }
 button.primary { background: linear-gradient(90deg, #FFD700, #FFA500) !important; color: #000000 !important; font-weight: bold !important; border: none !important; }
 """
 
-with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
+with gr.Blocks(title="JSM VIDEO GENERATOR MASTER", css=css) as demo:
     gr.HTML(f"""
     <div id="header">
-        <h1>✦ JSM VIDEO GENERATOR ✦</h1>
-        <div class="sub-title">AI POWERED VIDEO & AUDIO STUDIO</div>
+        <h1>✦ JSM VIDEO GENERATOR MASTER ✦</h1>
+        <div class="sub-title">{BRAND_NAME}</div>
         <div style="color:#A0A0A0; font-size:12px; margin-top:10px;">{ON}: {ONUM} | {MN}: {MNUM}</div>
     </div>
     """)
@@ -327,7 +366,7 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
         cat_hidden = gr.Textbox(value="Auto", visible=False)
         
     script = gr.Textbox(lines=8, label="Your Long Script (Up to 8 Mins) - Har Line = New Visual Scene", max_length=12000)
-    btn = gr.Button("✨ GENERATE VIDEO / AUDIO ✨", variant="primary")
+    btn = gr.Button("✨ GENERATE MASTER GOLDEN VIDEO ✨", variant="primary")
     
     with gr.Row():
         video = gr.Video(label="Player View")
@@ -337,4 +376,4 @@ with gr.Blocks(title="JSM VIDEO GENERATOR", css=css) as demo:
     btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, download_btn, status])
 
 demo.queue(max_size=10).launch(share=True, show_error=True)
-              
+      

@@ -3,22 +3,22 @@ from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, Aud
 from moviepy.audio.fx.volumex import volumex
 
 CONTACT = "03043399133 | 03022246271"
-ON = "SAEED"; ONUM = "03043399133"; MN = "MUJAHID"; MNUM = "03022246271"
-BRAND_NAME = "JSM AI BY SAEED"
+ON = "JAM SAEED MOTHA"; ONUM = "03043399133"; MN = "MUJAHID HUSSAIN"; MNUM = "03022246271"
+BRAND_NAME = "JSM AI BY JAM SAEED MOTHA"
 
 # 🔑 APIs & Keys Configuration
 SUPABASE_KEY = "sb_publishable_1W4NK6X7Edacm_eSB1cFDQ_CkT6c4EY"
 PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
 COVERR_API_KEY = "8c8c592b07a57e05dc49368c399b7659"
 
-K4 = [
-    'Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2',
-    'em5pWXZhdmhhbGY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=',
-    'ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaELJNGQ0Q2VuUlRaWENrcENXRDk=',
-    'MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=',
-    'dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk='
+# Cleaned Direct Pexels API Keys (No UnicodeDecodeError)
+XK = [
+    "563492ad6f91700001000001c3b28bcae9b342419f9f91a27e0259f9",
+    "563492ad6f917000010000012e8b0a232f0c43ca91e1d3e1ef62ea53",
+    "563492ad6f91700001000001f35832ea5d63473f8a02a46e107779f2",
+    "563492ad6f917000010000019e1b219159044955a6d59ea3b96e4911",
+    "563492ad6f91700001000001d2938361099b418381bf47a32e185f31"
 ]
-XK = [base64.b64decode(k.encode()).decode() for k in K4]
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -58,7 +58,6 @@ FIXED_LICENSES = {
     "JSM1000": {"bound_email": "", "total": 1000.0, "used": 0.0, "expiry": "2030-12-31"}
 }
 
-# 🌐 35+ Comprehensive Niche Categories Mapping
 CATEGORIES_MAP = {
     "medical": ["doctor", "hospital", "patient", "medical", "health", "surgery", "clinic", "nurse", "medicine"],
     "engineering": ["engineer", "construction", "architect", "building", "bridge", "blueprint", "site"],
@@ -153,12 +152,11 @@ def get_niche_music(text):
     except: pass
     return None
 
-# 🎥 Dynamic 3-4 Sec Clip Multi-Source Fetcher Engine
 def St(text, d, W, H, part_idx=0):
     q = Kw(text)
     q_encoded = urllib.parse.quote(q)
     
-    # 1. Pexels Multi-Key Search (Rotates through 5 keys & indexes for unique clips)
+    # 1. Pexels Multi-Key Search
     for key in XK:
         try:
             r = requests.get(f"https://api.pexels.com/videos/search?query={q_encoded}&per_page=30", headers={"Authorization": key}, timeout=6)
@@ -240,7 +238,6 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
     cs, kws = clean_analyze(script)
     voice_code = VOICES.get(lang, "en-US-AndrewNeural")
 
-    # 🎵 MP3 ONLY MODE
     if res == "MP3 Only (Audio Voice)":
         pr(0.3, desc="Generating Speech Audio...")
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -259,7 +256,6 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
         else:
             return None, None, "❌ Audio Generation Failed!"
 
-    # 🎬 VIDEO GENERATION MODE
     res_map = {"1280x720 - HD": (1280, 720), "854x480 - SD Fast": (854, 480)}
     W, H = res_map.get(res, (1280, 720))
     if "TikTok" in vtype: W, H = (720, 1280)
@@ -282,7 +278,6 @@ def Gen(email, code, script, lang, vtype, res, show_sub, cat_hidden, pr=gr.Progr
             need += au.duration / 60.0
             if need > rem + 0.01: au.close(); return None, None, f"Need {need:.1f}m Baki {rem:.1f}m"
             
-            # ⏱️ Enforce 3.5-second max clip duration for high video dynamic switching
             max_clip_dur = 3.5
             sub_clips = []
             dur_left = au.duration
@@ -376,4 +371,3 @@ with gr.Blocks(title="JSM VIDEO GENERATOR MASTER", css=css) as demo:
     btn.click(Gen, [email, code, script, lang, vtype, resolution, show_sub, cat_hidden], [video, download_btn, status])
 
 demo.queue(max_size=10).launch(share=True, show_error=True)
-      

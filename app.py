@@ -6,9 +6,18 @@ from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, Aud
 from moviepy.audio.fx.volumex import volumex
 import edge_tts
 
+# --- SAFE VARIABLE LOAD (ایرر فکس: آپ کے تمام ویری ایبلز کا سیف چیک) ---
+script = globals().get('script', 'یہ ایک خوبصورت دن ہے اور تکنیک دنیا کو بدل رہی ہے۔')
+voice_lang = globals().get('voice_lang', 'Urdu Male (Asad - Deep Narrative)')
+video_type = globals().get('video_type', '16:9')
+resolution = globals().get('resolution', '720p')
+show_subtitles = globals().get('show_subtitles', True)
+user_email = globals().get('user_email', 'areej3399133@gmail.com')
+
 # --- SHEET AUTO-CUT SYSTEM - JSM BY SAEED ---
 SHEET_ID = "1nD6trNVFzhBAPwGiGYn8lzN5yAXVY5lIe05DvAjP5kU"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
+
 def cut_mints_auto(email, mins):
     try:
         if not email or mins <=0: return
@@ -31,29 +40,51 @@ PEXELS_KEYS = [
 BRAND_NAME = "JSM AI BY JAM SAEED MOTHA"
 XK = PEXELS_KEYS
 
+# --- VOICES ROSTER ---
 VOICES = {
-    "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
+    # ENGLISH (US & UK)
+    "English Male (Andrew - Studio Quality)": "en-US-AndrewNeural",
     "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
-    "English Male (Guy - News Anchor)": "en-US-GuyNeural",
+    "English Male (Guy - Professional News)": "en-US-GuyNeural",
     "English Male (Ryan - UK Storyteller)": "en-GB-RyanNeural",
     "English Male (Brian - UK Deep)": "en-GB-BrianNeural",
-    "English Male (Brandon - Human Natural)": "en-US-BrandonNeural",
     "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
     "English Female (Aria - Natural Human)": "en-US-AriaNeural",
-    "English Female (Emma - Human Feel)": "en-US-EmmaNeural",
+    "English Female (Emma - Human Soft)": "en-US-EmmaNeural",
     "English Female (Sonia - UK Accent)": "en-GB-SoniaNeural",
-    "English Female (Libby - UK Human)": "en-GB-LibbyNeural",
-    "Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural",
-    "Urdu Female (Uzma - Soft & Clear)": "ur-PK-UzmaNeural",
-    "Hindi Male (Madhur - Deep)": "hi-IN-MadhurNeural",
-    "Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural",
-    "Hindi Female (Swara - Dynamic & Crisp)": "hi-IN-SwaraNeural",
-    "Hindi Female (Ananya - Soft)": "hi-IN-AnanyaNeural",
-    "Arabic Male (Hamdan)": "ar-SA-HamdanNeural",
-    "Arabic Female (Hanan)": "ar-SA-HananNeural",
-    "Russian Female (Svetlana - Viral TikTok)": "ru-RU-SvetlanaNeural",
-    "Russian Male (Dmitry - Deep Russian)": "ru-RU-DmitryNeural",
-    "Urdu-Hindi Mix (Auto Detect)": "AUTO"
+    
+    # URDU & HINDI
+    "Urdu Male (Asad - Deep Narrative)": "ur-PK-AsadNeural",
+    "Urdu Female (Uzma - Soft & Natural)": "ur-PK-UzmaNeural",
+    "Hindi Male (Madhur - Rich Deep)": "hi-IN-MadhurNeural",
+    "Hindi Male (Arjun - Speaker Style)": "hi-IN-ArjunNeural",
+    "Hindi Female (Swara - Dynamic Crisp)": "hi-IN-SwaraNeural",
+    "Hindi Female (Ananya - Gentle Soft)": "hi-IN-AnanyaNeural",
+    
+    # SPANISH & FRENCH
+    "Spanish Male (Alvaro - Natural Studio)": "es-ES-AlvaroNeural",
+    "Spanish Female (Elvira - Smooth Warm)": "es-ES-ElviraNeural",
+    "French Male (Henri - Cinematic)": "fr-FR-HenriNeural",
+    "French Female (Denise - Elegant)": "fr-FR-DeniseNeural",
+    
+    # GERMAN, TURKISH & ITALIAN
+    "German Male (Conrad - Deep Voice)": "de-DE-ConradNeural",
+    "Turkish Male (Ahmet - Natural Warm)": "tr-TR-AhmetNeural",
+    "Italian Male (Diego - Expressive)": "it-IT-DiegoNeural",
+    
+    # ARABIC & RUSSIAN
+    "Arabic Male (Hamdan - Rich Gulf Accent)": "ar-SA-HamdanNeural",
+    "Arabic Female (Hanan - Professional)": "ar-SA-HananNeural",
+    "Russian Male (Dmitry - Deep Narrative)": "ru-RU-DmitryNeural",
+    "Russian Female (Svetlana - TikTok Viral)": "ru-RU-SvetlanaNeural",
+    
+    # ASIAN (CHINESE, JAPANESE, KOREAN)
+    "Chinese Male (Yunxi - Deep Story)": "zh-CN-YunxiNeural",
+    "Japanese Male (Keita - Anime/Film)": "ja-JP-KeitaNeural",
+    "Korean Female (SunHi - Natural Soft)": "ko-KR-SunHiNeural",
+    
+    # AUTO DETECT
+    "Urdu-Hindi-English Mix (Auto Detect)": "AUTO"
 }
 
 CATEGORIES_MAP = {
@@ -109,8 +140,8 @@ def SMART_KEYWORD_ENGINE(sentence):
         return [f"{words[0]} {words[1]}" if len(words) > 1 else words[0], "business corporate"]
     return ["cinematic background"]
 
-def clean_analyze(script):
-    clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script, flags=re.I)
+def clean_analyze(script_text):
+    clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script_text, flags=re.I)
     raw_sentences = re.split(r'[.!?\n\u06d4]+', clean)
     sens = []
     for s in raw_sentences:
@@ -140,11 +171,9 @@ def download_clip(url, W, H, duration):
 
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
     orientation = 'portrait' if H > W else 'landscape'
-    # --- 6 PLATFORMS SYSTEM ---
     for q in smart_queries:
         q_enc = urllib.parse.quote(q)
         print(f"🔍 Searching 6 Platforms: {q}")
-        # 1. PEXELS - 5 KEYS
         for key in PEXELS_KEYS:
             try:
                 headers = {"Authorization": key}
@@ -159,7 +188,6 @@ def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
                         print(f"✅ Found on PEXELS: {q}")
                         return cl
             except: continue
-        # 2. PIXABAY
         try:
             url = f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_enc}&per_page=8"
             r = requests.get(url, timeout=8).json()
@@ -171,7 +199,6 @@ def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
                     print(f"✅ Found on PIXABAY: {q}")
                     return cl
         except: pass
-        # 3. COVERR.CO
         try:
             url = f"https://api.coverr.co/api/free/videos?query={q_enc}&per_page=8"
             headers = {"Authorization": COVERR_API_KEY, "User-Agent": "Mozilla/5.0"}
@@ -185,7 +212,6 @@ def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
                         print(f"✅ Found on COVERR: {q}")
                         return cl
         except: pass
-        # 4. MIXKIT FALLBACK - Use Pixabay with different order
         try:
             url = f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_enc}&per_page=10&order=popular"
             r = requests.get(url, timeout=8).json()
@@ -197,7 +223,6 @@ def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
                     print(f"✅ Found on MIXKIT/POPULAR: {q}")
                     return cl
         except: pass
-    # 5. PEXELS RANDOM FALLBACK & 6. FINAL COLOR
     print("⚠️ No stock found, using cinematic fallback")
     return ColorClip((W, H), color=(15, 18, 24), duration=duration)
 
@@ -224,8 +249,7 @@ def get_niche_music(text):
     return None
 
 async def Tt(t, o, v):
-    # HUMAN FEEL - Not reporting, natural human
-    if "ru-RU" in v:
+    if "ru-RU" in v or "es-" in v or "fr-" in v:
         rate_str = "-5%"
         pitch_str = "+0Hz"
     elif "ur-" in v or "hi-" in v:
@@ -251,17 +275,17 @@ def run_tts(tx, out, vc):
     return False
 
 def detect_voice(ch, selected):
-    if "AUTO" in selected:
-        if any(w in ch.lower() for w in ["breaking news","stock market","finance","dollar","bitcoin"]): return VOICES["English Male (Guy - News Anchor)"]
-        return VOICES["Urdu Male (Asad - Deep Voice / Narrative Style)"]
+    if "AUTO" in str(selected):
+        if any(w in ch.lower() for w in ["breaking news","stock market","finance","dollar","bitcoin"]): return VOICES["English Male (Guy - Professional News)"]
+        return VOICES["Urdu Male (Asad - Deep Narrative)"]
     eng_words = len(re.findall(r'\b[a-zA-Z]{4,}\b', ch))
-    if eng_words > len(ch.split()) * 0.6 and "Urdu" in selected: return VOICES["English Male (Guy - News Anchor)"]
+    if eng_words > len(ch.split()) * 0.6 and "Urdu" in str(selected): return VOICES["English Male (Guy - Professional News)"]
     return VOICES.get(selected, "ur-PK-AsadNeural")
 
 print(f"🎙️ Selected Voice: {voice_lang}")
 cs, kws = clean_analyze(script)
-W, H = (1280, 720) if "16:9" in video_type else (720, 1280)
-if "480" in resolution: W, H = (854, 480) if W > H else (480, 854)
+W, H = (1280, 720) if "16:9" in str(video_type) else (720, 1280)
+if "480" in str(resolution): W, H = (854, 480) if W > H else (480, 854)
 bgm_path = get_niche_music(script)
 
 scene_files = []

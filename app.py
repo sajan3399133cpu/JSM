@@ -61,7 +61,7 @@ PEXELS_KEYS = [
     "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtlSAjJkKPb9vVTkL",
     "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3XiJSTUT0NV32A6gG9"
 ]
-BRAND_NAME = "✨ JSM VIDEO GENERATOR V6.6 MASTER ✨"
+BRAND_NAME = "✨ JSM VIDEO GENERATOR ✨"
 XK = PEXELS_KEYS
 
 VOICES = {
@@ -415,7 +415,7 @@ custom_css = """
 .gen-btn { background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%) !important; color: white !important; font-size: 18px !important; font-weight: bold !important; border-radius: 8px !important; margin-top: 10px; }
 """
 
-with gr.Blocks(css=custom_css, theme=gr.themes.Default(dark_mode=True)) as demo:
+with gr.Blocks(css=custom_css, js="() => { document.body.classList.add('dark'); }") as demo:
     with gr.Column(elem_classes="header-box"):
         gr.Markdown(f"<div class='header-title'>{BRAND_NAME}</div>")
         gr.Markdown("<div class='header-sub'>JAM SAEED: 03043399133 | MUJAHID HUSSAIN: 03022246271</div>")

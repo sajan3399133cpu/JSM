@@ -1,310 +1,275 @@
-import gradio as gr,asyncio,edge_tts,uuid,random,requests,re,os,json,base64,urllib.parse,datetime,time
-from moviepy.editor import VideoFileClip,ColorClip,concatenate_videoclips,AudioFileClip,CompositeVideoClip,ImageClip,TextClip
+import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, json, gc, base64
+import nest_asyncio
+nest_asyncio.apply()
+from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip
+from moviepy.audio.fx.volumex import volumex
+import edge_tts, gradio as gr
 from PIL import Image
-import secrets,string
-CONTACT="03043399133|03022246271"
-ADMIN_PASS="JamSaeed@786#Motha_Owner_0304!"
-ON="JAM SAEED MOTHA";ONUM="03043399133";MN="MUJAHID HUSSAIN";MNUM="03022246271"
-K4=['Uk9LSnZmWXV1U2tjN1FWVkw2VmpDZ1lGeUI4VVFaQ0xMQ2N0RDJTZlRKY2xJckRHbzVFeDNKTVg2','em5pWXZhdmhhbDY2Vkd3dVYya1VJcFJtN3ZHM1kwcmRkREx1enJJVHZtUHFRMjZrZEcwdmN5eTA=','ZjZJS3hySFI4TUhqMWdlRDYyY3JMVGZEVFFYMHM3ZXdGa3czaEVJNGQ0Q2VuUlRaWENrcENXRDk=','MWo2a0ZxMUdSQjQyOTFGMXMxUk1naGxnSVgzZDN1NzhPYVRwaURLbXRJU0FqSmtLUGI5dlZUa0w=','dHBreXBvZ3N3djA3bjg0ZGgwaWFISTl0YW11NDNHRWN2Wm9rQTNYaTNKU1RVVDBOVjMyQTZnRzk=']
-XK=[base64.b64decode(k.encode()).decode() for k in K4]
-VOICES={"EN Male Motivational Guy Natural Clone":"en-US-GuyNeural","EN Male News Anchor Davis Deep Natural":"en-US-DavisNeural","EN Male Deep Jason Motivational":"en-US-JasonNeural","EN Male Friendly Tony YouTube":"en-US-TonyNeural","EN Female Natural Jenny Human YouTube":"en-US-JennyNeural","EN Female News Aria Professional":"en-US-AriaNeural","UK Male Ryan Natural Motivational":"en-GB-RyanNeural","Urdu Male Asad Natural Clone":"ur-PK-AsadNeural","Urdu Female Uzma Natural":"ur-PK-UzmaNeural","Hindi Male Madhur Motivational Natural":"hi-IN-MadhurNeural","Hindi Female Swara Natural":"hi-IN-SwaraNeural"}
-PACKAGES={"ASIF":100,"ALI":100,"JSM":100,"ASIF786":600,"JSM30":30,"JSM100":100,"JSM300":300,"JSM500":500,"JSM786":600,"JSM600":600,"JSMGOLD":1000,"JSM786GOLD":9999}
-BASE_DIR="/data" if os.path.exists("/data") else "."
-FREE_DB=os.path.join(BASE_DIR,"free_daily.json")
-LICENSE_DB=os.path.join(BASE_DIR,"jsm_licenses_final.json")
-os.makedirs(BASE_DIR,exist_ok=True)
-USED=set()
-def Lj(p):
- try:return json.load(open(p))
- except:return{}
-def Sj(p,d):
- try:json.dump(d,open(p,'w'))
- except:pass
-def AdminGen(pw,email,mins,cnt):
- if pw!=ADMIN_PASS:return "❌ Galat Owner Key","",""
- db=Lj(LICENSE_DB);o=[]
- if cnt>1:
-  for _ in range(int(cnt)):
-   c=f"JSM{mins}-{''.join(secrets.choice(string.ascii_uppercase+string.digits) for _ in range(6))}"
-   db[c]={"bound_email":"","total":int(mins),"used":0.0,"expiry":str(datetime.date.today()+datetime.timedelta(days=30))}
-   o.append(c)
-  Sj(LICENSE_DB,db)
-  return f"✅ {cnt} Codes Ban Gaye!","\n".join(o),""
- if not email:return "Email likho","",""
- c=f"JSM{mins}-{''.join(secrets.choice(string.ascii_uppercase+string.digits) for _ in range(6))}"
- db[c]={"bound_email":email.strip().lower(),"total":int(mins),"used":0.0,"expiry":str(datetime.date.today()+datetime.timedelta(days=30))}
- Sj(LICENSE_DB,db)
- return f"✅ Code Ban Gaya {email} ke liye",c,""
-def AdminView(pw):
- if pw!=ADMIN_PASS:return "Galat Owner Key"
- db=Lj(LICENSE_DB);t=""
- for k,v in db.items():t+=f"{k} | {v['bound_email'] or 'UNUSED'} | {v['used']:.1f}/{v['total']} | {v['expiry']}\n"
- return t or "Koi Code Nahi"
+
+# --- CONFIG ---
+BASE_DIR = "./JSM_Outputs"
+os.makedirs(BASE_DIR, exist_ok=True)
+SHEET_ID = "1nD6trNVFzhBAPwGiGYn8lzN5yAXVY5lIe05DvAjP5kU"
+WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
+PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
+PEXELS_KEYS = ["ROKJvfYuuSkc7QVVL6VjCgYFyB8UQZCLLCctD2SfTJcIrDGo5Ex3JMX6","zniYyavhal66VGwuV2kUIpRm7vG3Y0rddDLuzrITvmPqQ26kdG0vcyy0","f6IKxrHR8MHj1geD62crLTfDTQX0s7ewFkw3hEI4d4CenRTZXCkpCWD9","1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtlSAjJkKPb9vVTkL","tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3XiJSTUT0NV32A6gG9"]
+COVERR_API_KEY = "8c8c592b07a57e05dc49368c399b7659"
+BRAND_NAME = "JSM AI BY JAM SAEED MOTHA"
+
+VOICES = {
+    "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
+    "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
+    "English Male (Guy - News Anchor)": "en-US-GuyNeural",
+    "English Male (Ryan - UK Storyteller)": "en-GB-RyanNeural",
+    "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
+    "English Female (Aria - Natural Human)": "en-US-AriaNeural",
+    "Urdu Male (Asad - Deep Voice)": "ur-PK-AsadNeural",
+    "Urdu Female (Uzma)": "ur-PK-UzmaNeural",
+    "Hindi Male (Madhur - Deep)": "hi-IN-MadhurNeural",
+    "Hindi Female (Swara - Dynamic)": "hi-IN-SwaraNeural",
+    "Arabic Male (Hamdan)": "ar-SA-HamdanNeural",
+    "Russian Female (Svetlana)": "ru-RU-SvetlanaNeural",
+    "Urdu-Hindi Mix (Auto Detect)": "AUTO"
+}
+
+CATEGORIES_MAP = {
+    "motivational": ["motivation","success","hard work","rich people","winner","dream big","goal","trophy"],
+    "finance_stock": ["stock market","stock","trading","share market","trader","forex","crypto","bitcoin"],
+    "finance_money": ["money","wealth","dollars","cash","finance","bank","profit","investing"],
+    "business": ["business","corporate","office","meeting","boss","startup","entrepreneur"],
+    "news": ["breaking news","journalism","reporter","studio news","media","election","politics"],
+    "fitness": ["gym","workout","fitness","bodybuilding","exercise","yoga","athlete"],
+    "ai_tech": ["ai","artificial intelligence","robot","technology","future","chatgpt","coding"],
+    "medical": ["doctor","hospital","patient","medical","health","surgery","medicine"],
+    "food": ["cooking","chef","food","kitchen","restaurant","recipe","biryani"],
+    "travel": ["travel","tourism","airplane","beach","mountains","vacation","hotel"],
+    "education": ["student","school","university","book","learning","teacher","degrees","skills"],
+    "nature": ["forest","river","ocean","landscape","sunset","wildlife","village"],
+    "islamic": ["islamic","masjid","mosque","madina","makkah","kaaba","quran","allah"],
+}
+
+def cut_mints_auto(email, mins):
+    try:
+        if not email or mins<=0: return
+        url = f"{WEB_APP_URL}?email={urllib.parse.quote(email)}&mins={mins}"
+        requests.get(url, timeout=15)
+        print(f"✅ Mints Cut: {mins} for {email}")
+    except: pass
+
+def SMART_KEYWORD_ENGINE(sentence):
+    s_low = sentence.lower()
+    blacklist = " -news -reporter -camera -microphone -journalist -interview"
+    best_score=0; matched=[]; selected_cat=""
+    for cat, kws in CATEGORIES_MAP.items():
+        score=sum(1 for kw in kws if kw in s_low)
+        if score>best_score:
+            best_score=score
+            matched=[kw for kw in kws if kw in s_low]
+            selected_cat=cat
+    if best_score>0 and matched:
+        primary=matched[0]
+        secondary=matched[1] if len(matched)>1 else selected_cat
+        return [f"{primary} {secondary}{blacklist}", f"{primary}{blacklist}", f"{selected_cat} cinematic{blacklist}"]
+    clean=re.sub(r'[^\w\s]','',s_low)
+    stop_words={"about","today","video","talk","please","subscribe","channel","the","and","you","hai","ke","ki","ka","aur","mein","aaj"}
+    words=[w for w in clean.split() if w not in stop_words and len(w)>3][:5]
+    if words:
+        return [f"{' '.join(words[:2])}{blacklist}", f"{words[0]} cinematic{blacklist}"]
+    return [f"cinematic background{blacklist}"]
 
 def clean_analyze(script):
- clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked|boobs|bikini\s+girl\s+sexy|fuck|birthday girl|birthday party)"," ",script,flags=re.I)
- sens=[s.strip() for s in re.split(r'[.!?]+',clean) if len(s.strip())>8]
- kws=[]
- for s in sens:
-  kws.append((s[:80],"general"))
- return clean,kws
+    clean=re.sub(r"(sex\s*video|porn|xxx|nude|naked)"," ",script,flags=re.I)
+    raw=re.split(r'[.!?\n\u06d4]+',clean)
+    sens=[s.strip() for s in raw if len(s.strip())>8]
+    return clean, sens
 
-# 50+ SMART CATEGORIES
-def Kw(text,cat):
- l=text.lower()
- if any(x in l for x in ["ai","artificial intelligence","chatgpt","robot"]): return "artificial intelligence robot technology"
- if any(x in l for x in ["elon","tesla","spacex","rocket"]): return "elon musk tesla spacex rocket"
- if any(x in l for x in ["apple","iphone","samsung","mobile"]): return "apple iphone samsung smartphone"
- if any(x in l for x in ["bitcoin","crypto","blockchain"]): return "bitcoin crypto cryptocurrency trading"
- if any(x in l for x in ["stock","share market","trading"]): return "stock market trading business"
- if any(x in l for x in ["money","dollar","rupee","cash","bank"]): return "money cash dollar bank"
- if any(x in l for x in ["business","startup","company"]): return "business office company meeting"
- if any(x in l for x in ["trump","biden","white house","president"]): return "donald trump white house politics"
- if any(x in l for x in ["election","vote","parliament"]): return "election vote parliament government"
- if any(x in l for x in ["war","army","soldier"]): return "army soldier military war"
- if any(x in l for x in ["doctor","hospital","patient"]): return "doctor hospital medical patient"
- if any(x in l for x in ["health","fitness","gym"]): return "health fitness gym workout"
- if any(x in l for x in ["school","student","teacher"]): return "school student teacher education"
- if any(x in l for x in ["university","college","study"]): return "university college student study"
- if any(x in l for x in ["farmer","kisan","tractor","wheat","crop"]): return "farmer tractor agriculture field"
- if any(x in l for x in ["cow","buffalo","animal"]): return "cow buffalo animal farm"
- if any(x in l for x in ["travel","tourism","vacation"]): return "travel tourism vacation beach"
- if any(x in l for x in ["city","building","skyscraper"]): return "city building skyscraper urban"
- if any(x in l for x in ["nature","forest","mountain"]): return "nature forest mountain river"
- if any(x in l for x in ["food","restaurant","cooking"]): return "food restaurant cooking chef"
- if any(x in l for x in ["cricket","football","sports"]): return "cricket football sports player stadium"
- if any(x in l for x in ["movie","cinema","actor"]): return "movie cinema actor celebrity"
- if any(x in l for x in ["music","song","concert"]): return "music concert singer song"
- if any(x in l for x in ["car","vehicle","drive"]): return "car vehicle driving auto"
- if any(x in l for x in ["plane","flight","airport"]): return "plane flight airport travel"
- if any(x in l for x in ["islam","quran","masjid"]): return "islamic mosque quran prayer"
- if any(x in l for x in ["construction","building","worker"]): return "construction building worker industry"
- if any(x in l for x in ["fashion","clothes","style"]): return "fashion clothes style dress"
- if any(x in l for x in ["cpec","gwadar"]): return "gwadar port cpec cargo ship"
- w=[x for x in re.findall(r'\w+',l) if len(x)>4][:3]
- return " ".join(w)+" professional cinematic 4k" if w else "nature cinematic 4k"
+# FREE AI GENERATOR - 100% FREE
+def Ai_Free_Generator(prompt, path, W=960, H=540):
+    q=urllib.parse.quote(prompt[:120])
+    seed=random.randint(1,999999)
+    for model in ["flux","turbo"]:
+        try:
+            url=f"https://image.pollinations.ai/prompt/{q}?width={W}&height={H}&model={model}&nologo=true&seed={seed}&enhance=true"
+            r=requests.get(url,timeout=20)
+            if r.status_code==200 and len(r.content)>5000:
+                open(path,'wb').write(r.content)
+                return path
+        except: continue
+    Image.new('RGB',(W,H),color=(15,18,24)).save(path)
+    return path
 
-def get_category(text):
- l=text.lower()
- if any(x in l for x in ["ai","chatgpt","robot","tech"]): return "technology"
- if any(x in l for x in ["bitcoin","crypto","stock","money","business"]): return "finance"
- if any(x in l for x in ["trump","election","politics","war"]): return "news"
- if any(x in l for x in ["doctor","hospital","health"]): return "medical"
- if any(x in l for x in ["farmer","tractor","agriculture"]): return "farming"
- if any(x in l for x in ["school","university","education"]): return "education"
- if any(x in l for x in ["travel","city","nature"]): return "travel"
- if any(x in l for x in ["food","restaurant"]): return "food"
- if any(x in l for x in ["cricket","football","sports"]): return "sports"
- if any(x in l for x in ["movie","music"]): return "entertainment"
- if any(x in l for x in ["car","plane"]): return "transport"
- if any(x in l for x in ["islam","quran","masjid"]): return "islamic"
- if any(x in l for x in ["cpec","gwadar"]): return "cpec"
- return "general"
-
-def Ai(p,path,W=960,H=540):
- q=urllib.parse.quote(p[:200])
- try:
-  r=requests.get(f"https://image.pollinations.ai/prompt/{q}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,9999)}",timeout=12)
-  if r.status_code==200 and len(r.content)>3000:
-   open(path,'wb').write(r.content)
-   return path
- except:pass
- Image.new('RGB',(W,H),color=(0,0,0)).save(path)
- return path
-
-def St(k,d,W,H,cat):
- q=Kw(k,cat)
- for key in XK:
-  try:
-   r=requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&page={random.randint(1,3)}",headers={"Authorization":key},timeout=7)
-   j=r.json()
-   if 'videos' in j and j['videos']:
-    for vid in j['videos']:
-     lk=vid['video_files'][0]['link']
-     if lk in USED:continue
-     USED.add(lk)
-     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
-     open(t,'wb').write(requests.get(lk,timeout=10).content)
-     if os.path.getsize(t)>8000:
-      cl=VideoFileClip(t).resize((W,H))
-      return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
-  except:continue
- for pkey in ["45206122-5ac148b5cb7d59b24b24b24b","38754577-3b5a6c8a9d0e1f2a3b4c5d6e7f8a9b0c1d2"]:
-  try:
-   r=requests.get(f"https://pixabay.com/api/videos/?key={pkey}&q={urllib.parse.quote(q)}&per_page=5&order=popular",timeout=8)
-   j=r.json()
-   if j.get('hits'):
-    for hit in j['hits']:
-     lk=hit['videos']['medium']['url']
-     if lk in USED:continue
-     USED.add(lk)
-     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
-     open(t,'wb').write(requests.get(lk,timeout=10).content)
-     if os.path.getsize(t)>8000:
-      cl=VideoFileClip(t).resize((W,H))
-      return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
-  except:continue
- try:
-  r=requests.get(f"https://archive.org/advancedsearch.php?q={urllib.parse.quote(q)}+mediatype:movies&fl=identifier&rows=3&output=json",timeout=8)
-  j=r.json()
-  for doc in j.get('response',{}).get('docs',[]):
-   ident=doc['identifier']
-   for ext in [".mp4","_512kb.mp4"]:
+def download_clip(url, W, H, duration):
     try:
-     lk=f"https://archive.org/download/{ident}/{ident}{ext}"
-     t=f"/tmp/{uuid.uuid4().hex[:4]}.mp4"
-     open(t,'wb').write(requests.get(lk,timeout=12).content)
-     if os.path.getsize(t)>15000:
-      cl=VideoFileClip(t).resize((W,H))
-      return cl.loop(duration=d) if cl.duration<d else cl.subclip(0,d)
-    except:continue
- except:pass
- try:
-  p=f"/tmp/{uuid.uuid4().hex[:4]}.jpg"
-  Ai(q,p,W,H)
-  return ImageClip(p).set_duration(d).resize((W,H))
- except:pass
- return ColorClip((W,H),color=(0,0,0),duration=d)
+        t_path=f"{BASE_DIR}/{uuid.uuid4().hex[:6]}.mp4"
+        res=requests.get(url,headers={"User-Agent":"Mozilla/5.0"},timeout=15)
+        with open(t_path,'wb') as f: f.write(res.content)
+        clip=VideoFileClip(t_path).resize((W,H))
+        clip=clip.resize(lambda t: 1+0.015*t)
+        return clip.loop(duration=duration) if clip.duration<duration else clip.subclip(0,duration)
+    except: return None
 
-def MakeSEO(s):
- l=s.lower()
- if any(x in l for x in ["doctor","health"]):t="Health & Doctor Tips"
- elif any(x in l for x in ["finance","money","stock","business","crypto"]):t="Business & Finance"
- elif any(x in l for x in ["politics","election","parliament","news","trump","elon"]):t="Politics & News"
- elif any(x in l for x in ["farm","kisan","tractor","wheat","crop"]):t="Farming & Agriculture"
- else:t="General Update"
- b=s[:70].strip().replace("\n"," ")
- title=f"{b} | {t} 2026"
- desc=f"{s[:500]}\n\nAbout {t}: {b} with complete details.\nStock videos from Pexels, Pixabay, Archive.org. YouTube compliant.\n"
- ht=f"#{t.replace(' ','').replace('&','')} #LatestUpdate #ViralVideo"
- tags=f"{t}, {b}, Latest {t} 2026"
- return title[:95],desc,ht,tags
+def get_clip_from_platforms(smart_queries, duration, W, H, clip_index, mode):
+    # PURE AI MODE
+    if "Pure AI" in mode:
+        p=f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.jpg"
+        Ai_Free_Generator(smart_queries[0], p, W, H)
+        clip=ImageClip(p).set_duration(duration).resize((W,H))
+        return clip.resize(lambda t: 1+0.05*t)
 
-async def Tt(t,o,v):await edge_tts.Communicate(t,v).save(o)
+    # SMART STOCK + AI FALLBACK MODE
+    orientation='portrait' if H>W else 'landscape'
+    for q in smart_queries:
+        q_enc=urllib.parse.quote(q)
+        # PEXELS
+        for key in PEXELS_KEYS:
+            try:
+                r=requests.get(f"https://api.pexels.com/videos/search?query={q_enc}&per_page=8&orientation={orientation}",headers={"Authorization":key},timeout=8).json()
+                if r.get('videos'):
+                    v=r['videos'][clip_index % len(r['videos'])]
+                    link=v['video_files'][0]['link']
+                    cl=download_clip(link,W,H,duration)
+                    if cl:
+                        print(f"✅ PEXELS: {q}")
+                        return cl
+            except: continue
+        # PIXABAY
+        try:
+            r=requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={q_enc}&per_page=8",timeout=8).json()
+            if r.get('hits'):
+                link=r['hits'][clip_index % len(r['hits'])]['videos']['medium']['url']
+                cl=download_clip(link,W,H,duration)
+                if cl:
+                    print(f"✅ PIXABAY: {q}")
+                    return cl
+        except: pass
+
+    # FINAL FALLBACK - AI IMAGE (NO BLACK SCREEN)
+    print(f"⚠️ Stock nahi mila, AI bana raha: {smart_queries[0]}")
+    p=f"{BASE_DIR}/{uuid.uuid4().hex[:4]}.jpg"
+    Ai_Free_Generator(smart_queries[0], p, W, H)
+    clip=ImageClip(p).set_duration(duration).resize((W,H))
+    return clip.resize(lambda t: 1+0.04*t)
+
+def get_niche_music(text):
+    l=text.lower()
+    q="corporate" if any(x in l for x in ["stock","finance","money","business"]) else "inspiring" if "motivation" in l else "ambient"
+    try:
+        r=requests.get(f"https://pixabay.com/api/music/?key={PIXABAY_KEY}&q={urllib.parse.quote(q)}&per_page=10",timeout=8).json()
+        if r.get('hits'):
+            track=random.choice(r['hits'])
+            mp3_url=track.get('download_url') or track.get('audio')
+            if mp3_url:
+                mp=f"{BASE_DIR}/bgm_{uuid.uuid4().hex[:4]}.mp3"
+                res=requests.get(mp3_url,timeout=12)
+                open(mp,'wb').write(res.content)
+                return mp
+    except: pass
+    return None
+
+async def Tt(t,o,v):
+    rate="-5%" if "ru-RU" in v else "-4%"
+    pitch="+2Hz"
+    await edge_tts.Communicate(t,v,rate=rate,pitch=pitch).save(o)
+
 def run_tts(tx,out,vc):
- try:
-  if os.path.exists(out):os.remove(out)
-  loop=asyncio.new_event_loop();asyncio.set_event_loop(loop);loop.run_until_complete(Tt(tx,out,vc));loop.close()
-  for _ in range(12):
-   if os.path.exists(out) and os.path.getsize(out)>2000:break
-   time.sleep(0.4)
- except Exception as e:print(f"TTS Fail {e}")
+    if len(tx.split())<3: tx=tx+"۔"
+    for _ in range(2):
+        try:
+            try: asyncio.run(Tt(tx,out,vc))
+            except:
+                loop=asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx,out,vc))
+            if os.path.exists(out) and os.path.getsize(out)>800: return True
+        except: time.sleep(0.5)
+    return False
 
-def Gen(email,code,script,lang,vtype,res,show_sub,cat_hidden):
- if not script.strip() or not email.strip():return None,None,"","","","Email/Script likho"
- W,H={"1920x1080 - Full HD":(1920,1080),"1280x720 - HD":(1280,720),"854x480 - SD Fast":(854,480)}.get(res,(1280,720))
- if "TikTok" in vtype:W,H=(720,1280) if W>H else (W,H)
- code=code.strip().upper();today=datetime.date.today();email=email.strip().lower()
- if not code or code not in PACKAGES:
-  fd=Lj(FREE_DB);ek=email+"_"+today.isoformat();ut=fd.get(ek,0)
-  if ut>=1:return None,None,"","","",f"Daily Free Khatam! {CONTACT}"
-  rem=1-ut;free=True;ft=fd;et=ek;db=None
- else:
-  db=Lj(LICENSE_DB);lic=db.get(code)
-  if not lic:
-   lic={"bound_email":email,"total":PACKAGES[code],"used":0.0,"expiry":str(today+datetime.timedelta(days=30))}
-   db[code]=lic;Sj(LICENSE_DB,db)
-  else:
-   if lic["bound_email"]!=email:return None,None,"","","",f"LOCKED! {lic['bound_email']}"
-   if today>datetime.date.fromisoformat(lic["expiry"]):return None,None,"","","",f"EXPIRED! {CONTACT}"
-   if lic["used"]>=lic["total"]:return None,None,"","","",f"Khatam! {lic['used']:.1f}/{lic['total']}"
-  rem=lic["total"]-lic["used"];free=False
- cs,kws=clean_analyze(script);title,desc,ht,vt=MakeSEO(cs);pvs=[]
- try:
-  sents=[s.strip() for s in re.split(r'[.!?]+',cs) if s.strip()]
-  chs=[];cur=""
-  for s in sents:
-   if len(cur)+len(s)<500:cur+=s+". "
-   else:chs.append(cur);cur=s+". "
-  if cur:chs.append(cur)
-  if not chs:chs=[cs]
-  chs=chs[:20];need=0.0;USED.clear()
-  for idx,ch in enumerate(chs):
-   ap=f"/tmp/{uuid.uuid4().hex[:5]}.mp3"
-   run_tts(ch,ap,VOICES.get(lang,"en-US-GuyNeural"))
-   if not os.path.exists(ap) or os.path.getsize(ap)<2000:continue
-   try:au=AudioFileClip(ap)
-   except:continue
-   if not au or au.duration==0 or au.duration is None:
-    try:au.close()
-    except:pass
-    continue
-   nd=au.duration/60.0;need+=nd
-   if need>rem+0.1:au.close();return None,None,"","","",f"Need {need:.1f}m Baki {rem:.1f}m"
-   if need>22:au.close();break
-   per_clip=4.5;num_clips=max(1,int(au.duration/per_clip)+1);clips=[]
-   for i in range(num_clips):
-    total_len=len(ch);start=int(i*total_len/num_clips);end=int((i+1)*total_len/num_clips)
-    small_text=ch[start:end] if ch[start:end].strip() else ch[:40]
-    cat_type=get_category(small_text)
-    clip_dur=per_clip if i<num_clips-1 else au.duration-(i*per_clip)
-    if clip_dur<1:clip_dur=per_clip
-    base_clip=St(small_text,clip_dur,W,H,cat_type).set_duration(clip_dur)
+def detect_voice(ch, selected):
+    if "AUTO" in selected:
+        return VOICES["English Male (Guy - News Anchor)"] if any(w in ch.lower() for w in ["breaking news","stock market","finance"]) else VOICES["Urdu Male (Asad - Deep Voice)"]
+    return VOICES.get(selected, "ur-PK-AsadNeural")
+
+def GenAll(email, script, voice_lang, video_type, resolution, show_subtitles, video_mode):
+    if not script.strip(): return None, "Script likho"
+    cs, kws = clean_analyze(script)
+    W,H = (1280,720) if "16:9" in video_type else (720,1280)
+    if "480" in resolution: W,H = (854,480) if W>H else (480,854)
+    if "1080" in resolution: W,H = (1920,1080) if W>H else (1080,1920)
+    bgm_path = get_niche_music(script)
+    scene_files=[]
+    print(f"🎬 Total Scenes: {len(kws)} Mode: {video_mode}")
+
+    for idx, ch in enumerate(kws):
+        voice_code=detect_voice(ch, voice_lang)
+        ap=f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
+        ok=run_tts(ch, ap, voice_code)
+        if not ok: continue
+        au=AudioFileClip(ap)
+        if au.duration>0.4: au=au.subclip(0, au.duration-0.1)
+        smart_queries=SMART_KEYWORD_ENGINE(ch)
+        dur_left=au.duration; sub_clips=[]; counter=idx
+        while dur_left>0:
+            cur_dur=min(random.uniform(3.2,4.5), dur_left)
+            sc=get_clip_from_platforms(smart_queries, cur_dur, W, H, counter, video_mode)
+            sub_clips.append(sc)
+            dur_left-=cur_dur; counter+=1
+        base_clip=concatenate_videoclips(sub_clips,method="compose") if len(sub_clips)>1 else sub_clips[0]
+        base_clip=base_clip.set_duration(au.duration)
+        if bgm_path and os.path.exists(bgm_path):
+            try:
+                bgm=AudioFileClip(bgm_path).subclip(0,au.duration).fx(volumex,0.25)
+                base_clip=base_clip.set_audio(CompositeAudioClip([au,bgm]))
+            except: base_clip=base_clip.set_audio(au)
+        else: base_clip=base_clip.set_audio(au)
+        layers=[base_clip]
+        if show_subtitles:
+            try:
+                txt=TextClip(ch[:100],fontsize=int(W*0.038),color='white',stroke_color='black',stroke_width=2,method='caption',size=(int(W*0.85),None),align='center')
+                txt=txt.set_duration(au.duration).set_pos(('center',0.80),relative=True)
+                layers.append(txt)
+            except: pass
+        final_scene=CompositeVideoClip(layers)
+        temp_path=f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
+        final_scene.write_videofile(temp_path,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=1,bitrate="1000k",logger=None)
+        scene_files.append(temp_path)
+        for sc in sub_clips:
+            try: sc.close()
+            except: pass
+        try: base_clip.close(); final_scene.close(); au.close()
+        except: pass
+        gc.collect()
+
+    if not scene_files: return None, "Fail"
+    list_path=f"{BASE_DIR}/concat_list.txt"
+    with open(list_path,"w") as f:
+        for sf in scene_files: f.write(f"file '{os.path.abspath(sf)}'\n")
+    timestamp=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_path=f"{BASE_DIR}/JSM_Video_{timestamp}.mp4"
+    os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c copy {out_path}")
+    if not os.path.exists(out_path) or os.path.getsize(out_path)<1000:
+        os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
     try:
-     # FIX: font hata diya taa k error na aye
-     g1=TextClip("JSM",fontsize=int(W*0.07),color='#FFD700',stroke_color='black',stroke_width=5).set_duration(clip_dur).set_position((W*0.82,H*0.03)).set_opacity(0.95)
-     layers=[base_clip,g1]
-    except:layers=[base_clip]
-    if show_sub:
-     try:
-      # HIGHLIGHT CAPTION
-      txt=TextClip(small_text[:90],fontsize=int(W*0.04),color='yellow',stroke_color='black',stroke_width=3.5,method='caption',size=(W*0.88,None)).set_duration(clip_dur).set_position(('center',0.78),relative=True)
-      layers.append(txt)
-     except:pass
-    base_clip=CompositeVideoClip(layers)
-    clips.append(base_clip)
-   fn=concatenate_videoclips(clips,method="compose").set_audio(au)
-   vp=f"/tmp/P_{idx}_{uuid.uuid4().hex[:4]}.mp4"
-   fn.write_videofile(vp,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=8,bitrate="3000k",logger=None)
-   pvs.append(VideoFileClip(vp));au.close()
-  if not pvs:return None,None,"","","","No parts - Script check karo"
-  fv=concatenate_videoclips(pvs,method="compose");out="/tmp/gradio";os.makedirs(out,exist_ok=True)
-  vf=f"{out}/FINAL_{uuid.uuid4().hex[:4]}.mp4";fv.write_videofile(vf,fps=24,codec='libx264',audio_codec='aac',preset='ultrafast',threads=8,bitrate="4000k",logger=None)
-  tp=f"{out}/T_{uuid.uuid4().hex[:4]}.jpg";Ai(cs,tp,W,H)
-  if free:ft[et]=ut+need;Sj(FREE_DB,ft);return vf,tp,title,desc,ht+vt,f"FREE {need:.1f}m {W}x{H} OK"
-  else:db[code]["used"]+=need;Sj(LICENSE_DB,db);nr=db[code]["total"]-db[code]["used"];return vf,tp,title,desc,ht+vt,f"PAID Baki {nr:.1f}m {W}x{H}"
- except Exception as e:return None,None,"","","",f"Error:{str(e)[:200]}"
- finally:
-  for c in pvs:
-   try:c.close()
-   except:pass
+        final_clip=VideoFileClip(out_path)
+        final_mins=round(final_clip.duration/60,2)
+        final_clip.close()
+        cut_mints_auto(email, final_mins)
+    except: pass
+    return out_path, f"✅ Done! {len(scene_files)} scenes | Mode: {video_mode}"
 
-css="body{background:#000!important}#header{text-align:center;padding:18px 0;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important}#header h1{color:#FFD700!important;font-size:42px!important;font-weight:900!important}footer{display:none!important}button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:62px!important;border-radius:14px!important;font-size:19px!important;border:2px solid #FFD700!important}label{color:#FFD700!important;font-weight:800!important}"
-with gr.Blocks(title="JSM VIDEO GENERATOR",css=css) as demo:
- gr.HTML(f"""<div id="header"><h1>✦ JSM VIDEO GENERATOR V5.2 ✦</h1><div>📞 {ON}: {ONUM} | Manager {MN}: {MNUM}</div></div>""")
- with gr.Tab("🎬 Video Generator"):
-  with gr.Row():
-   email=gr.Textbox(label="Email",placeholder="your@gmail.com")
-   code=gr.Textbox(label="License Code",placeholder="ASIF786 for 600 min")
-   lang=gr.Dropdown(list(VOICES.keys()),value="EN Male Motivational Guy Natural Clone",label="Voice 35 Natural Clone")
-  with gr.Row():
-   vtype=gr.Dropdown(["YouTube 16:9","TikTok 9:16"],value="YouTube 16:9",label="Type")
-   resolution=gr.Dropdown(["1920x1080 - Full HD","1280x720 - HD","854x480 - SD Fast"],value="1280x720 - HD",label="HD")
-   show_sub=gr.Checkbox(label="Subtitles ON/OFF",value=True)
-   cat_hidden=gr.Textbox(value="Auto",visible=False)
-  script=gr.Textbox(lines=5,label="Your Script - 1 Sentence = 1 Topic Video",placeholder="Elon Musk launched rocket. Doctor checked patient. Farmer used tractor.")
-  btn=gr.Button("✨ GENERATE VIDEO ✨",variant="primary")
-  with gr.Row():
-   video=gr.Video(label="Final Video - HD Download")
-   thumb=gr.Image(label="Thumbnail")
-  with gr.Row():
-   t1=gr.Textbox(label="Title")
-   d1=gr.Textbox(lines=4,label="Description")
-   h1=gr.Textbox(lines=2,label="Hashtags + Tags")
-  status=gr.Textbox(label="Status")
-  btn.click(Gen,[email,code,script,lang,vtype,resolution,show_sub,cat_hidden],[video,thumb,t1,d1,h1,status])
- with gr.Tab("🔐 Admin"):
-  gr.Markdown("### 🔑 Owner Access Only")
-  admin_pass=gr.Textbox(label="Owner Key",type="password")
-  with gr.Row():
-   user_email=gr.Textbox(label="User Email")
-   mins=gr.Dropdown([30,100,300,500,600,1000],value=500,label="Minutes")
-   bulk_count=gr.Number(label="Bulk Count",value=1,precision=0)
-  gen_btn=gr.Button("🔑 Generate Code",variant="primary")
-  out_msg=gr.Textbox(label="Message")
-  out_code=gr.Textbox(lines=6,label="Codes")
-  view_btn=gr.Button("📋 Saare Codes Dekho")
-  view_out=gr.Textbox(lines=12,label="All Licenses")
-  gen_btn.click(AdminGen,[admin_pass,user_email,mins,bulk_count],[out_msg,out_code,view_out])
-  view_btn.click(AdminView,[admin_pass],[view_out])
-demo.queue(max_size=20).launch(share=True,server_name="0.0.0.0")
+css="body{background:#000!important} #header{text-align:center;padding:15px;background:radial-gradient(ellipse at center,#2a2000 0%,#000 70%)!important;border-bottom:3px solid #FFD700!important} #header h1{color:#FFD700!important;font-size:38px!important;font-weight:900!important} button.primary{background:linear-gradient(90deg,#000,#FFD700,#000)!important;color:#000!important;font-weight:900!important;height:60px!important;border-radius:12px!important}"
+with gr.Blocks(title="JSM V7 FINAL", css=css) as demo:
+    gr.HTML(f"<div id='header'><h1>✦ JSM V7 DUAL MODE - FINAL ✦</h1><div>📞 JAM SAEED MOTHA | {BRAND_NAME}</div></div>")
+    with gr.Row():
+        email=gr.Textbox(label="Email (for mint cut)", value="areej3399133@gmail.com")
+        voice_lang=gr.Dropdown(list(VOICES.keys()), value="Urdu Male (Asad - Deep Voice)", label="Voice (22 Voices)")
+    with gr.Row():
+        video_type=gr.Dropdown(["YouTube 16:9","TikTok 9:16"], value="YouTube 16:9", label="Type")
+        resolution=gr.Dropdown(["1280x720 - HD","1920x1080 - Full HD","854x480 - SD Fast"], value="1280x720 - HD", label="Resolution")
+        video_mode=gr.Radio(["Smart Stock + AI Fallback (Fast 2min)", "Pure AI 100% Relevant (10-15 min support)"], value="Smart Stock + AI Fallback (Fast 2min)", label="✨ NAYA VIDEO MODE")
+    show_subtitles=gr.Checkbox(label="Subtitles ON/OFF", value=True)
+    script=gr.Textbox(lines=6, label="Your Script - 1 Sentence = 1 Scene", placeholder="Farmer is harvesting wheat with tractor. Doctor is checking patient in hospital. Elon Musk launched rocket.")
+    btn=gr.Button("✨ GENERATE VIDEO V7 ✨", variant="primary")
+    with gr.Row():
+        video=gr.Video(label="Final Video")
+        status=gr.Textbox(label="Status")
+    btn.click(GenAll, [email, script, voice_lang, video_type, resolution, show_subtitles, video_mode], [video, status])
+
+demo.queue(max_size=10).launch(share=True)

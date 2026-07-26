@@ -8,7 +8,7 @@ from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, Aud
 from moviepy.audio.fx.volumex import volumex
 import edge_tts
 
-# --- STRICT SECURITY & SHEET AUTO-CUT SYSTEM - JSM BY SAEED ---
+# --- STRICT SECURITY & SHEET AUTO-CUT SYSTEM ---
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOqPdND3z0j8lbNDdqVYeBAJ2qCFSrbWSNNJiLXk5tTZr6pf8hcAp7T3A8KcA4zvTuVA/exec"
 
@@ -250,7 +250,6 @@ def detect_voice(ch, selected):
 
 # --- CORE GENERATION ENGINE ---
 def generate_video_pipeline(email, license_code, voice_lang, video_type, resolution, show_subtitles, script, progress=gr.Progress()):
-    # Strict Input Checks
     if not email or not email.strip():
         return None, "❌ SECURITY ERROR: Email field cannot be empty!"
     if not license_code or not license_code.strip():
@@ -336,24 +335,24 @@ def generate_video_pipeline(email, license_code, voice_lang, video_type, resolut
         if not os.path.exists(out_path) or os.path.getsize(out_path) < 1000:
             os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
         
-        # --- STRICT DEDUCTION & VERIFICATION ---
+        # --- STRICT DEDUCTION & VERIFICATION WITH PROPER INDENTATION ---
+        status_msg = ""
         try:
             final_clip = VideoFileClip(out_path)
-final_mins = round(final_clip.duration / 60, 2)
-final_clip.close()
-
+            final_mins = round(final_clip.duration / 60, 2)
+            final_clip.close()
             
-            # Execute Strict Minutes Cut
             success, msg = strict_cut_mints(email, final_mins)
             
             if not success:
-                # Security Lockdown: If deduction failed, block video output
-                if os.path.exists(out_path): os.remove(out_path)
-                return None, f"🔒 SECURITY LOCK: Minutes Deduction Failed! Video access blocked. Error: {msg}"
+                if os.path.exists(out_path): 
+                    os.remove(out_path)
+                return None, f"🔒 SECURITY LOCK: Minutes Deduction Failed! Access blocked. Error: {msg}"
             
             status_msg = f"🎉 Video Ready! [{final_mins:.2f} Mints Cut from {email.strip().lower()}]"
         except Exception as e:
-            if os.path.exists(out_path): os.remove(out_path)
+            if os.path.exists(out_path): 
+                os.remove(out_path)
             return None, f"🔒 SECURITY LOCK: Verification Error ({e})"
             
         for sf in scene_files:
@@ -381,4 +380,5 @@ label { color: #FFD700 !important; font-weight: 600 !important; font-size: 13px 
 with gr.Blocks(css=custom_css, title="JSM VIDEO GENERATOR") as app:
     gr.HTML("""
     <div style='text-align: center; padding: 15px; border-bottom: 2px solid #FFD700; margin-bottom: 15px;'>
-        <h1 style='color: #FFD700; font-size: 32px; font-weight
+        <h1 style='color: #FFD700; font-size: 32px; font-weight: 900; margin: 0px; letter-spacing: 1px;'>✨ JSM VIDEO GENERATOR ✨</h1>
+        

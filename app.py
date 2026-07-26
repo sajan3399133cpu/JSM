@@ -14,9 +14,12 @@ def cut_mints_auto(email, mins):
 
 VOICES = {
     "English Male (Guy - News Anchor)": "en-US-GuyNeural",
+    "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
+    "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
     "Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural",
     "Urdu Female (Uzma - Soft & Clear)": "ur-PK-UzmaNeural",
     "Hindi Male (Madhur - Deep)": "hi-IN-MadhurNeural",
+    "Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural",
     "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
     "English Female (Aria - Natural Human)": "en-US-AriaNeural",
     "Russian Female (Svetlana - Viral TikTok)": "ru-RU-SvetlanaNeural",
@@ -39,29 +42,28 @@ def SMART_KEYWORD_ENGINE(sentence):
     return [q]
 
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
-    query = smart_queries[0] if smart_queries else "cinematic story background"
-    # --- ONLY AI VIDEO 5-6 SEC ---
+    query = smart_queries[0] if smart_queries else "cinematic background"
     try:
         print(f"🤖 AI VIDEO GENERATING: {query[:70]}")
-        prompt = f"{query}, cinematic motion, slow camera pan, natural movement, ultra realistic 8k, highly detailed"
+        prompt = f"{query}, cinematic motion, slow camera pan, natural movement, ultra realistic 8k"
         q = urllib.parse.quote(prompt[:130])
         video_url = f"https://image.pollinations.ai/prompt/{q}?model=video&width={W}&height={H}&seed={random.randint(1,9999999)}&nologo=true&enhance=true"
         t_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:4]}.mp4"
         r = requests.get(video_url, timeout=90)
         if r.status_code == 200 and len(r.content) > 20000:
+            if r.content[:2] == b'\xff\xd8':
+                raise Exception("Got Image instead of Video")
             open(t_path,'wb').write(r.content)
             clip = VideoFileClip(t_path).resize((W, H))
             print(f"✅ AI VIDEO DONE")
             return clip.subclip(0, duration) if clip.duration > duration else clip
     except Exception as e:
-        print(f"AI Video Fail: {e}")
+        print(f"AI Video Fail -> Image Fallback: {e}")
 
-    # --- FALLBACK AI IMAGE WITH ZOOM ---
     try:
         print(f"🎨 AI IMAGE FALLBACK: {query[:50]}")
-        prompt = f"{query}, ultra realistic 8k cinematic, photorealistic, dramatic lighting, no text"
         p_path = f"{BASE_DIR}/img_{uuid.uuid4().hex[:4]}.jpg"
-        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt[:140])}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,999999)}"
+        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(query[:120])}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,999999)}"
         r = requests.get(url, timeout=60)
         if r.status_code == 200 and len(r.content) > 5000:
             open(p_path,'wb').write(r.content)
@@ -94,7 +96,6 @@ def detect_voice(ch, selected):
     if "AUTO" in selected: return VOICES["Urdu Male (Asad - Deep Voice / Narrative Style)"]
     return VOICES.get(selected, "en-US-GuyNeural")
 
-# ========== MAIN DIRECT COLAB LOGIC ==========
 print(f"🎙️ Voice: {voice_lang} | Mode: {video_mode}")
 cs, kws = clean_analyze(script)
 W, H = (1280,720) if "16:9" in video_type else (720,1280)

@@ -335,7 +335,6 @@ def generate_video_pipeline(email, license_code, voice_lang, video_type, resolut
         if not os.path.exists(out_path) or os.path.getsize(out_path) < 1000:
             os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
         
-        # --- STRICT DEDUCTION & VERIFICATION WITH PROPER INDENTATION ---
         status_msg = ""
         try:
             final_clip = VideoFileClip(out_path)
@@ -353,7 +352,7 @@ def generate_video_pipeline(email, license_code, voice_lang, video_type, resolut
         except Exception as e:
             if os.path.exists(out_path): 
                 os.remove(out_path)
-            return None, f"🔒 SECURITY LOCK: Verification Error ({e})"
+            return None, f"🔒 SECURITY LOCK: Verification Error ({str(e)})"
             
         for sf in scene_files:
             try: os.remove(sf)
@@ -381,4 +380,4 @@ with gr.Blocks(css=custom_css, title="JSM VIDEO GENERATOR") as app:
     gr.HTML("""
     <div style='text-align: center; padding: 15px; border-bottom: 2px solid #FFD700; margin-bottom: 15px;'>
         <h1 style='color: #FFD700; font-size: 32px; font-weight: 900; margin: 0px; letter-spacing: 1px;'>✨ JSM VIDEO GENERATOR ✨</h1>
-        
+        <p style='color: #FFFFFF; font-size: 13px; font-weight: bold; margin-

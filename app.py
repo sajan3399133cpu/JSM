@@ -13,7 +13,6 @@ PEXELS_KEYS = [
     "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtISAyJkKPb9vVTkL",
     "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9"
 ]
-BRAND_NAME = "JSM AI BY JAM SAEED MOTHA"
 
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
@@ -58,7 +57,7 @@ os.makedirs(BASE_DIR, exist_ok=True)
 def analyze_overall_topic(script):
     s = script.lower()
     if any(x in s for x in ["money","rich","finance","business","invest","dollars"]): return "finance business money"
-    if any(x in s for x in ["ai","chatgpt","technology","robot","youtube"]): return "technology ai futuristic"
+    if any(x in s for x in ["ai","chatgpt","technology","robot","youtube","channel"]): return "technology ai futuristic"
     if any(x in s for x in ["potato","aloo","gobhi","vegetable","kitchen"]): return "vegetable kitchen cute"
     return "cinematic story"
 
@@ -88,7 +87,6 @@ def get_stock_video_smart(query, W, H):
                     t_path = f"{BASE_DIR}/pex_{uuid.uuid4().hex[:4]}.mp4"
                     open(t_path,'wb').write(requests.get(link, timeout=20).content)
                     if os.path.getsize(t_path) > 50000:
-                        print(f"✅ PEXELS FOUND: {query[:30]}")
                         return VideoFileClip(t_path).resize((W,H))
         except: continue
     try:
@@ -98,14 +96,13 @@ def get_stock_video_smart(query, W, H):
             t_path = f"{BASE_DIR}/pixa_{uuid.uuid4().hex[:4]}.mp4"
             open(t_path,'wb').write(requests.get(v_url, timeout=15).content)
             if os.path.getsize(t_path) > 50000:
-                print(f"✅ PIXABAY FOUND: {query[:30]}")
                 return VideoFileClip(t_path).resize((W,H))
     except: pass
     return None
 
 def get_ai_clip(query, duration, W, H):
     try:
-        q = urllib.parse.quote(f"{query}, cinematic motion, 8k"[:130])
+        q = urllib.parse.quote(f"{query}, cinematic motion, ultra realistic 8k"[:130])
         url = f"https://image.pollinations.ai/prompt/{q}?model=video&width={W}&height={H}&seed={random.randint(1,999999)}&nologo=true"
         t_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:4]}.mp4"
         r = requests.get(url, timeout=60)
@@ -123,31 +120,31 @@ def get_ai_clip(query, duration, W, H):
     except: pass
     return ColorClip((W,H), color=(12,12,12), duration=duration)
 
-# === FINAL 4 SEC CUT LOGIC ===
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
     mode = globals().get('video_mode','Smart Stock + AI Mix')
+
+    # 1. AI MODE - PURA PURANA WALA, KOI CUT NAHI
     if "Pure AI" in mode:
+        print(f"🤖 PURE AI MODE: {smart_queries[0][:50]}")
         return get_ai_clip(smart_queries[0], duration, W, H)
 
+    # 2. STOCK MODE - SIRF ISME 4-5 SEC CUT
+    print(f"🎬 STOCK MODE 4-SEC CUT: {smart_queries[0][:50]}")
     clips_to_join = []
-    time_covered = 0
-    q_idx = 0
-    print(f" ✂️ Building {duration:.1f}s with 4-sec cuts")
-
-    while time_covered < duration:
-        q = smart_queries[q_idx % len(smart_queries)]
-        q_idx += 1
+    covered = 0
+    qi = 0
+    while covered < duration:
+        q = smart_queries[qi % len(smart_queries)]
+        qi+=1
         stock = get_stock_video_smart(q, W, H)
         if not stock:
             stock = get_ai_clip(q, 5, W, H)
-
-        cut_len = min(random.uniform(3.5, 5.0), duration - time_covered)
+        cut_len = min(random.uniform(3.5, 5.0), duration - covered)
         if stock.duration > cut_len:
-            start = random.uniform(0, max(0.1, stock.duration - cut_len - 0.1))
-            stock = stock.subclip(start, start + cut_len)
-
+            start = random.uniform(0, max(0.1, stock.duration-cut_len-0.1))
+            stock = stock.subclip(start, start+cut_len)
         clips_to_join.append(stock.set_duration(cut_len).resize((W,H)))
-        time_covered += cut_len
+        covered += cut_len
         if len(clips_to_join) >= 6: break
 
     if len(clips_to_join) > 1:

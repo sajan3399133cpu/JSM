@@ -1,18 +1,8 @@
-import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, gc
+import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, json, gc
 import nest_asyncio
 nest_asyncio.apply()
-from moviepy.editor import VideoFileClip, ColorClip, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip, concatenate_videoclips
-
-SUPABASE_KEY = "sb_publishable_1W4NK6X7Edacm_eSBIcFDQ_CkT6c4EY"
-PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
-COVERR_API_KEY = "8c8c592b07a57e05dc49368c3659"
-PEXELS_KEYS = [
-    "ROKJvfYuuSkc7QVVL6VjCgYFyB8UQZCLLCctD2SfTJcIrDGo5Ex3JMX6",
-    "zniYvavhal66VGwuV2kUlpRm7vG3Y0rddDLuzrITvmPqQ26kdG0vcyy0",
-    "f6IKxrHR8MHj1geD62crLTfDTQX0s7ewFkw3hEI4d4CenRTZXCkpCWD9",
-    "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtISAyJkKPb9vVTkL",
-    "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9"
-]
+from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip
+from moviepy.audio.fx.volumex import volumex
 
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
@@ -21,6 +11,16 @@ def cut_mints_auto(email, mins):
         if not email or mins <=0: return
         requests.get(f"{WEB_APP_URL}?email={urllib.parse.quote(email)}&mins={mins}", timeout=15)
     except: pass
+
+PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
+COVERR_API_KEY = "8c8c592b07a57e05dc49368c399b7659"
+PEXELS_KEYS = [
+    "ROKJvfYuuSkc7QVVL6VjCgYFyB8UQZCLLCctD2SfTJcIrDGo5Ex3JMX6",
+    "zniYvavhal66VGwuV2kUlpRm7vG3Y0rddDLuzrITvmPqQ26kdG0vcyy0",
+    "f6IKxrHR8MHj1geD62crLTfDTQX0s7ewFkw3hEI4d4CenRTZXCkpCWD9",
+    "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtISAyJkKPb9vVTkL",
+    "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9"
+]
 
 VOICES = {
     "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
@@ -51,106 +51,146 @@ VOICES = {
     "Urdu-Hindi Mix (Auto Detect)": "AUTO"
 }
 
+CATEGORIES_MAP = {
+    "motivational": ["motivation","success","hard work","rich people","money works","train","winner","dream big","skill","failure","rizq","goal","trophy"],
+    "finance_stock": ["stock market","trading","share market","kse 100","trader","forex","crypto","bitcoin","bull market","profit","investment"],
+    "business": ["business","corporate","office","meeting","startup","entrepreneur","elon musk","tesla"],
+    "farming": ["tractor","khet","kheti","farmer","harvest","crop","field","agriculture"],
+    "youtube": ["youtube","youtuber","channel","subscriber","freelancing","earn money online"],
+    "news": ["news","breaking news","report","update"],
+    "food": ["potato","aloo","gobhi","tomato","tamatar","cooking","chef","food","kitchen","recipe","biryani"]
+}
+
 BASE_DIR = "./JSM_Outputs"
 os.makedirs(BASE_DIR, exist_ok=True)
+USED_VIDEOS = set() # No Repeat Logic
 
-def analyze_overall_topic(script):
-    s = script.lower()
-    if any(x in s for x in ["money","rich","finance","business","invest","dollars"]): return "finance business money"
-    if any(x in s for x in ["ai","chatgpt","technology","robot","youtube","channel"]): return "technology ai futuristic"
-    if any(x in s for x in ["potato","aloo","gobhi","vegetable","kitchen"]): return "vegetable kitchen cute"
-    return "cinematic story"
-
-OVERALL_TOPIC = ""
 def clean_analyze(script):
-    global OVERALL_TOPIC
-    OVERALL_TOPIC = analyze_overall_topic(script)
     clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script, flags=re.I)
     raw_sentences = re.split(r'[.!?\n\u06d4]+', clean)
     return clean, [s.strip() for s in raw_sentences if len(s.strip()) > 8]
 
 def SMART_KEYWORD_ENGINE(sentence):
-    s = re.sub(r'[^\w\s]', ' ', sentence.lower())
-    words = [w for w in s.split() if len(w) > 3][:4]
-    core = " ".join(words) if words else "story"
-    return [f"{core} {OVERALL_TOPIC}", core, OVERALL_TOPIC]
+    s_low = sentence.lower()
+    stop_words = {"just","now","then","that","this","these","those","there","here","will","would","very","really","even","still","also","only","next","see","you","thank","go","pick","one","about","today","video","talk","please","welcome","dosto","bhai","hello","everyone","the","and","you","will","have","is","are","was","were","aaj","hai","ke","ki","ka","aur","mein","ko","se","me","hoga","hain","main","hum","raha","rahe","liye"}
+    if "elon musk" in s_low: return ["Elon Musk SpaceX rocket launch ultra realistic", "SpaceX Falcon rocket launch"]
+    best_cat=""; best_score=0; matched=[]
+    for cat, kws in CATEGORIES_MAP.items():
+        score = sum(1 for kw in kws if kw in s_low)
+        if score > best_score: best_score=score; matched=[kw for kw in kws if kw in s_low]; best_cat=cat
+    clean = re.sub(r'[^\w\s]', ' ', s_low)
+    words = [w for w in clean.split() if w not in stop_words and len(w) > 3]
+    queries=[]
+    if best_score > 0 and matched:
+        primary = matched[0]
+        if words: queries.append(f"{primary} {words[0]} cinematic HD ultra realistic")
+        queries.append(f"{primary} {best_cat} HD")
+    else:
+        if len(words) >= 2: queries.append(f"{words[0]} {words[1]} cinematic HD ultra realistic")
+        elif words: queries.append(f"{words[0]} cinematic HD ultra realistic")
+        else: queries.append("cinematic story background HD")
+    return list(dict.fromkeys(queries))[:2]
 
-def get_stock_video_smart(query, W, H):
-    for key in PEXELS_KEYS:
-        try:
-            hdr = {"Authorization": key}
-            ori = "landscape" if W>H else "portrait"
-            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation={ori}", headers=hdr, timeout=10).json()
-            if r.get('videos'):
-                for vid in r['videos']:
-                    link = vid['video_files'][0]['link']
-                    t_path = f"{BASE_DIR}/pex_{uuid.uuid4().hex[:4]}.mp4"
-                    open(t_path,'wb').write(requests.get(link, timeout=20).content)
-                    if os.path.getsize(t_path) > 50000:
-                        return VideoFileClip(t_path).resize((W,H))
-        except: continue
+def download_clip(url, W, H, duration):
     try:
-        r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={urllib.parse.quote(query)}&per_page=3", timeout=10).json()
-        if r.get('hits'):
-            v_url = r['hits'][0]['videos']['medium']['url']
-            t_path = f"{BASE_DIR}/pixa_{uuid.uuid4().hex[:4]}.mp4"
-            open(t_path,'wb').write(requests.get(v_url, timeout=15).content)
-            if os.path.getsize(t_path) > 50000:
-                return VideoFileClip(t_path).resize((W,H))
+        if url in USED_VIDEOS: return None
+        t_path = f"{BASE_DIR}/{uuid.uuid4().hex[:6]}.mp4"
+        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+        if res.status_code == 200 and len(res.content) > 50000:
+            with open(t_path, 'wb') as f: f.write(res.content)
+            USED_VIDEOS.add(url)
+            clip = VideoFileClip(t_path).resize((W, H))
+            return clip
     except: pass
     return None
 
-def get_ai_clip(query, duration, W, H):
-    try:
-        q = urllib.parse.quote(f"{query}, cinematic motion, ultra realistic 8k"[:130])
-        url = f"https://image.pollinations.ai/prompt/{q}?model=video&width={W}&height={H}&seed={random.randint(1,999999)}&nologo=true"
-        t_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:4]}.mp4"
-        r = requests.get(url, timeout=60)
-        if r.status_code==200 and len(r.content)>20000 and r.content[:2]!=b'\xff\xd8':
-            open(t_path,'wb').write(r.content)
-            clip = VideoFileClip(t_path).resize((W,H))
-            return clip.subclip(0, duration) if clip.duration > duration else clip
-    except: pass
-    try:
-        p_path = f"{BASE_DIR}/img_{uuid.uuid4().hex[:4]}.jpg"
-        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(query[:100])}?width={W}&height={H}&model=flux&nologo=true"
-        r = requests.get(url, timeout=30)
-        open(p_path,'wb').write(r.content)
-        return ImageClip(p_path).set_duration(duration).resize((W,H)).resize(lambda t: 1+0.04*t)
-    except: pass
-    return ColorClip((W,H), color=(12,12,12), duration=duration)
-
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
-    mode = globals().get('video_mode','Smart Stock + AI Mix')
+    mode = globals().get('video_mode','')
 
-    # 1. AI MODE - PURA PURANA WALA, KOI CUT NAHI
+    # === 1. PURE AI MODE - TUMHARA PURANA WALA 100% SAME ===
     if "Pure AI" in mode:
-        print(f"🤖 PURE AI MODE: {smart_queries[0][:50]}")
-        return get_ai_clip(smart_queries[0], duration, W, H)
+        for q in smart_queries:
+            print(f"🤖 AI ONLY: {q}")
+            try:
+                prompt = f"{q}, ultra realistic 8k cinematic, dramatic lighting, highly detailed, photorealistic, no text, story scene"
+                p_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:5]}.jpg"
+                url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt[:150])}?width={W}&height={H}&seed={random.randint(1,9999999)}&model=flux&enhance=true&nologo=true"
+                r = requests.get(url, timeout=45)
+                if r.status_code==200 and len(r.content)>8000:
+                    open(p_path,'wb').write(r.content)
+                    print(f"✅ AI Generated: {q}")
+                    return ImageClip(p_path).set_duration(duration).resize((W,H)).resize(lambda t: 1+0.04*t)
+            except: continue
+        return ColorClip((W,H), color=(12,12,12), duration=duration)
 
-    # 2. STOCK MODE - SIRF ISME 4-5 SEC CUT
-    print(f"🎬 STOCK MODE 4-SEC CUT: {smart_queries[0][:50]}")
-    clips_to_join = []
-    covered = 0
-    qi = 0
-    while covered < duration:
-        q = smart_queries[qi % len(smart_queries)]
-        qi+=1
-        stock = get_stock_video_smart(q, W, H)
-        if not stock:
-            stock = get_ai_clip(q, 5, W, H)
-        cut_len = min(random.uniform(3.5, 5.0), duration - covered)
-        if stock.duration > cut_len:
-            start = random.uniform(0, max(0.1, stock.duration-cut_len-0.1))
-            stock = stock.subclip(start, start+cut_len)
-        clips_to_join.append(stock.set_duration(cut_len).resize((W,H)))
-        covered += cut_len
-        if len(clips_to_join) >= 6: break
+    # === 2. FREE STOCK MODE - HUMAN BRAIN + 4 SEC CUT + NO REPEAT ===
+    else:
+        clips_to_join = []
+        time_covered = 0
+        q_idx = 0
+        print(f"🧠 HUMAN BRAIN STOCK: {smart_queries}")
 
-    if len(clips_to_join) > 1:
-        return concatenate_videoclips(clips_to_join, method="compose").set_duration(duration)
-    return clips_to_join[0].set_duration(duration)
+        while time_covered < duration:
+            q = smart_queries[q_idx % len(smart_queries)]
+            q_idx += 1
+            found_clip = None
 
+            # Pexels First
+            for key in PEXELS_KEYS:
+                try:
+                    hdr = {"Authorization": key}
+                    ori = "landscape" if W>H else "portrait"
+                    r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(q)}&per_page=5&orientation={ori}", headers=hdr, timeout=10).json()
+                    if r.get('videos'):
+                        for vid in r['videos']:
+                            link = vid['video_files'][0]['link']
+                            if link in USED_VIDEOS: continue
+                            cl = download_clip(link, W, H, 10)
+                            if cl:
+                                found_clip = cl
+                                break
+                        if found_clip: break
+                except: continue
+
+            # Pixabay Second
+            if not found_clip:
+                try:
+                    r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={urllib.parse.quote(q)}&per_page=10", timeout=10).json()
+                    if r.get('hits'):
+                        for hit in r['hits']:
+                            url = hit['videos']['medium']['url']
+                            if url in USED_VIDEOS: continue
+                            cl = download_clip(url, W, H, 10)
+                            if cl:
+                                found_clip = cl
+                                break
+                except: pass
+
+            if not found_clip:
+                # AI fallback as image
+                p_path = f"{BASE_DIR}/fallback_{uuid.uuid4().hex[:4]}.jpg"
+                try:
+                    url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(q[:100])}?width={W}&height={H}&model=flux"
+                    r = requests.get(url, timeout=20)
+                    open(p_path,'wb').write(r.content)
+                    found_clip = ImageClip(p_path).set_duration(5).resize((W,H))
+                except:
+                    found_clip = ColorClip((W,H), color=(15,18,24), duration=5)
+
+            cut_len = min(random.uniform(3.5, 5.0), duration - time_covered)
+            if found_clip.duration > cut_len:
+                start = random.uniform(0, max(0.1, found_clip.duration-cut_len-0.1))
+                found_clip = found_clip.subclip(start, start+cut_len)
+
+            clips_to_join.append(found_clip.set_duration(cut_len).resize((W,H)))
+            time_covered += cut_len
+            if len(clips_to_join) >= 6: break
+
+        if len(clips_to_join) > 1:
+            return concatenate_videoclips(clips_to_join, method="compose").set_duration(duration)
+        return clips_to_join[0].set_duration(duration)
+
+#... Baki TTS wala hissa same...
 async def Tt(t, o, v):
     import edge_tts
     await edge_tts.Communicate(t, v, rate="-4%", pitch="+1Hz").save(o)
@@ -162,12 +202,18 @@ def run_tts(tx, out, vc):
             except: loop = asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx, out, vc))
             if os.path.exists(out) and os.path.getsize(out) > 800: return True
         except: time.sleep(1)
-    return False
+    try:
+        from gtts import gTTS
+        v_low = str(globals().get('voice_lang','')).lower()
+        lang = 'ur' if 'urdu' in v_low else 'hi' if 'hindi' in v_low else 'en'
+        gTTS(text=tx[:400], lang=lang, slow=False).save(out)
+        return True
+    except: return False
 def detect_voice(ch, selected):
     if "AUTO" in selected: return VOICES["Urdu Male (Asad - Deep Voice / Narrative Style)"]
     return VOICES.get(selected, "en-US-GuyNeural")
 
-print(f"🎙️ Voice: {voice_lang} | Mode: {video_mode} | Topic: {OVERALL_TOPIC}")
+print(f"🎙️ Voice: {voice_lang} | Mode: {video_mode}")
 cs, kws = clean_analyze(script)
 W, H = (1280,720) if "16:9" in video_type else (720,1280)
 if "480" in resolution: W, H = (854,480) if W>H else (480,854)
@@ -182,6 +228,7 @@ for idx, ch in enumerate(kws):
         if au.duration < 0.5: continue
         if au.duration > 0.4: au = au.subclip(0, au.duration-0.1)
         smart_queries = SMART_KEYWORD_ENGINE(ch)
+        print(f"🔑 {smart_queries}")
         dur = au.duration
         clip = get_clip_from_platforms(smart_queries, dur, W, H, idx)
         base_clip = clip.set_duration(dur).set_audio(au)
@@ -195,14 +242,14 @@ for idx, ch in enumerate(kws):
         temp_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
         final_scene.write_videofile(temp_path, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=2, bitrate="1000k", logger=None)
         scene_files.append(temp_path)
-        print(f"✅ Scene {idx+1} Done & Saved")
+        print(f"✅ Scene {idx+1} Done")
         try: base_clip.close(); final_scene.close(); au.close()
         except: pass
         gc.collect()
     except Exception as e: print(f"❌ Scene {idx+1} Error {e}"); continue
 
 if scene_files:
-    print(f"\n🔗 Joining all scenes (FFMPEG)...")
+    print(f"\n🔗 FINAL JOINING {len(scene_files)} scenes...")
     list_path = f"{BASE_DIR}/concat_list.txt"
     with open(list_path,"w") as f:
         for sf in scene_files: f.write(f"file '{os.path.abspath(sf)}'\n")

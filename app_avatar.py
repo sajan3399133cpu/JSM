@@ -1,8 +1,9 @@
-# JSM AVATAR V3 - FINAL FIXED LOGIC - By Saeed
+# JSM AVATAR V3.1 - FINAL FIXED - ReadAsArray Bug Fixed - By Saeed
 import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, gc, math
 import nest_asyncio
 nest_asyncio.apply()
 from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, AudioFileClip, CompositeVideoClip, TextClip, ImageClip
+from PIL import Image
 
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
@@ -16,14 +17,13 @@ BASE_DIR = "./JSM_Outputs"
 os.makedirs(BASE_DIR, exist_ok=True)
 USED_VIDEOS = set()
 
-VOICES = {"English Male (Brandon - Human Natural)": "en-US-BrandonNeural","English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural","Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural","Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural"}
-# Avatar library - Agar GitHub pe nahi mile to Pollination se generate hoga
+VOICES = {"English Male (Brandon - Human Natural)": "en-US-BrandonNeural","English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural","Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural","Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural","English Male (Andrew - Professional Studio)": "en-US-AndrewNeural"}
 AVATAR_PROMPTS = {
-    "1 - Young Boy - Hoodie (Motivational)": "young handsome man hoodie, ultra realistic human face, studio portrait, transparent background",
-    "2 - Business Man - Suit (Finance)": "business man suit tie, ultra realistic human face, professional CEO, transparent background",
-    "3 - Beard Boy - Casual (YouTube)": "young man beard casual tshirt, ultra realistic human face, youtuber style, transparent background",
-    "4 - Girl - Professional (News)": "beautiful professional woman, ultra realistic human face, news anchor, transparent background",
-    "5 - Old Man - Wise (Story)": "old wise man beard, ultra realistic human face, professor style, transparent background"
+    "1 - Young Boy - Hoodie (Motivational)": "young handsome man hoodie, ultra realistic human face, studio portrait, transparent background, 8k",
+    "2 - Business Man - Suit (Finance)": "business man suit tie, ultra realistic human face, professional CEO, 8k",
+    "3 - Beard Boy - Casual (YouTube)": "young man beard casual tshirt, ultra realistic human face, youtuber style, 8k",
+    "4 - Girl - Professional (News)": "beautiful professional woman, ultra realistic human face, news anchor, 8k",
+    "5 - Old Man - Wise (Story)": "old wise man beard, ultra realistic human face, professor style, 8k"
 }
 
 def clean_analyze(script):
@@ -51,23 +51,24 @@ def download_clip(url, W, H):
 
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
     mode = globals().get('video_mode','')
-    # --- FIX 1: PURE AI MODE ---
     if "Pure AI" in mode:
         for q in smart_queries:
             try:
                 print(f"🤖 AI MODE: {q}")
-                prompt = f"{q}, ultra realistic 8k cinematic, dramatic lighting, highly detailed, photorealistic, no text, story scene"
+                prompt = f"{q}, ultra realistic 8k cinematic, dramatic lighting, highly detailed, photorealistic, no text"
                 p_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:5]}.jpg"
                 url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt[:120])}?width={W}&height={H}&seed={random.randint(1,9999999)}&model=flux&nologo=true"
                 r = requests.get(url, timeout=40)
                 if r.status_code==200 and len(r.content)>8000:
                     open(p_path,'wb').write(r.content)
+                    try:
+                        im = Image.open(p_path).convert("RGB")
+                        im.save(p_path)
+                    except: pass
                     print(f"✅ AI Generated: {q}")
                     return ImageClip(p_path).set_duration(duration).resize((W,H)).resize(lambda t: 1+0.04*t)
             except: continue
         return ColorClip((W,H), color=(12,12,12), duration=duration)
-
-    # --- FIX 2: STOCK MODE ---
     else:
         print(f"🎥 STOCK MODE: {smart_queries}")
         clips_to_join = []; time_covered = 0; q_idx = 0
@@ -135,37 +136,44 @@ def get_avatar_clip(duration, W, H):
         mode = globals().get('avatar_mode','')
         selected = globals().get('selected_avatar','1 - Young Boy - Hoodie (Motivational)')
         if "No Avatar" in mode:
-            print("🚫 No Avatar Mode")
+            print("🚫 No Avatar")
             return None
-
-        # Download or Generate Avatar if not exists
         local_path = f"{BASE_DIR}/av_{selected.split()[0]}.jpg"
+        if os.path.exists(local_path) and os.path.getsize(local_path) < 5000:
+            os.remove(local_path)
         if not os.path.exists(local_path):
-            # Try GitHub first
-            try:
-                gh_url = f"https://raw.githubusercontent.com/sajan3399133cpu/JSM/main/avatar{selected.split()[0]}.png"
-                r = requests.get(gh_url, timeout=10)
-                if r.status_code==200 and len(r.content)>5000:
-                    open(local_path,'wb').write(r.content)
-                    print(f"✅ Avatar from GitHub: {selected}")
-                else: raise Exception("GitHub not found")
-            except:
-                # Fallback generate via AI
-                print(f"🎨 Generating Avatar: {selected}")
-                prompt = AVATAR_PROMPTS.get(selected, AVATAR_PROMPTS["1 - Young Boy - Hoodie (Motivational)"])
-                url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width=512&height=512&model=flux&seed={random.randint(1,99999)}"
-                r = requests.get(url, timeout=30)
+            print(f"🎨 Generating Avatar: {selected}")
+            prompt = AVATAR_PROMPTS.get(selected, AVATAR_PROMPTS["1 - Young Boy - Hoodie (Motivational)"])
+            url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width=512&height=768&model=flux&seed={random.randint(1,999999)}&nologo=true&enhance=true"
+            r = requests.get(url, timeout=45)
+            if r.status_code==200 and len(r.content)>8000:
                 open(local_path,'wb').write(r.content)
-
-        if not os.path.exists(local_path): return None
-        def talking_effect(t): return 1 + 0.018 * math.sin(t * 14)
+                try:
+                    im = Image.open(local_path).convert("RGB")
+                    im.save(local_path)
+                    print(f"✅ Avatar Generated & Fixed: {local_path}")
+                except Exception as e:
+                    print(f"PIL Fix Error: {e}")
+        if not os.path.exists(local_path) or os.path.getsize(local_path) < 5000:
+            print("❌ Avatar file missing/corrupt")
+            return None
+        try:
+            # Validate image
+            img = Image.open(local_path)
+            img.verify()
+        except:
+            print("❌ Corrupt image, deleting")
+            if os.path.exists(local_path): os.remove(local_path)
+            return None
+        def talking_effect(t): return 1 + 0.015 * math.sin(t * 14)
         av_w = int(W*0.32); av_h = int(av_w * 1.25)
         avatar = ImageClip(local_path).set_duration(duration).resize((av_w, av_h))
         avatar = avatar.resize(lambda t: talking_effect(t)).set_pos((0.67, 0.55), relative=True)
-        print(f"✅ Avatar Added: {selected} | Mode: {mode}")
+        print(f"✅ Avatar OK: {selected}")
         return avatar
     except Exception as e:
         print(f"Avatar error: {e}")
+        import traceback; traceback.print_exc()
         return None
 
 print(f"🎙️ Voice: {voice_lang} | Video Mode: {video_mode} | Avatar Mode: {avatar_mode} | Selected: {globals().get('selected_avatar','')}")
@@ -173,10 +181,11 @@ cs, kws = clean_analyze(script)
 W, H = (1280,720) if "16:9" in video_type else (720,1280)
 if "480" in resolution: W, H = (854,480) if W>H else (480,854)
 scene_files = []
+print(f"🎬 Total Scenes: {len(kws)}")
 
 for idx, ch in enumerate(kws):
     try:
-        print(f"\n🎬 SCENE {idx+1}/{len(kws)}: {ch[:50]}...")
+        print(f"\n🎬 SCENE {idx+1}/{len(kws)}: {ch[:60]}...")
         ap = f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
         if not run_tts(ch, ap, detect_voice(ch, voice_lang)): continue
         au = AudioFileClip(ap)
@@ -186,8 +195,6 @@ for idx, ch in enumerate(kws):
         dur = au.duration
         clip = get_clip_from_platforms(smart_queries, dur, W, H, idx)
         avatar_clip = get_avatar_clip(dur, W, H)
-
-        # FINAL LOGIC FIX
         if avatar_clip and "Only" in avatar_mode:
             print("👤 AVATAR ONLY MODE")
             base_clip = ColorClip((W,H), color=(10,10,15), duration=dur)
@@ -198,7 +205,6 @@ for idx, ch in enumerate(kws):
         else:
             print("🎥 STOCK ONLY MODE")
             base_clip = clip.set_duration(dur)
-
         base_clip = base_clip.set_audio(au)
         layers=[base_clip]
         if show_subtitles:
@@ -210,12 +216,14 @@ for idx, ch in enumerate(kws):
         temp_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
         final_scene.write_videofile(temp_path, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=2, bitrate="1000k", logger=None)
         scene_files.append(temp_path)
+        print(f"✅ Scene {idx+1} Done")
         try: base_clip.close(); final_scene.close(); au.close()
         except: pass
         gc.collect(); time.sleep(0.2)
-    except Exception as e: print(f"❌ Scene {idx+1} Error {e}"); continue
+    except Exception as e: print(f"❌ Scene {idx+1} Error {e}"); import traceback; traceback.print_exc(); continue
 
 if scene_files:
+    print(f"\n🔗 FINAL JOINING {len(scene_files)} scenes...")
     list_path = f"{BASE_DIR}/concat_list.txt"
     with open(list_path,"w") as f:
         for sf in scene_files: f.write(f"file '{os.path.abspath(sf)}'\n")

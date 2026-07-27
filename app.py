@@ -2,7 +2,19 @@ import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, gc
 import nest_asyncio
 nest_asyncio.apply()
 from moviepy.editor import VideoFileClip, ColorClip, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip
-from moviepy.audio.fx.volumex import volumex
+
+# === تمہاری اپنی Keys - Screenshot والی ===
+SUPABASE_KEY = "sb_publishable_1W4NK6X7Edacm_eSBIcFDQ_CkT6c4EY"
+PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
+COVERR_API_KEY = "8c8c592b07a57e05dc49368c3659"
+PEXELS_KEYS = [
+    "ROKJvfYuuSkc7QVVL6VjCgYFyB8UQZCLLCctD2SfTJcIrDGo5Ex3JMX6",
+    "zniYvavhal66VGwuV2kUlpRm7vG3Y0rddDLuzrITvmPqQ26kdG0vcyy0",
+    "f6IKxrHR8MHj1geD62crLTfDTQX0s7ewFkw3hEI4d4CenRTZXCkpCWD9",
+    "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtISAyJkKPb9vVTkL",
+    "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9"
+]
+BRAND_NAME = "JSM AI BY JAM SAEED"
 
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
@@ -13,68 +25,126 @@ def cut_mints_auto(email, mins):
     except: pass
 
 VOICES = {
-    "English Male (Guy - News Anchor)": "en-US-GuyNeural",
     "English Male (Andrew - Professional Studio)": "en-US-AndrewNeural",
     "English Male (Christopher - Deep Motivational)": "en-US-ChristopherNeural",
+    "English Male (Guy - News Anchor)": "en-US-GuyNeural",
+    "English Male (Ryan - UK Storyteller)": "en-GB-RyanNeural",
+    "English Male (Brian - UK Deep)": "en-GB-BrianNeural",
+    "English Male (Brandon - Human Natural)": "en-US-BrandonNeural",
+    "English Male (Eric - Conversational)": "en-US-EricNeural",
+    "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
+    "English Female (Aria - Natural Human)": "en-US-AriaNeural",
+    "English Female (Emma - Human Feel)": "en-US-EmmaNeural",
+    "English Female (Sonia - UK Accent)": "en-GB-SoniaNeural",
+    "English Female (Libby - UK Human)": "en-GB-LibbyNeural",
+    "English Female (Ana - Kids Story)": "en-US-AnaNeural",
     "Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural",
     "Urdu Female (Uzma - Soft & Clear)": "ur-PK-UzmaNeural",
     "Hindi Male (Madhur - Deep)": "hi-IN-MadhurNeural",
     "Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural",
-    "English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural",
-    "English Female (Aria - Natural Human)": "en-US-AriaNeural",
+    "Hindi Female (Swara - Dynamic & Crisp)": "hi-IN-SwaraNeural",
+    "Hindi Female (Ananya - Soft)": "hi-IN-AnanyaNeural",
+    "Arabic Male (Hamdan)": "ar-SA-HamdanNeural",
+    "Arabic Female (Hanan)": "ar-SA-HananNeural",
     "Russian Female (Svetlana - Viral TikTok)": "ru-RU-SvetlanaNeural",
+    "Russian Male (Dmitry - Deep Russian)": "ru-RU-DmitryNeural",
     "Turkish Male (Ahmet)": "tr-TR-AhmetNeural",
+    "Turkish Female (Emel)": "tr-TR-EmelNeural",
     "Urdu-Hindi Mix (Auto Detect)": "AUTO"
 }
 
 BASE_DIR = "./JSM_Outputs"
 os.makedirs(BASE_DIR, exist_ok=True)
 
+# HUMAN BRAIN - TOPIC DETECTOR
+def analyze_overall_topic(script):
+    s = script.lower()
+    if any(x in s for x in ["money","rich","finance","business","invest","dollars"]): return "finance business money"
+    if any(x in s for x in ["ai","chatgpt","technology","robot","youtube"]): return "technology ai futuristic"
+    if any(x in s for x in ["potato","aloo","gobhi","vegetable","kitchen"]): return "vegetable kitchen cute"
+    return "cinematic story"
+
+OVERALL_TOPIC = ""
 def clean_analyze(script):
+    global OVERALL_TOPIC
+    OVERALL_TOPIC = analyze_overall_topic(script)
     clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script, flags=re.I)
     raw_sentences = re.split(r'[.!?\n\u06d4]+', clean)
     return clean, [s.strip() for s in raw_sentences if len(s.strip()) > 8]
 
 def SMART_KEYWORD_ENGINE(sentence):
     s = re.sub(r'[^\w\s]', ' ', sentence.lower())
-    words = [w for w in s.split() if len(w) > 3][:5]
-    q = " ".join(words) if words else "cinematic story background"
-    return [q]
+    words = [w for w in s.split() if len(w) > 3][:4]
+    core = " ".join(words) if words else "story"
+    return [f"{core} {OVERALL_TOPIC}", core, OVERALL_TOPIC]
 
-def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
-    query = smart_queries[0] if smart_queries else "cinematic background"
+def get_stock_video_smart(query, W, H):
+    # 1st PRIORITY - PEXELS (Best Performance)
+    for key in PEXELS_KEYS:
+        try:
+            hdr = {"Authorization": key}
+            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation=landscape" if W>H else f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation=portrait", headers=hdr, timeout=10).json()
+            if r.get('videos'):
+                for vid in r['videos']:
+                    link = vid['video_files'][0]['link']
+                    t_path = f"{BASE_DIR}/pex_{uuid.uuid4().hex[:4]}.mp4"
+                    open(t_path,'wb').write(requests.get(link, timeout=20).content)
+                    if os.path.getsize(t_path) > 50000:
+                        print(f"✅ PEXELS FOUND: {query}")
+                        return VideoFileClip(t_path).resize((W,H))
+        except: continue
+    # 2nd PRIORITY - PIXABAY
     try:
-        print(f"🤖 AI VIDEO GENERATING: {query[:70]}")
-        prompt = f"{query}, cinematic motion, slow camera pan, natural movement, ultra realistic 8k"
-        q = urllib.parse.quote(prompt[:130])
-        video_url = f"https://image.pollinations.ai/prompt/{q}?model=video&width={W}&height={H}&seed={random.randint(1,9999999)}&nologo=true&enhance=true"
+        r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={urllib.parse.quote(query)}&per_page=3", timeout=10).json()
+        if r.get('hits'):
+            v_url = r['hits'][0]['videos']['medium']['url']
+            t_path = f"{BASE_DIR}/pixa_{uuid.uuid4().hex[:4]}.mp4"
+            open(t_path,'wb').write(requests.get(v_url, timeout=15).content)
+            if os.path.getsize(t_path) > 50000:
+                print(f"✅ PIXABAY FOUND: {query}")
+                return VideoFileClip(t_path).resize((W,H))
+    except: pass
+    return None
+
+def get_ai_clip(query, duration, W, H):
+    try:
+        q = urllib.parse.quote(f"{query}, cinematic motion, 8k"[:130])
+        url = f"https://image.pollinations.ai/prompt/{q}?model=video&width={W}&height={H}&seed={random.randint(1,999999)}&nologo=true"
         t_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:4]}.mp4"
-        r = requests.get(video_url, timeout=90)
-        if r.status_code == 200 and len(r.content) > 20000:
-            if r.content[:2] == b'\xff\xd8':
-                raise Exception("Got Image instead of Video")
-            open(t_path,'wb').write(r.content)
-            clip = VideoFileClip(t_path).resize((W, H))
-            print(f"✅ AI VIDEO DONE")
-            return clip.subclip(0, duration) if clip.duration > duration else clip
-    except Exception as e:
-        print(f"AI Video Fail -> Image Fallback: {e}")
-
-    try:
-        print(f"🎨 AI IMAGE FALLBACK: {query[:50]}")
-        p_path = f"{BASE_DIR}/img_{uuid.uuid4().hex[:4]}.jpg"
-        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(query[:120])}?width={W}&height={H}&model=flux&nologo=true&seed={random.randint(1,999999)}"
         r = requests.get(url, timeout=60)
-        if r.status_code == 200 and len(r.content) > 5000:
-            open(p_path,'wb').write(r.content)
-            return ImageClip(p_path).set_duration(duration).resize((W,H)).resize(lambda t: 1+0.04*t)
+        if r.status_code==200 and len(r.content)>20000 and r.content[:2]!=b'\xff\xd8':
+            open(t_path,'wb').write(r.content)
+            clip = VideoFileClip(t_path).resize((W,H))
+            return clip.subclip(0, duration) if clip.duration > duration else clip
+    except: pass
+    try:
+        p_path = f"{BASE_DIR}/img_{uuid.uuid4().hex[:4]}.jpg"
+        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(query[:100])}?width={W}&height={H}&model=flux&nologo=true"
+        r = requests.get(url, timeout=30)
+        open(p_path,'wb').write(r.content)
+        return ImageClip(p_path).set_duration(duration).resize((W,H)).resize(lambda t: 1+0.04*t)
     except: pass
     return ColorClip((W,H), color=(12,12,12), duration=duration)
+
+def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
+    mode = globals().get('video_mode','Smart Stock + AI Mix')
+    if "Pure AI" in mode:
+        return get_ai_clip(smart_queries[0], duration, W, H)
+    # SMART STOCK MODE - 2-4 sec fast cut
+    for q in smart_queries:
+        stock = get_stock_video_smart(q, W, H)
+        if stock:
+            # 2-4 sec ka cut, sentence ke sath sync
+            cut_dur = min(duration, random.uniform(2.5, 4.0))
+            if stock.duration > cut_dur:
+                start = random.uniform(0, stock.duration-cut_dur)
+                stock = stock.subclip(start, start+cut_dur)
+            return stock.set_duration(duration)
+    return get_ai_clip(smart_queries[0], duration, W, H)
 
 async def Tt(t, o, v):
     import edge_tts
     await edge_tts.Communicate(t, v, rate="-4%", pitch="+1Hz").save(o)
-
 def run_tts(tx, out, vc):
     if len(tx.split()) < 3: tx = tx + "۔"
     for _ in range(2):
@@ -83,20 +153,12 @@ def run_tts(tx, out, vc):
             except: loop = asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx, out, vc))
             if os.path.exists(out) and os.path.getsize(out) > 800: return True
         except: time.sleep(1)
-    try:
-        from gtts import gTTS
-        v_low = str(globals().get('voice_lang','')).lower()
-        lang = 'ur' if 'urdu' in v_low else 'hi' if 'hindi' in v_low else 'en'
-        gTTS(text=tx[:400], lang=lang, slow=False).save(out)
-        if os.path.exists(out) and os.path.getsize(out) > 1000: return True
-    except: pass
     return False
-
 def detect_voice(ch, selected):
     if "AUTO" in selected: return VOICES["Urdu Male (Asad - Deep Voice / Narrative Style)"]
     return VOICES.get(selected, "en-US-GuyNeural")
 
-print(f"🎙️ Voice: {voice_lang} | Mode: {video_mode}")
+print(f"🎙️ Voice: {voice_lang} | Mode: {video_mode} | Topic: {OVERALL_TOPIC}")
 cs, kws = clean_analyze(script)
 W, H = (1280,720) if "16:9" in video_type else (720,1280)
 if "480" in resolution: W, H = (854,480) if W>H else (480,854)

@@ -1,9 +1,8 @@
 import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, gc
 import nest_asyncio
 nest_asyncio.apply()
-from moviepy.editor import VideoFileClip, ColorClip, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip
+from moviepy.editor import VideoFileClip, ColorClip, AudioFileClip, CompositeVideoClip, TextClip, CompositeAudioClip, ImageClip, concatenate_videoclips
 
-# === تمہاری اپنی Keys - Screenshot والی ===
 SUPABASE_KEY = "sb_publishable_1W4NK6X7Edacm_eSBIcFDQ_CkT6c4EY"
 PIXABAY_KEY = "56386293-14facd94fdac26f9fc37f5f2c"
 COVERR_API_KEY = "8c8c592b07a57e05dc49368c3659"
@@ -14,7 +13,7 @@ PEXELS_KEYS = [
     "1j6kFq1GRB4291F1s1RMghlgIX3d3u78OaTpiDKmtISAyJkKPb9vVTkL",
     "tpkypogswv07n84dh0iaHI9tamu43GEcvZokA3Xi3JSTUT0NV32A6gG9"
 ]
-BRAND_NAME = "JSM AI BY JAM SAEED"
+BRAND_NAME = "JSM AI BY JAM SAEED MOTHA"
 
 SHEET_ID = "1wANoZUC8GOi4BSXQRalm2gKrhP8SDLCy_CfCaSWMkEQ"
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
@@ -56,7 +55,6 @@ VOICES = {
 BASE_DIR = "./JSM_Outputs"
 os.makedirs(BASE_DIR, exist_ok=True)
 
-# HUMAN BRAIN - TOPIC DETECTOR
 def analyze_overall_topic(script):
     s = script.lower()
     if any(x in s for x in ["money","rich","finance","business","invest","dollars"]): return "finance business money"
@@ -79,21 +77,20 @@ def SMART_KEYWORD_ENGINE(sentence):
     return [f"{core} {OVERALL_TOPIC}", core, OVERALL_TOPIC]
 
 def get_stock_video_smart(query, W, H):
-    # 1st PRIORITY - PEXELS (Best Performance)
     for key in PEXELS_KEYS:
         try:
             hdr = {"Authorization": key}
-            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation=landscape" if W>H else f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation=portrait", headers=hdr, timeout=10).json()
+            ori = "landscape" if W>H else "portrait"
+            r = requests.get(f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=3&orientation={ori}", headers=hdr, timeout=10).json()
             if r.get('videos'):
                 for vid in r['videos']:
                     link = vid['video_files'][0]['link']
                     t_path = f"{BASE_DIR}/pex_{uuid.uuid4().hex[:4]}.mp4"
                     open(t_path,'wb').write(requests.get(link, timeout=20).content)
                     if os.path.getsize(t_path) > 50000:
-                        print(f"✅ PEXELS FOUND: {query}")
+                        print(f"✅ PEXELS FOUND: {query[:30]}")
                         return VideoFileClip(t_path).resize((W,H))
         except: continue
-    # 2nd PRIORITY - PIXABAY
     try:
         r = requests.get(f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={urllib.parse.quote(query)}&per_page=3", timeout=10).json()
         if r.get('hits'):
@@ -101,7 +98,7 @@ def get_stock_video_smart(query, W, H):
             t_path = f"{BASE_DIR}/pixa_{uuid.uuid4().hex[:4]}.mp4"
             open(t_path,'wb').write(requests.get(v_url, timeout=15).content)
             if os.path.getsize(t_path) > 50000:
-                print(f"✅ PIXABAY FOUND: {query}")
+                print(f"✅ PIXABAY FOUND: {query[:30]}")
                 return VideoFileClip(t_path).resize((W,H))
     except: pass
     return None
@@ -126,21 +123,36 @@ def get_ai_clip(query, duration, W, H):
     except: pass
     return ColorClip((W,H), color=(12,12,12), duration=duration)
 
+# === FINAL 4 SEC CUT LOGIC ===
 def get_clip_from_platforms(smart_queries, duration, W, H, clip_index):
     mode = globals().get('video_mode','Smart Stock + AI Mix')
     if "Pure AI" in mode:
         return get_ai_clip(smart_queries[0], duration, W, H)
-    # SMART STOCK MODE - 2-4 sec fast cut
-    for q in smart_queries:
+
+    clips_to_join = []
+    time_covered = 0
+    q_idx = 0
+    print(f" ✂️ Building {duration:.1f}s with 4-sec cuts")
+
+    while time_covered < duration:
+        q = smart_queries[q_idx % len(smart_queries)]
+        q_idx += 1
         stock = get_stock_video_smart(q, W, H)
-        if stock:
-            # 2-4 sec ka cut, sentence ke sath sync
-            cut_dur = min(duration, random.uniform(2.5, 4.0))
-            if stock.duration > cut_dur:
-                start = random.uniform(0, stock.duration-cut_dur)
-                stock = stock.subclip(start, start+cut_dur)
-            return stock.set_duration(duration)
-    return get_ai_clip(smart_queries[0], duration, W, H)
+        if not stock:
+            stock = get_ai_clip(q, 5, W, H)
+
+        cut_len = min(random.uniform(3.5, 5.0), duration - time_covered)
+        if stock.duration > cut_len:
+            start = random.uniform(0, max(0.1, stock.duration - cut_len - 0.1))
+            stock = stock.subclip(start, start + cut_len)
+
+        clips_to_join.append(stock.set_duration(cut_len).resize((W,H)))
+        time_covered += cut_len
+        if len(clips_to_join) >= 6: break
+
+    if len(clips_to_join) > 1:
+        return concatenate_videoclips(clips_to_join, method="compose").set_duration(duration)
+    return clips_to_join[0].set_duration(duration)
 
 async def Tt(t, o, v):
     import edge_tts

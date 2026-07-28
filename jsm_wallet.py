@@ -4,34 +4,34 @@ WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyN72bUynR-vhSIW1h8jryguS
 
 def run_jsm(email, license_code, script, voice_lang, video_type, resolution, all_keys):
     print(f"🔍 Checking License: {license_code} for {email}")
-    check_data = {"action": "check", "email": email, "code": license_code}
-    res = requests.post(WEBHOOK_URL, json=check_data, timeout=10).json()
-
-    if res.get("status")!= "ACTIVE":
-        raise Exception(f"❌ License Expired یا غلط ہے! Status: {res.get('status')}")
+    res = requests.post(WEBHOOK_URL, json={"action":"check","email":email,"code":license_code}, timeout=10).json()
+    if res.get("status")!= "ACTIVE": raise Exception(f"❌ License: {res.get('status')}")
 
     remaining_mins = int(res.get("remaining", 0))
     needed_mins = math.ceil(len(script.split()) / 150)
-    print(f"✅ License ACTIVE | Remaining: {remaining_mins} min | Needed: {needed_mins} min")
+    print(f"✅ ACTIVE | Remaining: {remaining_mins} min | Needed: {needed_mins} min")
+    if remaining_mins < needed_mins: raise Exception(f"❌ منٹ کم ہیں")
 
-    if remaining_mins < needed_mins:
-        raise Exception(f"❌ منٹ ختم! آپ کے پاس {remaining_mins} منٹ ہیں، چاہیے {needed_mins} منٹ")
-
-    deduct_data = {"action": "deduct", "email": email, "code": license_code, "mins": needed_mins}
-    requests.post(WEBHOOK_URL, json=deduct_data, timeout=10)
+    requests.post(WEBHOOK_URL, json={"action":"deduct","email":email,"code":license_code,"mins":needed_mins}, timeout=10)
     print(f"✅ {needed_mins} منٹ کٹ گئے۔ باقی: {remaining_mins - needed_mins}")
 
-    # KEYS AB YAHAN SE AYENGI
-    groq_api_key=""; pexels_keys=[]; pixabay_key=""
+    # KEYS
+    groq_api_key=""; pexels_keys=[]; pixabay_key=""; supabase_key=""; coverr_key=""
     for line in all_keys.strip().splitlines():
         line=line.strip().strip(',').strip('"').strip("'")
         if not line: continue
-        if line.startswith("gsk_"): groq_api_key=line.strip()
+        if line.startswith("gsk_"): groq_api_key=line
+        elif line.startswith("sb_"): supabase_key=line
+        elif line.startswith("8c8c"): coverr_key=line
         elif len(line)>30 and "," in line: pexels_keys.extend([k.strip() for k in line.split(',') if len(k.strip())>10])
-        elif len(line)>30: pexels_keys.append(line.strip())
-        elif "-" in line and line[0].isdigit(): pixabay_key=line.strip()
+        elif len(line)>30: pexels_keys.append(line)
+        elif "-" in line and line[0].isdigit(): pixabay_key=line
 
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "moviepy==1.0.3", "edge-tts", "gtts", "pillow", "nest-asyncio", "requests"])
+    # VOICE FIX: Agar ur-PK ho to male default
+    if "ur-PK" in voice_lang and "Uzma" not in voice_lang:
+        voice_lang = "ur-PK-AsadNeural" # مرد کی آواز ڈیفالٹ
+
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "moviepy==1.0.3", "edge-tts", "gtts", "pillow"])
     import urllib.request
-    print(f"Keys Check: Groq=YES Pexels={len(pexels_keys)} Pixabay=YES")
+    print(f"Settings: Voice={voice_lang} | Video={video_type} | Res={resolution}")
     exec(urllib.request.urlopen("https://raw.githubusercontent.com/sajan3399133cpu/JSM/main/app_avatar.py").read().decode())

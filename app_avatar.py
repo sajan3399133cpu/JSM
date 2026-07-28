@@ -1,185 +1,228 @@
-# JSM FINAL SMOOTH V5 - WATER FLOW TRAILER - RAM/DISK FIXED - By Saeed
-import os, uuid, random, requests, re, urllib.parse, datetime, time, gc, math
+# JSM V8 FINAL - MULTI SOURCE INTELLIGENT - GITHUB FILE - By Jam Saeed
+import os, uuid, random, requests, re, urllib.parse, datetime, time, gc
 import asyncio
 import nest_asyncio
 nest_asyncio.apply()
-from moviepy.editor import *
-from PIL import Image
+from moviepy.editor import VideoFileClip, ColorClip, AudioFileClip, CompositeVideoClip, TextClip
+
+BASE_DIR = "/tmp/JSM_Outputs"
+os.makedirs(BASE_DIR, exist_ok=True)
+USED_LINKS = set()
+
+# --- KEYS COLAB SE AYENGI - YAHAN HARDCODE NAHI ---
+GROQ_KEY = globals().get('groq_api_key','').strip()
+PEXELS_KEYS = globals().get('pexels_keys', [])
+PIXABAY_KEY = globals().get('pixabay_key','').strip()
+COVERR_KEY = globals().get('coverr_api_key','').strip()
+
+# Agar string me aayi to list banao + space clean
+if isinstance(PEXELS_KEYS, str):
+    PEXELS_KEYS = [k.strip() for k in PEXELS_KEYS.split(',') if len(k.strip())>10]
+else:
+    PEXELS_KEYS = [str(k).strip() for k in PEXELS_KEYS if len(str(k).strip())>10]
+
+print(f"🔑 LOADED: Groq={'ON' if GROQ_KEY else 'OFF'} | Pexels={len(PEXELS_KEYS)} keys | Pixabay={'ON' if PIXABAY_KEY else 'OFF'} | Coverr={'ON' if COVERR_KEY else 'OFF'}")
+
+VOICES = {
+    "English Male (Brandon)": "en-US-BrandonNeural",
+    "English Female (Jenny)": "en-US-JennyNeural",
+    "Trailer Voice": "en-US-GuyNeural",
+    "Urdu Male (Asad)": "ur-PK-AsadNeural",
+    "Hindi Male (Arjun)": "hi-IN-ArjunNeural"
+}
 
 WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
 def cut_mints_auto(email, mins):
     try: requests.get(f"{WEB_APP_URL}?email={urllib.parse.quote(email)}&mins={mins}", timeout=10)
     except: pass
 
-BASE_DIR = "/tmp/JSM_Outputs"
-os.makedirs(BASE_DIR, exist_ok=True)
+# --- INTELLIGENT BRAIN ---
+def get_intelligent_keywords(sentence):
+    if GROQ_KEY and len(GROQ_KEY) > 20:
+        try:
+            print(f"🧠 BRAIN Thinking: {sentence[:60]}...")
+            headers = {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"}
+            data = {
+                "model": "llama3-8b-8192",
+                "messages": [
+                    {"role": "system", "content": "You are stock video expert. Convert motivational sentence to 3 highly relevant stock video search queries (2-4 words each). Return ONLY comma separated keywords. Example: 'He worked while world slept' -> man working late night, hustle in dark office, entrepreneur night"},
+                    {"role": "user", "content": sentence}
+                ],
+                "temperature": 0.2,
+                "max_tokens": 70
+            }
+            r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=data, timeout=12)
+            if r.status_code == 200:
+                text = r.json()['choices'][0]['message']['content']
+                kws = [k.strip().strip('"').strip("'") for k in text.split(',') if len(k.strip())>2][:3]
+                print(f"✅ BRAIN Keywords: {kws}")
+                return kws
+            else:
+                print(f"Groq Error {r.status_code}: {r.text[:150]}")
+        except Exception as e:
+            print(f"Brain Error: {e}")
 
-VOICES = {"Trailer Voice (Deep & Powerful)": "en-US-GuyNeural","English Male (Brandon)": "en-US-BrandonNeural","English Female (Jenny)": "en-US-JennyNeural","Urdu Male (Asad)": "ur-PK-AsadNeural","Hindi Male (Arjun)": "hi-IN-ArjunNeural"}
+    # Fallback Smart Brain
+    low = sentence.lower()
+    if "sleep" in low and ("factory" in low or "work" in low): return ["man working late night office", "factory worker night shift", "entrepreneur sleeping factory"]
+    if "fail" in low: return ["failure sad businessman", "man alone dark struggle", "overcoming failure motivational"]
+    if "success" in low or "rich" in low: return ["success businessman mountain top", "rich businessman luxury", "achievement celebration"]
+    if "team" in low: return ["business team meeting", "startup team working"]
+    if "elon" in low or "musk" in low: return ["elon musk working", "spacex factory worker", "tesla hard work"]
+    words = [w for w in re.sub(r'[^\w\s]', ' ', low).split() if len(w)>3][:3]
+    if not words: words = ["motivational"]
+    return [f"{' '.join(words)} motivational", f"business {words[0]}", f"{words[0]} cinematic broll"]
 
-def parse_script(script):
-    scenes = []
-    # DIRECTOR MODE: SCENE 1 | 8s / VISUAL: / AUDIO:
-    pattern = re.compile(r"SCENE\s*\d*\s*\|?\s*(\d+)s?\s*\nVISUAL:\s*(.*?)\nAUDIO:\s*(.*?)(?=\nSCENE|\Z)", re.IGNORECASE | re.DOTALL)
-    matches = pattern.findall(script)
-    if matches:
-        for dur, visual, audio in matches:
-            scenes.append({"duration": int(dur), "visual": visual.strip(), "audio": audio.strip()})
-        print(f"🎬 DIRECTOR MODE: {len(scenes)} scenes found")
-        return scenes
-    # SIMPLE MODE: Har line ek scene
-    else:
-        clean = re.sub(r"(sex\s*video|porn|xxx|nude)", " ", script, flags=re.I)
-        lines = [x.strip() for x in re.split(r'[.!?\n]+', clean) if len(x.strip())>8]
-        for line in lines:
-            scenes.append({"duration": 5, "visual": line, "audio": line})
-        print(f"🎬 SIMPLE MODE: {len(scenes)} scenes")
-        return scenes
+# --- MULTI SOURCE VIDEO SEARCH ---
+def search_video(keyword, W, H):
+    orientation = "landscape" if W>H else "portrait"
 
-async def Tt(t, o, v):
+    # 1. PEXELS - Try all keys one by one
+    for p_key in PEXELS_KEYS:
+        try:
+            headers = {"Authorization": p_key}
+            url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(keyword)}&per_page=3&orientation={orientation}&size=medium"
+            res = requests.get(url, headers=headers, timeout=12).json()
+            for vid in res.get('videos', []):
+                # best file
+                vfiles = sorted(vid.get('video_files', []), key=lambda x: x.get('width',0), reverse=True)
+                if not vfiles: continue
+                link = vfiles[0]['link']
+                if link in USED_LINKS: continue
+                path = f"{BASE_DIR}/{uuid.uuid4().hex[:6]}.mp4"
+                vr = requests.get(link, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+                if vr.status_code==200 and len(vr.content)>50000:
+                    open(path,'wb').write(vr.content)
+                    USED_LINKS.add(link)
+                    clip = VideoFileClip(path).resize((W,H))
+                    print(f"✅ PEXELS HIT: '{keyword}' -> ID {vid['id']}")
+                    return clip
+        except Exception as e:
+            continue
+
+    # 2. PIXABAY
+    if PIXABAY_KEY:
+        try:
+            url = f"https://pixabay.com/api/videos/?key={PIXABAY_KEY}&q={urllib.parse.quote(keyword)}&per_page=3&orientation={orientation.replace('landscape','horizontal').replace('portrait','vertical')}"
+            res = requests.get(url, timeout=12).json()
+            for hit in res.get('hits', []):
+                link = hit['videos']['medium']['url']
+                if link in USED_LINKS: continue
+                path = f"{BASE_DIR}/{uuid.uuid4().hex[:6]}.mp4"
+                vr = requests.get(link, timeout=20)
+                if vr.status_code==200 and len(vr.content)>50000:
+                    open(path,'wb').write(vr.content)
+                    USED_LINKS.add(link)
+                    clip = VideoFileClip(path).resize((W,H))
+                    print(f"✅ PIXABAY HIT: '{keyword}'")
+                    return clip
+        except Exception as e:
+            print(f"Pixabay fail {e}")
+
+    return None
+
+async def Tt(t,o,v):
     import edge_tts
-    await edge_tts.Communicate(t, v, rate="-4%", pitch="-1Hz").save(o)
+    await edge_tts.Communicate(t,v, rate="-4%", pitch="+1Hz").save(o)
 
-def run_tts(tx, out, vc):
+def run_tts(tx,out,vc):
     if len(tx.split()) < 2: tx = tx + "."
     for _ in range(2):
         try:
-            try: asyncio.run(Tt(tx, out, vc))
+            try: asyncio.run(Tt(tx,out,vc))
             except:
-                loop = asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx, out, vc))
-            if os.path.exists(out) and os.path.getsize(out) > 500: return True
-        except: time.sleep(0.4)
+                loop=asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx,out,vc))
+            if os.path.exists(out) and os.path.getsize(out)>500:
+                return True
+        except:
+            time.sleep(0.3)
     try:
         from gtts import gTTS
         gTTS(text=tx[:300], lang='en', slow=False).save(out)
-        return True
-    except: return False
+        return os.path.exists(out) and os.path.getsize(out)>500
+    except:
+        return False
 
-# --- PANI KI TARAH SMOOTH - 1 SEC = 1 IMAGE ---
-def get_water_flow_clip(visual_prompt, duration, W, H):
-    print(f"🌊 FLOW: {visual_prompt[:50]} | {duration}s")
-    clips = []
-    num_images = max(3, int(duration)) # 1 sec = 1 image
-    per_img_dur = duration / num_images
+# --- MAIN PROCESS ---
+print("🚀 JSM V8 START...")
+sentences = [s.strip() for s in re.split(r'[.!?\n\u06d4]+', script) if len(s.strip())>12]
+W,H = (1280,720) if "16:9" in video_type else (720,1280)
+if "480" in resolution: W,H = (854,480) if W>H else (480,854)
 
-    for i in range(num_images):
-        p_path = f"{BASE_DIR}/{uuid.uuid4().hex[:6]}.jpg"
-        try:
-            # Har image ka prompt thora alag - is se flow lagega
-            enhanced_prompt = f"{visual_prompt}, cinematic movie frame {i+1}, ultra realistic 8k, dramatic lighting, highly detailed, photorealistic, no text, movie trailer"
-            url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(enhanced_prompt[:150])}?width={W}&height={H}&seed={random.randint(1,9999999)+i*77}&model=flux&nologo=true&enhance=true"
-            r = requests.get(url, timeout=35)
-            if r.status_code!=200 or len(r.content)<5000:
-                continue
-            open(p_path,'wb').write(r.content)
-            im = Image.open(p_path).convert("RGB").resize((W,H), Image.LANCZOS)
-            im.save(p_path, "JPEG", quality=90)
-
-            # Har image pe alag motion
-            clip = ImageClip(p_path).set_duration(per_img_dur + 0.4) # 0.4 sec overlap for crossfade
-            # Pani jaisa smooth zoom/pan
-            if i % 3 == 0:
-                clip = clip.resize(lambda t: 1 + 0.04*t).set_position('center')
-            elif i % 3 == 1:
-                clip = clip.resize(lambda t: 1.08 - 0.04*t).set_position('center')
-            else:
-                clip = clip.resize(lambda t: 1.05).set_position(lambda t: (-10*t, 'center'))
-
-            clips.append(clip.resize((W,H)))
-        except Exception as e:
-            print(f"Img {i} fail {e}")
-            continue
-        # Disk clean for this image later
-
-    if len(clips)==0:
-        return ColorClip((W,H), color=(12,12,15), duration=duration)
-    if len(clips)==1:
-        return clips[0].set_duration(duration)
-
-    # Crossfade se jorna - pani ki tarah
-    final = clips[0]
-    for j in range(1, len(clips)):
-        final = CompositeVideoClip([final, clips[j].set_start(final.duration - 0.4).crossfadein(0.4)]).set_duration(final.duration + clips[j].duration - 0.4)
-
-    final = final.set_duration(duration)
-    print(f"✅ FLOW Ready: {len(clips)} images joined")
-    return final
-
-# --- MAIN ---
-print(f"🎬 WATER FLOW MODE | Voice: {voice_lang}")
-scenes = parse_script(script)
-W, H = (1280,720) if "16:9" in video_type else (720,1280)
-if "480" in resolution: W, H = (854,480) if W>H else (480,854)
 scene_files = []
-
-for idx, scene in enumerate(scenes):
+for idx, sent in enumerate(sentences):
     try:
-        print(f"\n--- SCENE {idx+1}/{len(scenes)} | {scene['duration']}s ---")
-        visual = scene["visual"]
-        audio_text = scene["audio"]
+        print(f"\n{'='*20} SCENE {idx+1}/{len(sentences)} {'='*20}")
+        print(f"SENT: {sent}")
+        keywords = get_intelligent_keywords(sent)
 
+        # Audio
         ap = f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
-        if not run_tts(audio_text, ap, VOICES.get(voice_lang, "en-US-GuyNeural")):
+        if not run_tts(sent, ap, VOICES.get(voice_lang, "en-US-BrandonNeural")):
+            print("TTS Fail skip")
             continue
         au = AudioFileClip(ap)
-        final_dur = max(scene["duration"], au.duration + 0.2)
-        if au.duration > 0.3:
-            au = au.subclip(0, min(au.duration, final_dur))
+        dur = max(3.2, au.duration + 0.2)
 
-        video_clip = get_water_flow_clip(visual, final_dur, W, H)
-        video_clip = video_clip.set_duration(final_dur).set_audio(au)
+        # Video - Try intelligent keywords one by one
+        vclip = None
+        for kw in keywords:
+            vclip = search_video(kw, W, H)
+            if vclip: break
 
-        layers = [video_clip]
-        if show_subtitles:
+        if not vclip:
+            print(f"❌ No video for {keywords}, using color")
+            vclip = ColorClip((W,H), color=(14,14,18), duration=dur)
+
+        if vclip.duration > dur:
+            start = random.uniform(0, max(0.1, vclip.duration - dur - 0.2))
+            vclip = vclip.subclip(start, start+dur)
+        vclip = vclip.set_duration(dur).resize((W,H)).set_audio(au)
+
+        layers = [vclip]
+        if globals().get('show_subtitles', True):
             try:
-                txt = TextClip(audio_text[:120], fontsize=int(W*0.035), color='white', stroke_color='black', stroke_width=2, method='caption', size=(int(W*0.84), None), align='center').set_duration(final_dur).set_pos(('center',0.84), relative=True)
+                txt = TextClip(sent[:115], fontsize=int(W*0.038), color='white', stroke_color='black', stroke_width=2, method='caption', size=(int(W*0.82), None), align='center').set_duration(dur).set_pos(('center',0.82), relative=True)
                 layers.append(txt)
             except: pass
 
-        final_scene = CompositeVideoClip(layers, size=(W,H)).set_duration(final_dur)
-        temp_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
-        final_scene.write_videofile(temp_path, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=2, bitrate="1200k", logger=None)
-        scene_files.append(temp_path)
-        print(f"✅ SCENE {idx+1} DONE - RAM Clear")
+        final = CompositeVideoClip(layers, size=(W,H)).set_duration(dur)
+        out_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
+        final.write_videofile(out_path, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=2, bitrate="1300k", logger=None)
+        scene_files.append(out_path)
+        print(f"✅ SCENE {idx+1} DONE")
 
-        # RAM + DISK FIX
-        try: video_clip.close(); final_scene.close(); au.close()
+        try: vclip.close(); final.close(); au.close()
         except: pass
-        # Delete temp images
-        for f in os.listdir(BASE_DIR):
-            if f.endswith('.jpg'):
-                try: os.remove(os.path.join(BASE_DIR,f))
-                except: pass
         gc.collect()
-        time.sleep(0.3)
+        time.sleep(0.2)
 
     except Exception as e:
-        print(f"❌ Scene {idx+1} Error {e}")
+        print(f"❌ SCENE {idx+1} Error: {e}")
+        import traceback; traceback.print_exc()
         continue
 
-# FINAL JOIN - DISK CLEAN
+# FINAL JOIN
 if scene_files:
-    print(f"\n🔗 JOINING {len(scene_files)} scenes...")
+    print(f"\n🔗 JOINING {len(scene_files)} SCENES...")
     list_path = f"{BASE_DIR}/concat_list.txt"
-    with open(list_path,"w") as f:
-        for sf in scene_files: f.write(f"file '{os.path.abspath(sf)}'\n")
-    out_path = f"/tmp/FINAL_TRAILER_{datetime.datetime.now().strftime('%H%M%S')}.mp4"
-    os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c copy {out_path}")
-    if not os.path.exists(out_path) or os.path.getsize(out_path)<5000:
-        os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
+    with open(list_path,"w", encoding='utf-8') as f:
+        for sf in scene_files:
+            f.write(f"file '{os.path.abspath(sf)}'\n")
+    final_out = f"/tmp/JSM_V8_FINAL_{datetime.datetime.now().strftime('%H%M%S')}.mp4"
+    os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c copy {final_out}")
+    if not os.path.exists(final_out) or os.path.getsize(final_out)<5000:
+        os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {final_out}")
 
-    print(f"\n🎉 FINAL READY: {out_path}")
+    print(f"\n🎉🎉 FINAL VIDEO READY: {final_out} 🎉🎉🎉")
     try:
-        fc = VideoFileClip(out_path)
-        cut_mints_auto(globals().get('email',''), round(fc.duration/60,2))
+        fc = VideoFileClip(final_out)
+        cut_mints_auto(globals().get('email',''), round(fc.duration/60, 2))
         fc.close()
     except: pass
     try:
-        from google.colab import files; files.download(out_path)
+        from google.colab import files
+        files.download(final_out)
     except: pass
-
-    # Final Disk Clean
-    for sf in scene_files:
-        try: os.remove(sf)
-        except: pass
-    try: os.remove(list_path)
-    except: pass
+else:
+    print("❌ No scenes made!")

@@ -16,20 +16,17 @@ def run_jsm(email, license_code, script, voice_lang, video_type, resolution, all
     print(f"✅ {needed_mins} منٹ کٹ گئے۔ باقی: {remaining_mins - needed_mins}")
 
     # KEYS
-    groq_api_key=""; pexels_keys=[]; pixabay_key=""; supabase_key=""; coverr_key=""
+    groq_api_key=""; pexels_keys=[]; pixabay_key=""
     for line in all_keys.strip().splitlines():
         line=line.strip().strip(',').strip('"').strip("'")
         if not line: continue
         if line.startswith("gsk_"): groq_api_key=line
-        elif line.startswith("sb_"): supabase_key=line
-        elif line.startswith("8c8c"): coverr_key=line
         elif len(line)>30 and "," in line: pexels_keys.extend([k.strip() for k in line.split(',') if len(k.strip())>10])
         elif len(line)>30: pexels_keys.append(line)
         elif "-" in line and line[0].isdigit(): pixabay_key=line
 
-    # VOICE FIX: Agar ur-PK ho to male default
-    if "ur-PK" in voice_lang and "Uzma" not in voice_lang:
-        voice_lang = "ur-PK-AsadNeural" # مرد کی آواز ڈیفالٹ
+    # VOICE FIX: "ur-PK-AsadNeural - Male Urdu" se sirf "ur-PK-AsadNeural" nikalna
+    voice_lang = voice_lang.split(" - ")[0].strip()
 
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "moviepy==1.0.3", "edge-tts", "gtts", "pillow"])
     import urllib.request

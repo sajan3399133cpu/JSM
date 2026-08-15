@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>JSM AI V52</title></head>
+<body style="background:#000;color:#0f0;text-align:center">
+  <h1>👑 JSM AI V52 - 1000+ Niche</h1>
+  <textarea id="script" rows="8" cols="50">Ek kisan tha...</textarea><br><br>
+  <button id="btn">🚀 VIDEO BANAO</button>
+  <p id="status">Ready</p>
+<script>
+btn.onclick = async () => {
+  status.innerText = "⏳ 20 min lag sakte hain..."
+  let res = await fetch("/.netlify/functions/generate", {
+    method: "POST",
+    body: JSON.stringify({script: script.value})
+  })
+  let data = await res.json()
+  status.innerHTML = `✅ <a href="${data.url}">Download</a>`
+}
+</script>
+</body>
+</html>

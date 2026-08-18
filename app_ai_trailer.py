@@ -1,171 +1,238 @@
-# JSM PURE AI TRAILER V1 - 100% FREE UNLIMITED - Pollinations FIXED - By Saeed
-import asyncio, uuid, random, requests, re, os, urllib.parse, datetime, time, gc
+# JSM PURE AI & STOCK VIDEO GENERATOR V100 - PUBLIC WEB DASHBOARD EDITION
+# Designed for Netlify Frontend + GitHub Actions Backend Workflow
+import os, sys, re, uuid, time, random, gc, requests, urllib.parse, datetime, asyncio
 import nest_asyncio
 nest_asyncio.apply()
+
 from moviepy.editor import VideoFileClip, ColorClip, concatenate_videoclips, AudioFileClip, CompositeVideoClip, TextClip, ImageClip
 from PIL import Image
 
-WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyfopJoiGBueO6AsZ5JE-juplXjSa1Lc_klKn4bOswLyhPmPGsvOhT9r6Axow6rsl-rXg/exec"
-def cut_mints_auto(email, mins):
-    try: requests.get(f"{WEB_APP_URL}?email={urllib.parse.quote(email)}&mins={mins}", timeout=15)
-    except: pass
+# -------------------------------------------------------------
+# 🌐 ENVIRONMENT INPUTS (From Netlify Web Dashboard)
+# -------------------------------------------------------------
+script = os.environ.get('SCRIPT_TEXT', '')
+voice_lang = os.environ.get('VOICE_LANG', 'ur-PK-AsadNeural')
+video_mode = os.environ.get('VIDEO_MODE', 'Free Stock Videos')
+video_type = "16:9"
+resolution = "720p"
+show_subtitles = True
+
+# Fallback script for testing if run manually
+if not script:
+    script = "ایک جدید اور خوبصورت شہر کی سڑک پر گاڑیوں کی آمدورفت۔ انسان اپنی محنت سے کامیابی حاصل کرتا ہے۔"
 
 BASE_DIR = "./JSM_Outputs"
 os.makedirs(BASE_DIR, exist_ok=True)
 
-VOICES = {"English Male (Brandon - Human Natural)": "en-US-BrandonNeural","English Female (Jenny - Clear & Energetic)": "en-US-JennyNeural","Urdu Male (Asad - Deep Voice / Narrative Style)": "ur-PK-AsadNeural","Hindi Male (Arjun - Motivational Speaker Style)": "hi-IN-ArjunNeural","English Male (Andrew - Professional Studio)": "en-US-AndrewNeural"}
+# -------------------------------------------------------------
+# 🎙️ VOICE MAPPING (Supported 30+ Edge-TTS Voices)
+# -------------------------------------------------------------
+VOICES = {
+    "ur-PK-AsadNeural": "ur-PK-AsadNeural",
+    "en-US-BrandonNeural": "en-US-BrandonNeural",
+    "hi-IN-ArjunNeural": "hi-IN-ArjunNeural",
+    "ar-SA-HamedNeural": "ar-SA-HamedNeural",
+    "zh-CN-YunxiNeural": "zh-CN-YunxiNeural",
+    "es-ES-AlvaroNeural": "es-ES-AlvaroNeural",
+    "fr-FR-HenriNeural": "fr-FR-HenriNeural",
+    "de-DE-KillianNeural": "de-DE-KillianNeural",
+    "ja-JP-KeitaNeural": "ja-JP-KeitaNeural",
+    "ru-RU-DmitryNeural": "ru-RU-DmitryNeural",
+    "pt-BR-AntonioNeural": "pt-BR-AntonioNeural",
+    "tr-TR-AhmetNeural": "tr-TR-AhmetNeural",
+    "fa-IR-FaridNeural": "fa-IR-FaridNeural",
+    "it-IT-DiegoNeural": "it-IT-DiegoNeural",
+    "ko-KR-InJoonNeural": "ko-KR-InJoonNeural"
+}
 
-def clean_analyze(script):
-    clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script, flags=re.I)
+def detect_voice(selected):
+    return VOICES.get(selected, selected if selected else "ur-PK-AsadNeural")
+
+# -------------------------------------------------------------
+# 🧠 SMART SENSOR ENGINE (Urdu/English Keyword Filtering)
+# -------------------------------------------------------------
+def smart_topic_sensor(sentence_text):
+    stop_words = ["ایک", "اور", "کا", "کی", "کے", "میں", "پر", "سے", "ہے", "ہیں", "تھا", "تھی", "تھے", "کو", "یہ", "وہ", "تک", "بھی", "a", "the", "and", "is", "of", "in", "on"]
+    urdu_topic_map = {
+        "شہر": "modern city skyline night",
+        "گاڑیاں": "traffic night highway cars",
+        "سڑک": "city street night",
+        "شخص": "man thinking looking street",
+        "آدمی": "man business professional",
+        "محنت": "hard working man office night",
+        "کامیابی": "successful businessman mountain top",
+        "پیسہ": "money stocks wall street trading",
+        "پہاڑ": "mountains nature landscape",
+        "سمندر": "ocean waves aerial"
+    }
+    extracted = []
+    for word in sentence_text.split():
+        clean_w = re.sub(r'[^\w\s]', '', word).strip()
+        if clean_w in urdu_topic_map:
+            extracted.append(urdu_topic_map[clean_w])
+        elif len(clean_w) > 3 and clean_w not in stop_words:
+            extracted.append(clean_w)
+            
+    return " ".join(extracted[:2]) if extracted else sentence_text[:30]
+
+def clean_analyze(script_text):
+    clean = re.sub(r"(sex\s*video|porn|xxx|nude|naked)", " ", script_text, flags=re.I)
     raw_sentences = re.split(r'[.!?\n\u06d4]+', clean)
-    return clean, [s.strip() for s in raw_sentences if len(s.strip()) > 8]
+    return clean, [s.strip() for s in raw_sentences if len(s.strip()) > 5]
 
-def SMART_KEYWORD_ENGINE(sentence):
-    s_low = sentence.lower()
-    if "elon musk" in s_low: return "Elon Musk in SpaceX control room, cinematic lighting, ultra realistic 8k, dramatic"
-    if "success" in s_low or "motivation" in s_low: return "successful businessman on top of mountain sunrise, ultra realistic 8k cinematic"
-    if "money" in s_low or "stock" in s_low: return "stock market trading floor, wall street, cinematic ultra realistic 8k"
-    if "hard work" in s_low: return "man working hard late night in office, cinematic ultra realistic"
-    if "dream" in s_low: return "man looking at stars dreaming big, cinematic ultra realistic 8k"
-    words = ' '.join([w for w in re.sub(r'[^\w\s]', ' ', s_low).split() if len(w)>3][:4])
-    return f"{words}, ultra realistic 8k cinematic, dramatic lighting, highly detailed, photorealistic, movie trailer scene, no text"
-
+# -------------------------------------------------------------
+# 🔊 AUDIO TTS ENGINE
+# -------------------------------------------------------------
 async def Tt(t, o, v):
     import edge_tts
-    await edge_tts.Communicate(t, v, rate="-4%", pitch="+1Hz").save(o)
+    await edge_tts.Communicate(t, v, rate="-3%", pitch="+0Hz").save(o)
+
 def run_tts(tx, out, vc):
     if len(tx.split()) < 3: tx = tx + "."
     for _ in range(2):
         try:
             try: asyncio.run(Tt(tx, out, vc))
-            except: loop = asyncio.new_event_loop(); asyncio.set_event_loop(loop); loop.run_until_complete(Tt(tx, out, vc))
+            except: 
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(Tt(tx, out, vc))
             if os.path.exists(out) and os.path.getsize(out) > 800: return True
-        except: time.sleep(0.8)
+        except: time.sleep(0.5)
+    return False
+
+# -------------------------------------------------------------
+# 📹 VISUAL FETCHERS (Free Stock Videos & AI Motion Clips)
+# -------------------------------------------------------------
+def get_stock_video_smart(prompt_text, target_duration, W, H):
+    smart_keyword = smart_topic_sensor(prompt_text)
+    print(f"  🧠 AI Sensor Topic: '{smart_keyword}'")
+    headers = {"Authorization": "563492ad6f91700001000001cbe2d7c588a44ec4b36d013f9c62957f"}
+    clean_q = urllib.parse.quote(smart_keyword)
+    url = f"https://api.pexels.com/videos/search?query={clean_q}&per_page=6&orientation=landscape"
+    v_path = f"{BASE_DIR}/stock_{uuid.uuid4().hex[:6]}.mp4"
     try:
-        from gtts import gTTS
-        lang = 'ur' if 'urdu' in str(globals().get('voice_lang','')).lower() else 'en'
-        gTTS(text=tx[:350], lang=lang, slow=False).save(out)
-        return True
-    except: return False
-def detect_voice(ch, selected): return VOICES.get(selected, "en-US-BrandonNeural")
+        res = requests.get(url, headers=headers, timeout=15).json()
+        if "videos" in res and len(res["videos"]) > 0:
+            video_choice = random.choice(res["videos"][:3])
+            files_list = video_choice["video_files"]
+            best_url = sorted(files_list, key=lambda x: x.get('width', 0), reverse=True)[0]['link']
+            v_data = requests.get(best_url, timeout=25).content
+            with open(v_path, 'wb') as f: f.write(v_data)
+            clip = VideoFileClip(v_path).resize((W, H))
+            if clip.duration > target_duration:
+                clip = clip.subclip(0, target_duration)
+            else:
+                clip = clip.loop(duration=target_duration)
+            return clip
+    except Exception as e:
+        print(f"  ⚠️ Stock Error: {e}")
+    return None
 
-# --- 100% FIXED AI VIDEO GENERATOR - NO BLACK SCREEN ---
 def get_pure_ai_clip(prompt_text, duration, W, H, retry=0):
-    if retry > 3:
-        print("⚠️ AI failed 3 times, using color")
-        return ColorClip((W,H), color=(15,15,20), duration=duration)
-
+    if retry > 2:
+        return ColorClip((W, H), color=(15, 15, 20), duration=duration)
+    smart_keyword = smart_topic_sensor(prompt_text)
     p_path = f"{BASE_DIR}/ai_{uuid.uuid4().hex[:6]}.jpg"
     try:
-        print(f"🤖 Generating: {prompt_text[:60]}... | Retry: {retry}")
-        # Enhanced prompt for trailer
-        full_prompt = f"{prompt_text}, movie trailer style, ultra realistic, 8k, cinematic lighting, dramatic atmosphere, highly detailed, photorealistic, no text, no watermark"
-        # Pollinations - Flux is best for realistic
-        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(full_prompt[:200])}?width={W}&height={H}&seed={random.randint(1, 99999999)}&model=flux&nologo=true&enhance=true&nofeed=true"
-        
-        r = requests.get(url, timeout=60)
-        if r.status_code != 200 or len(r.content) < 8000:
-            print(f"❌ Pollinations failed: {r.status_code}")
-            time.sleep(1)
-            return get_pure_ai_clip(prompt_text, duration, W, H, retry+1)
-
-        open(p_path, 'wb').write(r.content)
-        
-        # PIL FIX - 100% black screen fix
-        try:
-            im = Image.open(p_path)
-            im = im.convert("RGB")
-            # Resize to exact W,H to avoid black borders
-            im = im.resize((W, H), Image.LANCZOS)
+        full_prompt = f"{smart_keyword}, highly detailed, 8k resolution, cinematic lighting, movie scene, photorealistic"
+        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(full_prompt)}?width={W}&height={H}&seed={random.randint(1, 999999)}&model=flux&nologo=true"
+        r = requests.get(url, timeout=30)
+        if r.status_code == 200 and len(r.content) > 5000:
+            with open(p_path, 'wb') as f: f.write(r.content)
+            im = Image.open(p_path).convert("RGB").resize((W, H), Image.LANCZOS)
             im.save(p_path, "JPEG", quality=95)
+            clip = ImageClip(p_path).set_duration(duration)
+            clip = clip.resize(lambda t: 1 + 0.05 * t / duration).set_position(('center', 'center')).resize((W, H))
+            return clip
+    except Exception as e:
+        print(f"  ⚠️ AI Image Error: {e}")
+    return get_pure_ai_clip(prompt_text, duration, W, H, retry+1)
+
+# -------------------------------------------------------------
+# 🎬 MAIN VIDEO BUILDER PROCESS
+# -------------------------------------------------------------
+def main():
+    print("=" * 60)
+    print(f"👑 JSM AI V100 - VIDEO GENERATOR ENGINE STARTED")
+    print(f"🎙️ Selected Voice: {detect_voice(voice_lang)}")
+    print(f"🎥 Selected Mode: {video_mode}")
+    print("=" * 60)
+
+    cs, kws = clean_analyze(script)
+    W, H = (1280, 720) if "16:9" in video_type else (720, 1280)
+    scene_files = []
+
+    print(f"📋 Total Sentences Processed: {len(kws)}")
+
+    for idx, sentence in enumerate(kws):
+        try:
+            print(f"\n🎥 Scene {idx+1}/{len(kws)}: '{sentence[:40]}...'")
+            ap = f"{BASE_DIR}/audio_{idx}_{uuid.uuid4().hex[:4]}.mp3"
+            if not run_tts(sentence, ap, detect_voice(voice_lang)): 
+                continue
+            
+            au = AudioFileClip(ap)
+            dur = au.duration
+            if dur < 0.5: continue
+
+            # Select Clip Type Based on Dashboard Input
+            clip = None
+            if video_mode == "Free Stock Videos":
+                clip = get_stock_video_smart(sentence, dur, W, H)
+            
+            if clip is None:
+                clip = get_pure_ai_clip(sentence, dur, W, H)
+
+            base_clip = clip.set_duration(dur).set_audio(au)
+            layers = [base_clip]
+
+            if show_subtitles:
+                try:
+                    txt = TextClip(sentence[:90], fontsize=int(W*0.035), color='gold', stroke_color='black', stroke_width=2, method='caption', size=(int(W*0.85), None), align='center').set_duration(dur).set_pos(('center', 0.82), relative=True)
+                    layers.append(txt)
+                except Exception as e: pass
+
+            final_scene = CompositeVideoClip(layers, size=(W, H)).set_duration(dur)
+            temp_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
+            
+            final_scene.write_videofile(
+                temp_path, 
+                fps=24, 
+                codec='libx264', 
+                audio_codec='aac', 
+                preset='ultrafast', 
+                threads=2, 
+                bitrate="1500k", 
+                logger=None
+            )
+            scene_files.append(temp_path)
+            print(f"✅ Scene {idx+1} Generated Successfully!")
+
+            try: base_clip.close(); final_scene.close(); au.close(); clip.close()
+            except: pass
+            gc.collect()
+
         except Exception as e:
-            print(f"PIL Error: {e}")
-            if os.path.exists(p_path): os.remove(p_path)
-            time.sleep(0.5)
-            return get_pure_ai_clip(prompt_text, duration, W, H, retry+1)
+            print(f"❌ Error Scene {idx+1}: {e}")
+            continue
 
-        # Check file again
-        if not os.path.exists(p_path) or os.path.getsize(p_path) < 5000:
-            return get_pure_ai_clip(prompt_text, duration, W, H, retry+1)
-
-        # Create video with Ken Burns effect (slow zoom) - NO BLACK SCREEN
-        clip = ImageClip(p_path).set_duration(duration)
-        # Slow zoom in effect for trailer feel
-        clip = clip.resize(lambda t: 1 + 0.08 * t / duration)  # 8% zoom over duration
-        clip = clip.set_position(('center','center')).resize((W,H))
+    if scene_files:
+        print(f"\n🔗 Final Joining {len(scene_files)} Scenes...")
+        list_path = f"{BASE_DIR}/concat_list.txt"
+        with open(list_path, "w") as f:
+            for sf in scene_files: 
+                f.write(f"file '{os.path.abspath(sf)}'\n")
         
-        print(f"✅ AI OK: {prompt_text[:40]}")
-        return clip
-
-    except Exception as e:
-        print(f"AI Error: {e}")
-        if os.path.exists(p_path):
-            try: os.remove(p_path)
-            except: pass
-        time.sleep(1)
-        return get_pure_ai_clip(prompt_text, duration, W, H, retry+1)
-
-print(f"🎙️ Voice: {voice_lang} | MODE: PURE AI 100% FREE UNLIMITED TRAILER")
-cs, kws = clean_analyze(script)
-W, H = (1280,720) if "16:9" in video_type else (720,1280)
-if "480" in resolution: W, H = (854,480) if W>H else (480,854)
-scene_files = []
-print(f"🎬 Total Scenes: {len(kws)} - PURE AI TRAILER MODE")
-
-for idx, ch in enumerate(kws):
-    try:
-        print(f"\n🎬 SCENE {idx+1}/{len(kws)}: {ch[:70]}...")
-        ap = f"{BASE_DIR}/{uuid.uuid4().hex[:5]}.mp3"
-        if not run_tts(ch, ap, detect_voice(ch, voice_lang)): continue
-        au = AudioFileClip(ap)
-        if au.duration < 0.5: continue
-        if au.duration > 0.4: au = au.subclip(0, au.duration-0.1)
+        out_path = f"{BASE_DIR}/JSM_VIDEO_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+        os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c copy {out_path}")
         
-        ai_prompt = SMART_KEYWORD_ENGINE(ch)
-        dur = au.duration
-        
-        # PURE AI CLIP
-        clip = get_pure_ai_clip(ai_prompt, dur, W, H)
-        base_clip = clip.set_duration(dur).set_audio(au)
-        
-        layers=[base_clip]
-        if show_subtitles:
-            try:
-                txt = TextClip(ch[:100], fontsize=int(W*0.038), color='white', stroke_color='black', stroke_width=2, method='caption', size=(int(W*0.82), None), align='center').set_duration(dur).set_pos(('center',0.80), relative=True)
-                layers.append(txt)
-            except: pass
-        
-        final_scene = CompositeVideoClip(layers, size=(W,H)).set_duration(dur)
-        temp_path = f"{BASE_DIR}/scene_{idx}_{uuid.uuid4().hex[:4]}.mp4"
-        final_scene.write_videofile(temp_path, fps=24, codec='libx264', audio_codec='aac', preset='ultrafast', threads=2, bitrate="1200k", logger=None)
-        scene_files.append(temp_path)
-        print(f"✅ Scene {idx+1} Done")
-        try: base_clip.close(); final_scene.close(); au.close(); clip.close()
-        except: pass
-        gc.collect()
-        time.sleep(0.3)
-    except Exception as e:
-        print(f"❌ Scene {idx+1} Error {e}")
-        import traceback; traceback.print_exc()
-        continue
+        if not os.path.exists(out_path) or os.path.getsize(out_path) < 5000:
+            os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
+            
+        print(f"\n🎉 VIDEO SUCCESS! Saved at: {out_path}")
+    else:
+        print("\n❌ Process Failed: No scenes generated.")
 
-if scene_files:
-    print(f"\n🔗 FINAL JOINING {len(scene_files)} scenes...")
-    list_path = f"{BASE_DIR}/concat_list.txt"
-    with open(list_path,"w") as f:
-        for sf in scene_files: f.write(f"file '{os.path.abspath(sf)}'\n")
-    out_path = f"{BASE_DIR}/JSM_TRAILER_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
-    os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c copy {out_path}")
-    if not os.path.exists(out_path) or os.path.getsize(out_path)<5000:
-        os.system(f"ffmpeg -y -f concat -safe 0 -i {list_path} -c:v libx264 -preset ultrafast -c:a aac {out_path}")
-    print(f"\n🎉 TRAILER SUCCESS! Video Ready: {out_path}")
-    try:
-        final_clip = VideoFileClip(out_path)
-        cut_mints_auto(globals().get('email',''), round(final_clip.duration/60,2))
-        final_clip.close()
-    except: pass
-    try:
-        from google.colab import files; files.download(out_path)
-    except: pass
-else:
-    print("❌ No scenes created!")
+if __name__ == "__main__":
+    main()
+    

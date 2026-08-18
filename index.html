@@ -9,8 +9,8 @@
             --gold-primary: #D4AF37;
             --gold-light: #FFDF00;
             --gold-dark: #AA771C;
-            --bg-black: #0a0a0c;
-            --panel-bg: rgba(20, 18, 12, 0.85);
+            --bg-black: #08080a;
+            --panel-bg: #0f0e0a;
         }
 
         body {
@@ -18,62 +18,64 @@
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 480px;
             background: var(--panel-bg);
             border: 2px solid var(--gold-primary);
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            padding: 15px;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
             box-sizing: border-box;
         }
 
         .header {
             text-align: center;
-            border-bottom: 2px solid var(--gold-dark);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gold-dark);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
             color: var(--gold-light);
-            font-size: 20px;
+            font-size: 18px;
             margin: 0;
-            text-shadow: 0 0 8px rgba(255, 223, 0, 0.4);
+            text-shadow: 0 0 8px rgba(255, 223, 0, 0.5);
         }
 
         .section-box {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid var(--gold-dark);
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
         }
 
         .section-title {
             color: var(--gold-primary);
             font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 15px;
+            margin-bottom: 8px;
+            font-size: 14px;
             display: block;
+            text-align: center;
         }
 
         textarea {
             width: 100%;
-            height: 120px;
+            height: 90px;
             background: #121215;
             border: 1px solid var(--gold-primary);
             color: #fff;
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
             box-sizing: border-box;
             resize: vertical;
+            font-size: 13px;
         }
 
         .grid-2 {
@@ -82,48 +84,63 @@
             gap: 10px;
         }
 
-        select, input[type="file"], input[type="text"] {
+        select, input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             background: #121215;
             border: 1px solid var(--gold-dark);
             color: var(--gold-primary);
             border-radius: 6px;
             box-sizing: border-box;
+            font-size: 12px;
         }
 
         .drop-zone {
-            border: 2px dashed var(--gold-primary);
-            padding: 20px;
+            border: 1.5px dashed var(--gold-primary);
+            padding: 15px;
             text-align: center;
             border-radius: 6px;
             background: rgba(212, 175, 55, 0.05);
             cursor: pointer;
+            font-size: 12px;
+            color: #ddd;
         }
 
         .btn-generate {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, var(--gold-dark), var(--gold-light), var(--gold-dark));
+            padding: 12px;
+            background: linear-gradient(135deg, #FFDF00, #D4AF37, #AA771C);
             border: none;
             color: #000;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             border-radius: 8px;
             cursor: pointer;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(255, 223, 0, 0.4);
+            transition: 0.2s;
         }
 
         .btn-generate:hover {
-            box-shadow: 0 0 15px var(--gold-light);
-            transform: scale(1.01);
+            transform: scale(1.02);
         }
 
         .status {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 12px;
             color: #00ffcc;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        #downloadLink {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #008cba;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
             font-weight: bold;
         }
     </style>
@@ -132,18 +149,29 @@
 
 <div class="container">
     <div class="header">
-        <h1>👑 JSM AI V100 - Premium 30+ Min Video Studio</h1>
+        <h1>JSM AI V100 - Premium 👑<br>30+ Min Video Studio</h1>
     </div>
 
     <!-- Script Input -->
     <div class="section-box">
-        <label class="section-title">جز ویڈیو والا اسکرپٹ (Script)</label>
+        <label class="section-title">(Script) جز ویڈیو والا اسکرپٹ</label>
         <textarea id="scriptInput" placeholder="یہاں اپنا اسکرپٹ درج کریں... (25-30 منٹ کی ویڈیو کے لیے لمبا اسکرپٹ پیسٹ کریں)"></textarea>
     </div>
 
     <!-- Options Grid -->
     <div class="grid-2">
-        <!-- Language Selection -->
+        <!-- Video Duration -->
+        <div class="section-box">
+            <label class="section-title">ویڈیو کی لمبائی</label>
+            <select id="videoDuration">
+                <option value="unwan">(Al Unwan) 25-30 Min</option>
+                <option value="15">15 Min Full Video</option>
+                <option value="5">5 Min Medium</option>
+                <option value="short">Shorts / Reel (1 Min)</option>
+            </select>
+        </div>
+
+        <!-- Language Selection (30+ Languages) -->
         <div class="section-box">
             <label class="section-title">زبان کا انتخاب کریں (30+ Languages)</label>
             <select id="voiceLang">
@@ -157,34 +185,33 @@
                 <option value="de-DE-KillianNeural">German</option>
                 <option value="ja-JP-KeitaNeural">Japanese</option>
                 <option value="ru-RU-DmitryNeural">Russian</option>
-                <!-- باقی زبانیں یہاں شامل ہیں -->
-            </select>
-        </div>
-
-        <!-- Video Duration -->
-        <div class="section-box">
-            <label class="section-title">ویڈیو کی لمبائی</label>
-            <select id="videoDuration">
-                <option value="auto">25-30 Min (Al Unwan)</option>
-                <option value="10">10 Minutes</option>
-                <option value="5">5 Minutes</option>
-                <option value="short">Shorts / Reel (1 Min)</option>
+                <option value="pt-BR-AntonioNeural">Portuguese</option>
+                <option value="tr-TR-AhmetNeural">Turkish</option>
+                <option value="fa-IR-FaridNeural">Persian (فارسی)</option>
+                <option value="it-IT-DiegoNeural">Italian</option>
+                <option value="ko-KR-InJoonNeural">Korean</option>
             </select>
         </div>
     </div>
 
-    <!-- Stock Media Drag Drop -->
+    <!-- Video Mode & Stock Drop -->
     <div class="section-box">
-        <label class="section-title">فری اسٹاک ویڈیو (Drag & Drop)</label>
+        <label class="section-title">(Drag & Drop) فری اسٹاک ویڈیو</label>
         <div class="drop-zone" onclick="document.getElementById('videoFile').click()">
             <span id="fileLabel">اپنی فری اسٹاک ویڈیو یہاں ڈریگ اینڈ ڈراپ کریں یا سلیکٹ کریں</span>
             <input type="file" id="videoFile" accept="video/*" style="display:none" onchange="updateFileName(this)">
+        </div>
+        <div style="margin-top: 8px;">
+            <select id="videoMode">
+                <option value="Free Stock Videos">Free Stock Videos (Pexels)</option>
+                <option value="Image To Motion Video">AI Image To Motion Video</option>
+            </select>
         </div>
     </div>
 
     <!-- Topic / Niche -->
     <div class="section-box">
-        <label class="section-title">موضوع / نِش (Topic / Niche)</label>
+        <label class="section-title">(Topic / Niche) موضوع / نِش</label>
         <input type="text" id="nicheInput" placeholder="مثلاً: Autonomous Driving, Finance, Motivation...">
     </div>
 
@@ -192,9 +219,13 @@
     <button class="btn-generate" onclick="generateVideo()">🚀 ویڈیو بناؤ (Generate Video)</button>
 
     <div class="status" id="statusBox">Ready</div>
+    <a id="downloadLink" href="#" target="_blank">📥 ویڈیو ڈاؤن لوڈ کریں</a>
 </div>
 
 <script>
+    // ⚠️ یہاں اپنے Python Backend Server کا لائیو URL درج کریں (Render / VPS / Ngrok)
+    const BACKEND_API_URL = "https://jsm-backend-server.onrender.com"; 
+
     function updateFileName(input) {
         if (input.files && input.files[0]) {
             document.getElementById('fileLabel').innerText = "سلیکٹ شدہ فائل: " + input.files[0].name;
@@ -204,29 +235,37 @@
     async function generateVideo() {
         const script = document.getElementById('scriptInput').value;
         const voice = document.getElementById('voiceLang').value;
+        const mode = document.getElementById('videoMode').value;
         const status = document.getElementById('statusBox');
+        const dlBtn = document.getElementById('downloadLink');
 
-        if(!script) {
-            alert('براہ کرم پہلے اسکرپٹ لکھیں!');
+        if (!script.trim()) {
+            alert('براہ کرم پہلے اسکرپٹ لکھیے!');
             return;
         }
 
-        status.innerText = "⏳ ویڈیو پروسیسنگ شروع ہو رہی ہے...";
+        status.innerText = "⏳ پروسیسنگ جاری ہے... ویڈیو بن رہی ہے!";
+        dlBtn.style.display = "none";
 
-        // یہاں اپنے Python Backend API یا Colab Webhook کا URL جوڑیں
         try {
-            /* 
-            const response = await fetch('YOUR_BACKEND_URL/generate', {
+            const res = await fetch(`${BACKEND_API_URL}/generate-video`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ script, voice })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script, voice, mode })
             });
-            */
-            setTimeout(() => {
-                status.innerText = "✅ ویڈیو بن چکی ہے! ڈاؤن لوڈ لنک تیار ہے۔";
-            }, 3000);
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+                status.innerText = "🎉 ویڈیو کامیابی سے بن گئی ہے!";
+                dlBtn.href = `${BACKEND_API_URL}${data.download_url}`;
+                dlBtn.style.display = "block";
+            } else {
+                status.innerText = "❌ ایرر: " + data.message;
+            }
         } catch (err) {
-            status.innerText = "❌ ویڈیو بنانے میں مسئلہ آیا!";
+            status.innerText = "❌ سرور سے رابطہ نہیں ہو سکا۔ پائیتھون بیک اینڈ آن رکھیں!";
+            console.error(err);
         }
     }
 </script>

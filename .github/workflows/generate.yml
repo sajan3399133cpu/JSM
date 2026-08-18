@@ -1,0 +1,32 @@
+name: JSM Video Generator Engine
+
+on:
+  repository_dispatch:
+    types: [generate_video]
+
+jobs:
+  build-video:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install FFmpeg & Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        pip install moviepy edge-tts pillow requests nest_asyncio
+
+    - name: Run Video Generator Code
+      env:
+        SCRIPT_TEXT: ${{ github.event.client_payload.script }}
+        VOICE_LANG: ${{ github.event.client_payload.voice }}
+        VIDEO_MODE: ${{ github.event.client_payload.mode }}
+      run: |
+        python app_ai_trailer.py

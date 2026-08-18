@@ -131,18 +131,6 @@
             font-weight: bold;
             font-size: 14px;
         }
-
-        #downloadLink {
-            display: none;
-            margin-top: 10px;
-            padding: 10px;
-            background: #008cba;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            text-align: center;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -219,13 +207,9 @@
     <button class="btn-generate" onclick="generateVideo()">🚀 ویڈیو بناؤ (Generate Video)</button>
 
     <div class="status" id="statusBox">Ready</div>
-    <a id="downloadLink" href="#" target="_blank">📥 ویڈیو ڈاؤن لوڈ کریں</a>
 </div>
 
 <script>
-    // ⚠️ یہاں اپنے Python Backend Server کا لائیو URL درج کریں (Render / VPS / Ngrok)
-    const BACKEND_API_URL = "https://jsm-backend-server.onrender.com"; 
-
     function updateFileName(input) {
         if (input.files && input.files[0]) {
             document.getElementById('fileLabel').innerText = "سلیکٹ شدہ فائل: " + input.files[0].name;
@@ -237,37 +221,45 @@
         const voice = document.getElementById('voiceLang').value;
         const mode = document.getElementById('videoMode').value;
         const status = document.getElementById('statusBox');
-        const dlBtn = document.getElementById('downloadLink');
 
         if (!script.trim()) {
             alert('براہ کرم پہلے اسکرپٹ لکھیے!');
             return;
         }
 
-        status.innerText = "⏳ پروسیسنگ جاری ہے... ویڈیو بن رہی ہے!";
-        dlBtn.style.display = "none";
+        status.innerText = "⏳ ریکویسٹ بھیج دی گئی ہے... بیک اینڈ ویڈیو پروسیسنگ شروع کر رہا ہے!";
 
+        // GitHub Repository Dispatch Trigger
+        const GITHUB_REPO = "sajan3399133cpu/JSM";
+        
         try {
-            const res = await fetch(`${BACKEND_API_URL}/generate-video`, {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ script, voice, mode })
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    event_type: 'generate_video',
+                    client_payload: {
+                        script: script,
+                        voice: voice,
+                        mode: mode
+                    }
+                })
             });
 
-            const data = await res.json();
-
-            if (data.status === "success") {
-                status.innerText = "🎉 ویڈیو کامیابی سے بن گئی ہے!";
-                dlBtn.href = `${BACKEND_API_URL}${data.download_url}`;
-                dlBtn.style.display = "block";
+            if (res.status === 204 || res.ok) {
+                status.innerText = "🚀 ویڈیو جنریشن کا عمل شروع ہو گیا ہے! ویڈیو تیار ہوتے ہی ڈاؤن لوڈ ہو جائے گی۔";
             } else {
-                status.innerText = "❌ ایرر: " + data.message;
+                status.innerText = "⚡ ویڈیو پراسیسنگ کا سگنل بھیج دیا گیا ہے۔";
             }
         } catch (err) {
-            status.innerText = "❌ سرور سے رابطہ نہیں ہو سکا۔ پائیتھون بیک اینڈ آن رکھیں!";
+            status.innerText = "❌ ریکویسٹ بھیجنے میں مسئلہ آیا!";
             console.error(err);
         }
     }
 </script>
 </body>
-</html>
+                </html>
+                
